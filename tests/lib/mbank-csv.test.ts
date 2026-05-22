@@ -57,6 +57,14 @@ broken;line
     expect(rows[0]?.mbankCategory).toBe("Wynagrodzenie");
   });
 
+  it("parses EUR amounts", () => {
+    const csv = `#Data operacji;#Opis operacji;#Rachunek;#Kategoria;#Kwota;
+2026-05-20;"HOTEL";"konto";"Podróże";-538,00 EUR;;`;
+    const rows = parseMbankCsv(csv);
+    expect(rows[0]?.amount).toBe("-538.00");
+    expect(rows[0]?.currency).toBe("EUR");
+  });
+
   it("throws on invalid amount", () => {
     const broken = `#Data operacji;#Opis operacji;#Rachunek;#Kategoria;#Kwota;
 2026-01-01;"TEST";"konto";"Kat";"nie-kwota";`;

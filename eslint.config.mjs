@@ -37,15 +37,15 @@ export default tseslint.config(
         "error",
         { allowExpressions: true },
       ],
-      "@typescript-eslint/consistent-type-imports": [
-        "error",
-        { prefer: "type-imports" },
-      ],
+      "@typescript-eslint/consistent-type-imports": ["error", { prefer: "type-imports" }],
       "@typescript-eslint/no-floating-promises": "error",
       "@typescript-eslint/no-misused-promises": "error",
       complexity: ["error", 8],
       "max-depth": ["error", 2],
-      "max-lines-per-function": ["error", { max: 25, skipBlankLines: true, skipComments: true }],
+      "max-lines-per-function": [
+        "error",
+        { max: 25, skipBlankLines: true, skipComments: true },
+      ],
       "max-lines": ["error", { max: 200, skipBlankLines: true, skipComments: true }],
       "max-params": ["error", 3],
       "no-console": ["error", { allow: ["warn", "error"] }],
@@ -79,27 +79,39 @@ export default tseslint.config(
   {
     files: ["src/components/**/*.tsx", "src/app/**/*.tsx"],
     rules: {
-      "max-lines-per-function": ["error", { max: 120, skipBlankLines: true, skipComments: true }],
+      "max-lines-per-function": [
+        "error",
+        { max: 120, skipBlankLines: true, skipComments: true },
+      ],
       complexity: ["error", 12],
     },
   },
   {
     files: ["src/server/actions/**/*.ts"],
     rules: {
-      "max-lines-per-function": ["error", { max: 45, skipBlankLines: true, skipComments: true }],
+      "max-lines-per-function": [
+        "error",
+        { max: 45, skipBlankLines: true, skipComments: true },
+      ],
       complexity: ["error", 10],
     },
   },
   {
     files: ["src/app/api/**/*.ts"],
     rules: {
-      "max-lines-per-function": ["error", { max: 45, skipBlankLines: true, skipComments: true }],
+      "max-lines-per-function": [
+        "error",
+        { max: 45, skipBlankLines: true, skipComments: true },
+      ],
     },
   },
   {
     files: ["src/lib/ai/**/*.ts"],
     rules: {
-      "max-lines-per-function": ["error", { max: 45, skipBlankLines: true, skipComments: true }],
+      "max-lines-per-function": [
+        "error",
+        { max: 45, skipBlankLines: true, skipComments: true },
+      ],
       complexity: ["error", 14],
     },
   },
@@ -112,8 +124,11 @@ export default tseslint.config(
   {
     files: ["src/lib/analytics/load-dashboard.ts"],
     rules: {
-      "max-lines-per-function": ["error", { max: 55, skipBlankLines: true, skipComments: true }],
+      "max-lines-per-function": [
+        "error",
+        { max: 55, skipBlankLines: true, skipComments: true },
+      ],
       "max-params": ["error", 4],
     },
-  }
+  },
 );

@@ -125,6 +125,7 @@ async function importFullCsv(workspaceId: string, accountId: string): Promise<vo
         dedupeHash,
         bookedAt: row.bookedAt,
         amount: row.amount,
+        currency: row.currency,
         description: row.description,
         counterparty: row.counterparty,
         mbankCategory: row.mbankCategory,

@@ -27,10 +27,11 @@ Prawdziwe pliki `lista_operacji*.csv` są w `.gitignore`.
 
 ## Progi coverage (CI fail)
 
+`npm run check` uruchamia Vitest z progami **80% / 75%** na logikę w `src/lib/`, z wyłączeniem plików granicznych (Prisma, zewnętrzne API, cienkie wrappery UI) — lista w `vitest.config.ts` → `COVERAGE_EXCLUDE`.
+
 ```text
-src/lib/**              → 95% lines, 90% branches
-src/server/actions/**   → 85% lines
-global                  → 80% lines (podnoszone co sprint)
+src/lib/** (po exclude)  → min. 80% lines w CI
+Integracja / E2E         → import-flow, optimization-actions, test:smoke
 ```
 
 ## Workflow deweloperski

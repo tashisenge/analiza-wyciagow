@@ -46,6 +46,7 @@ async function persistImport(input: PersistImportInput): Promise<{
         dedupeHash: row.dedupeHash,
         bookedAt: row.bookedAt,
         amount: row.amount,
+        currency: row.currency,
         description: row.description,
         counterparty: row.counterparty,
         mbankCategory: row.mbankCategory,

@@ -3,6 +3,7 @@ import { extractMerchantFromDescription } from "@/lib/extract-merchant";
 export interface ParsedMbankRow {
   bookedAt: Date;
   amount: string;
+  currency: string;
   description: string;
   counterparty: string;
   mbankCategory: string;
@@ -21,14 +22,19 @@ function normalizeHeader(header: string): string {
   return header.replace(/^#/, "").trim().toLowerCase();
 }
 
-function parsePolishPlnAmount(raw: string): string {
-  const withoutCurrency = raw.replace(/\s*PLN\s*$/i, "").trim();
-  const normalized = withoutCurrency.replace(/\s/g, "").replace(",", ".");
+const AMOUNT_CURRENCY_SUFFIX = /\s*([A-Za-z]{3})\s*$/;
+
+function parseMbankAmount(raw: string): { amount: string; currency: string } {
+  const trimmed = raw.trim();
+  const match = AMOUNT_CURRENCY_SUFFIX.exec(trimmed);
+  const currency = match?.[1]?.toUpperCase() ?? "PLN";
+  const numericPart = match ? trimmed.slice(0, match.index).trim() : trimmed;
+  const normalized = numericPart.replace(/\s/g, "").replace(",", ".");
   const value = Number(normalized);
   if (Number.isNaN(value)) {
     throw new Error(`Nieprawidłowa kwota: ${raw}`);
   }
-  return value.toFixed(2);
+  return { amount: value.toFixed(2), currency };
 }
 
 /** Dzieli linię CSV z separatorem `;`, respektując cudzysłowy (opisy mogą zawierać `;`). */
@@ -90,9 +96,11 @@ function parseRow(cols: string[], indexes: ColumnIndexes): ParsedMbankRow {
   if (Number.isNaN(bookedAt.getTime())) {
     throw new Error(`Nieprawidłowa data operacji: ${cols[indexes.date] ?? ""}`);
   }
+  const { amount, currency } = parseMbankAmount(unquote(cols[indexes.amount] ?? ""));
   return {
     bookedAt,
-    amount: parsePolishPlnAmount(unquote(cols[indexes.amount] ?? "")),
+    amount,
+    currency,
     description,
     counterparty: extractMerchantFromDescription(description),
     mbankCategory: unquote(cols[indexes.category] ?? ""),
