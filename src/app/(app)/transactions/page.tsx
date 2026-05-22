@@ -11,6 +11,7 @@ import {
   transactionActiveFilter,
   type TransactionSearchParams,
 } from "@/lib/transactions/page-filters";
+import { buildSimilarCountByTransactionId } from "@/lib/transactions/similar-transaction-count";
 import { updateTransactionCategory } from "@/server/actions/transactions";
 
 async function changeCategoryAction(formData: FormData): Promise<void> {
@@ -23,11 +24,25 @@ async function changeCategoryAction(formData: FormData): Promise<void> {
   const returnTo =
     typeof returnToRaw === "string" && returnToRaw ? returnToRaw : "/transactions";
 
-  const result = await updateTransactionCategory(transactionId, categoryId);
+  const applyToSimilar = formData.get("applyToSimilar") === "on";
+  const createRule = formData.get("createRule") === "on";
+
+  const result = await updateTransactionCategory(transactionId, categoryId, {
+    applyToSimilar,
+    createRule,
+  });
   if (!result.ok) {
     const separator = returnTo.includes("?") ? "&" : "?";
     redirect(
       `${returnTo}${separator}error=${encodeURIComponent(result.error ?? "Błąd")}`,
+    );
+  }
+  if (result.updatedCount && result.updatedCount > 1) {
+    const separator = returnTo.includes("?") ? "&" : "?";
+    redirect(
+      `${returnTo}${separator}msg=${encodeURIComponent(
+        `Zaktualizowano ${String(result.updatedCount)} transakcji (w tym podobne).`,
+      )}`,
     );
   }
   redirect(returnTo);
@@ -81,6 +96,11 @@ export default async function TransactionsPage({
 
   const returnTo = buildTransactionsReturnTo(params);
   const categoryLabel = filterCategory?.name ?? params.categoryName;
+  const similarCounts = buildSimilarCountByTransactionId(transactions);
+  const rows = transactions.map((tx) => ({
+    ...tx,
+    similarCount: similarCounts.get(tx.id) ?? 0,
+  }));
 
   return (
     <div className="space-y-4">
@@ -97,8 +117,18 @@ export default async function TransactionsPage({
       {params.error ? (
         <p className="rounded bg-red-50 px-3 py-2 text-sm text-red-800">{params.error}</p>
       ) : null}
+      {params.msg ? (
+        <p className="rounded bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
+          {params.msg}
+        </p>
+      ) : null}
+      <p className="text-sm text-slate-600">
+        Kolumna „Podobne” — ten sam kontrahent na liście. Przy zmianie kategorii możesz
+        zastosować do podobnych bez kategorii; opcjonalnie tworzona jest reguła i pamięć
+        kontrahenta (kolejny import i kategoryzacja).
+      </p>
       <TransactionsTable
-        transactions={transactions}
+        transactions={rows}
         categories={categories}
         returnTo={returnTo}
         changeCategoryAction={changeCategoryAction}

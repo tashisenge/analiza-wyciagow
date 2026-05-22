@@ -4,6 +4,7 @@ export interface TransactionSearchParams {
   categoryId?: string;
   categoryName?: string;
   counterparty?: string;
+  msg?: string;
 }
 
 export function transactionActiveFilter(params: TransactionSearchParams): string {
