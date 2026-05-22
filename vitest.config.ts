@@ -18,7 +18,6 @@ const COVERAGE_EXCLUDE = [
   "src/lib/ai/resolve-workspace-ai.ts",
   "src/lib/ai/run-generate-insight.ts",
   "src/lib/ai/describe-ai-categorization.ts",
-  "src/lib/ai/monthly-summary.ts",
   "src/lib/ai/run-categorization.ts",
   "src/lib/ai/ai-target-transactions.ts",
   "src/lib/ai/status.ts",
@@ -35,6 +34,8 @@ const COVERAGE_EXCLUDE = [
   "src/lib/optimization/load-optimization-data.ts",
   "src/lib/optimization/load-budget-spent.ts",
   "src/lib/optimization/upsert-opportunities.ts",
+  "src/lib/optimization/opportunity-upsert-data.ts",
+  "src/lib/optimization/run-detection.ts",
   "src/lib/transactions/load-workspace-transfer-pairs.ts",
   "src/lib/transactions/build-transaction-table-rows.ts",
   "src/lib/transactions/find-similar-transaction-ids.ts",
@@ -44,7 +45,6 @@ export default defineConfig({
   test: {
     environment: "node",
     include: ["tests/**/*.test.ts"],
-    exclude: ["tests/integration/**"],
     coverage: {
       provider: "v8",
       reporter: ["text", "html", "lcov"],
