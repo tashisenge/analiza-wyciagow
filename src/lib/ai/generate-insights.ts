@@ -1,5 +1,9 @@
 import { completeWithAi, type FetchFn } from "@/lib/ai/complete";
 import type { AiConfig } from "@/lib/ai/config";
+import {
+  buildInsightSystemPrompt,
+  type InsightPromptContext,
+} from "@/lib/ai/prompts/insights";
 
 export interface SpendingSummaryForAi {
   periodLabel: string;
@@ -9,31 +13,39 @@ export interface SpendingSummaryForAi {
   topCategories: { name: string; total: number; percent: number }[];
   topMerchants: { name: string; total: number; changePercent: number | null }[];
   uncategorizedCount: number;
+  dataNote?: string;
 }
 
-const SYSTEM_PROMPT = `Jesteś doradcą finansowym dla pary prowadzącej JDG i budżet domowy w Polsce.
-Na podstawie danych JSON napisz krótką analizę po polsku (markdown).
-Struktura:
-## Co widać
-2-3 zdania o głównych trendach.
-
-## Gdzie optymalizować
-3-5 konkretnych punktów (kwoty gdzie możliwe). Bez ogólników.
-
-## Jedna rzecz do zmiany w tym miesiącu
-1 konkretna, wykonalna rada.
-
-Ton: empatyczny, konkretny, bez moralizowania. Max 400 słów.`;
+export interface GenerateInsightsOptions {
+  config: AiConfig;
+  summary: SpendingSummaryForAi;
+  promptContext: InsightPromptContext;
+  fetchFn?: FetchFn;
+}
 
 export async function generateSpendingInsights(
-  config: AiConfig,
-  summary: SpendingSummaryForAi,
-  fetchFn?: FetchFn,
+  options: GenerateInsightsOptions,
 ): Promise<string> {
-  const user = `Dane za okres ${summary.periodLabel}:\n${JSON.stringify(summary, null, 2)}`;
+  const { config, summary, promptContext, fetchFn } = options;
+  const payload = {
+    ...summary,
+    dataNote:
+      promptContext.transfersFiltered > 0 || promptContext.excludedByCategory > 0
+        ? {
+            transfersOmitted: promptContext.transfersFiltered,
+            excludedCategories: promptContext.excludedCategoryNames,
+            excludedTxCount: promptContext.excludedByCategory,
+          }
+        : undefined,
+  };
+  const user = `Okres: ${summary.periodLabel}\nDane:\n${JSON.stringify(payload, null, 2)}`;
   return completeWithAi(
     config,
-    { system: SYSTEM_PROMPT, user, maxTokens: 1500 },
+    {
+      system: buildInsightSystemPrompt(promptContext),
+      user,
+      maxTokens: 1800,
+    },
     fetchFn,
   );
 }

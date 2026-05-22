@@ -3,11 +3,11 @@
 import { revalidatePath } from "next/cache";
 
 import { findAiCategorizationTargets } from "@/lib/ai/ai-target-transactions";
-import { getAiConfig } from "@/lib/ai/config";
-import { generateSpendingInsights } from "@/lib/ai/generate-insights";
-import { loadInsightTransactions } from "@/lib/ai/load-insight-transactions";
-import { buildMonthlySummary } from "@/lib/ai/monthly-summary";
+import { describeAiCategorization } from "@/lib/ai/describe-ai-categorization";
+import { getAiConfigForWorkspace } from "@/lib/ai/resolve-workspace-ai";
 import { categorizeUncategorizedWithAi } from "@/lib/ai/run-categorization";
+import { runGenerateInsight } from "@/lib/ai/run-generate-insight";
+import { accountIdsForContext } from "@/lib/analytics/filters";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { logActionError } from "@/lib/logger";
@@ -15,6 +15,13 @@ import { assignMbankCategoriesForWorkspace } from "@/lib/mbank/sync-categories";
 
 export type AiActionResult =
   | { ok: true; message: string; categorized?: number; insight?: string }
+  | { ok: false; error: string };
+
+export type AiCategorizePreviewResult =
+  | {
+      ok: true;
+      description: ReturnType<typeof describeAiCategorization>;
+    }
   | { ok: false; error: string };
 
 async function getWorkspaceId(): Promise<string | null> {
@@ -36,6 +43,7 @@ function buildCategoryMaps(categories: { id: string; name: string }[]): {
 function revalidateFinancePages(): void {
   revalidatePath("/dashboard");
   revalidatePath("/transactions");
+  revalidatePath("/settings");
 }
 
 export async function applyMbankMapping(): Promise<AiActionResult> {
@@ -64,7 +72,7 @@ export async function applyMbankMapping(): Promise<AiActionResult> {
 }
 
 async function runAiCategorize(workspaceId: string): Promise<AiActionResult> {
-  const config = getAiConfig();
+  const config = await getAiConfigForWorkspace(workspaceId);
   if (!config) {
     return {
       ok: false,
@@ -97,7 +105,7 @@ async function runAiCategorize(workspaceId: string): Promise<AiActionResult> {
   revalidateFinancePages();
   return {
     ok: true,
-    message: `AI przypisało kategorie do ${String(total)} z ${String(targetCount)} kwalifikujących się transakcji (max 100 na raz).`,
+    message: `AI (${config.provider}) przypisało kategorie do ${String(total)} z ${String(targetCount)} transakcji (max 100 na raz).`,
     categorized: total,
   };
 }
@@ -121,6 +129,27 @@ export async function aiCategorizeUncategorized(): Promise<AiActionResult> {
   }
 }
 
+export async function getAiCategorizePreview(): Promise<AiCategorizePreviewResult> {
+  const workspaceId = await getWorkspaceId();
+  if (!workspaceId) {
+    return { ok: false, error: "Brak sesji" };
+  }
+
+  const { transactions, count } = await findAiCategorizationTargets(workspaceId, 5);
+  return {
+    ok: true,
+    description: describeAiCategorization(
+      count,
+      transactions.map((tx) => ({
+        counterparty: tx.counterparty,
+        description: tx.description,
+        amount: tx.amount.toString(),
+        mbankCategory: tx.mbankCategory,
+      })),
+    ),
+  };
+}
+
 export async function aiGenerateInsights(
   contextParam = "razem",
 ): Promise<AiActionResult> {
@@ -129,24 +158,25 @@ export async function aiGenerateInsights(
     return { ok: false, error: "Brak sesji" };
   }
 
-  const config = getAiConfig();
+  const config = await getAiConfigForWorkspace(workspaceId);
   if (!config) {
     return { ok: false, error: "Brak klucza API w .env" };
   }
 
+  const context =
+    contextParam === "firma" || contextParam === "dom" ? contextParam : "razem";
+
   try {
-    const { transactions, periodLabel } = await loadInsightTransactions(
+    const accounts = await prisma.account.findMany({ where: { workspaceId } });
+    const accountIds = accountIdsForContext(accounts, context);
+    const result = await runGenerateInsight({
       workspaceId,
-      contextParam,
-    );
-    const summary = buildMonthlySummary(transactions, periodLabel);
-    const insight = await generateSpendingInsights(config, summary);
-    await prisma.workspace.update({
-      where: { id: workspaceId },
-      data: { lastAiInsight: insight, lastAiInsightAt: new Date() },
+      context,
+      accountIds,
+      config,
     });
     revalidateFinancePages();
-    return { ok: true, message: "Analiza wygenerowana i zapisana.", insight };
+    return { ok: true, message: result.message, insight: result.insight };
   } catch (error) {
     return {
       ok: false,

@@ -62,7 +62,7 @@ export function AiPanelButtons({
         disabled={busy || !aiAvailable}
         title={!aiAvailable ? "Brak klucza API w .env" : undefined}
         onClick={() => {
-          onRun(() => aiGenerateInsights(context), "insight", false);
+          onRun(() => aiGenerateInsights(context), "insight", true);
         }}
         className="btn-primary disabled:opacity-50"
       >

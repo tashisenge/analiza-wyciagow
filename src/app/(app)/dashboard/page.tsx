@@ -11,11 +11,13 @@ import { MerchantList } from "@/components/dashboard/MerchantList";
 import { OptimizeWidget } from "@/components/dashboard/OptimizeWidget";
 import { PeriodSummaryCards } from "@/components/dashboard/PeriodSummary";
 import { PageHeader } from "@/components/ui/PageHeader";
-import { getAiStatus } from "@/lib/ai/status";
+import { loadAiInsightHistory } from "@/lib/ai/load-ai-insight-history";
+import { getWorkspaceAiStatus } from "@/lib/ai/status";
 import { resolveDateRange } from "@/lib/analytics/date-range";
 import type { ContextFilter } from "@/lib/analytics/filters";
 import { loadDashboardData } from "@/lib/analytics/load-dashboard";
 import { auth } from "@/lib/auth";
+import { prisma } from "@/lib/db";
 
 export default async function DashboardPage({
   searchParams,
@@ -32,7 +34,14 @@ export default async function DashboardPage({
   const period = params.period ?? "month";
   const range = resolveDateRange(period);
   const data = await loadDashboardData(session.user.workspaceId, context, range);
-  const aiStatus = getAiStatus();
+  const [aiStatus, insightHistory, workspace] = await Promise.all([
+    getWorkspaceAiStatus(session.user.workspaceId),
+    loadAiInsightHistory(session.user.workspaceId),
+    prisma.workspace.findUnique({
+      where: { id: session.user.workspaceId },
+      select: { analysisExcludedCategoryIds: true },
+    }),
+  ]);
 
   return (
     <div className="space-y-8">
@@ -74,11 +83,21 @@ export default async function DashboardPage({
 
       <AiPanel
         aiAvailable={aiStatus.available}
-        aiProvider={aiStatus.provider}
+        aiPreference={aiStatus.preference}
+        activeProvider={aiStatus.activeProvider}
+        availableProviders={aiStatus.availableProviders}
         aiTargetCount={data.aiTargetCount}
         context={context}
-        initialInsight={data.lastAiInsight}
-        initialInsightAt={data.lastAiInsightAt?.toISOString() ?? null}
+        excludedCategoryCount={workspace?.analysisExcludedCategoryIds.length ?? 0}
+        insightHistory={insightHistory.map((entry) => ({
+          id: entry.id,
+          context: entry.context,
+          provider: entry.provider,
+          contentMarkdown: entry.contentMarkdown,
+          transfersFiltered: entry.transfersFiltered,
+          excludedTxCount: entry.excludedTxCount,
+          createdAt: entry.createdAt.toISOString(),
+        }))}
       />
 
       <section className="grid gap-6 lg:grid-cols-2">

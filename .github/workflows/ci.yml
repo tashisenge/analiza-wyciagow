@@ -8,6 +8,22 @@ on:
 jobs:
   check:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: analiza
+          POSTGRES_PASSWORD: analiza
+          POSTGRES_DB: analiza_wyciagow
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U analiza"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgresql://analiza:analiza@localhost:5432/analiza_wyciagow
+      DIRECT_URL: postgresql://analiza:analiza@localhost:5432/analiza_wyciagow
     steps:
       - uses: actions/checkout@v4
 
@@ -17,6 +33,8 @@ jobs:
           cache: npm
 
       - run: npm ci
+
+      - run: npx prisma migrate deploy
 
       - run: npm run check
 

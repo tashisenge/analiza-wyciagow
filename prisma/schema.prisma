@@ -38,23 +38,49 @@ enum AccountContext {
   razem
 }
 
+enum AiProviderPreference {
+  auto
+  anthropic
+  openai
+}
+
 model Workspace {
-  id               String                   @id @default(cuid())
-  name             String                   @default("Nasze finanse")
-  inviteCode       String                   @unique @default(cuid())
-  lastAiInsight    String?                  @db.Text
-  lastAiInsightAt  DateTime?
-  createdAt        DateTime                 @default(now())
-  members          WorkspaceMember[]
-  accounts         Account[]
-  categories       Category[]
-  rules            CategoryRule[]
-  transactions     Transaction[]
-  importBatches    ImportBatch[]
-  merchantMemories MerchantCategoryMemory[]
-  opportunities    OptimizationOpportunity[]
-  opportunityResearch OpportunityResearch[]
-  categoryBudgets  CategoryBudget[]
+  id                          String                   @id @default(cuid())
+  name                        String                   @default("Nasze finanse")
+  inviteCode                  String                   @unique @default(cuid())
+  lastAiInsight               String?                  @db.Text
+  lastAiInsightAt             DateTime?
+  aiProviderPreference        AiProviderPreference     @default(auto)
+  analysisExcludedCategoryIds String[]               @default([])
+  createdAt                   DateTime                 @default(now())
+  members                     WorkspaceMember[]
+  accounts                    Account[]
+  categories                  Category[]
+  rules                       CategoryRule[]
+  transactions                Transaction[]
+  importBatches               ImportBatch[]
+  merchantMemories            MerchantCategoryMemory[]
+  opportunities               OptimizationOpportunity[]
+  opportunityResearch         OpportunityResearch[]
+  categoryBudgets             CategoryBudget[]
+  aiInsights                  AiInsight[]
+}
+
+model AiInsight {
+  id                    String         @id @default(cuid())
+  workspaceId           String
+  context               AccountContext @default(razem)
+  provider              String
+  model                 String
+  contentMarkdown       String         @db.Text
+  summaryJson           Json?
+  excludedCategoryIds   String[]       @default([])
+  transfersFiltered     Int            @default(0)
+  excludedTxCount       Int            @default(0)
+  createdAt             DateTime       @default(now())
+  workspace             Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId, createdAt(sort: Desc)])
 }
 
 model WorkspaceMember {

@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { PrivacyAmountsToggle } from "@/components/privacy/PrivacyAmountsToggle";
+import { AiAnalysisSettings } from "@/components/settings/AiAnalysisSettings";
 import { CopyInviteButton } from "@/components/settings/CopyInviteButton";
 import { InfoTip } from "@/components/ui/InfoTip";
 import { PageHeader } from "@/components/ui/PageHeader";
@@ -16,11 +17,19 @@ interface MemberRow {
   user: { email: string };
 }
 
+interface CategoryOption {
+  id: string;
+  name: string;
+}
+
 interface SettingsViewProps {
   workspaceName: string;
   inviteCode: string;
   accounts: AccountRow[];
   members: MemberRow[];
+  categories: CategoryOption[];
+  excludedCategoryIds: string[];
+  updateExclusionsAction: (formData: FormData) => Promise<void>;
   createAccountAction: (formData: FormData) => Promise<void>;
   deleteDataAction: (formData: FormData) => Promise<void>;
   error?: string;
@@ -32,6 +41,9 @@ export function SettingsView({
   inviteCode,
   accounts,
   members,
+  categories,
+  excludedCategoryIds,
+  updateExclusionsAction,
   createAccountAction,
   deleteDataAction,
   error,
@@ -50,6 +62,12 @@ export function SettingsView({
           Wszystkie transakcje zostały usunięte. Kategorie i konta zostały.
         </p>
       ) : null}
+
+      <AiAnalysisSettings
+        categories={categories}
+        excludedCategoryIds={excludedCategoryIds}
+        updateExclusionsAction={updateExclusionsAction}
+      />
 
       <section className="section-card">
         <h2 className="section-title mb-3">Prywatność przy pokazywaniu ekranu</h2>

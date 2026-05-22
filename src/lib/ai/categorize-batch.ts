@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { completeWithAi, type FetchFn } from "@/lib/ai/complete";
 import type { AiConfig } from "@/lib/ai/config";
+import { buildCategorizationSystemPrompt } from "@/lib/ai/prompts/categorization";
 import { logger } from "@/lib/logger";
 
 export interface TransactionForAi {
@@ -20,20 +21,6 @@ const responseSchema = z.object({
     }),
   ),
 });
-
-function buildSystemPrompt(categoryNames: string[]): string {
-  const list = categoryNames.map((name) => `- ${name}`).join("\n");
-  return `Jesteś asystentem finansowym. Przypisujesz transakcje bankowe do DOKŁADNIE jednej kategorii z listy.
-Dostępne kategorie:
-${list}
-
-Zasady:
-- Odpowiedź TYLKO jako JSON: {"assignments":[{"id":"...","category":"..."}]}
-- category musi być dokładnie jedną nazwą z listy (uwzględnij polskie znaki)
-- Przychody (dodatnia kwota) → "Przychód" jeśli pasuje
-- Wydatki firmowe (ZUS, KUP w opisie) → odpowiednia kategoria firmowa
-- Bądź konsekwentny dla tego samego kontrahenta`;
-}
 
 function buildUserPrompt(transactions: TransactionForAi[]): string {
   const rows = transactions.map((tx) => ({
@@ -92,7 +79,7 @@ export async function categorizeBatchWithAi(
   const raw = await completeWithAi(
     config,
     {
-      system: buildSystemPrompt(categoryNames),
+      system: buildCategorizationSystemPrompt(categoryNames),
       user: buildUserPrompt(transactions),
       maxTokens: 4096,
     },

@@ -6,7 +6,7 @@ export interface AiConfig {
   model: string;
 }
 
-function anthropicFromEnv(): AiConfig | null {
+export function anthropicFromEnv(): AiConfig | null {
   const apiKey = process.env["ANTHROPIC_API_KEY"]?.trim();
   if (!apiKey) {
     return null;
@@ -18,7 +18,7 @@ function anthropicFromEnv(): AiConfig | null {
   };
 }
 
-function openaiFromEnv(): AiConfig | null {
+export function openaiFromEnv(): AiConfig | null {
   const apiKey = process.env["OPENAI_API_KEY"]?.trim();
   if (!apiKey) {
     return null;
@@ -31,11 +31,23 @@ function openaiFromEnv(): AiConfig | null {
 }
 
 export function getAiConfig(): AiConfig | null {
-  const preferred = process.env["AI_PROVIDER"]?.trim() as AiProvider | undefined;
-  if (preferred === "openai") {
+  return resolveAiConfigFromPreference("auto");
+}
+
+export function resolveAiConfigFromPreference(
+  preference: "auto" | "anthropic" | "openai",
+): AiConfig | null {
+  if (preference === "openai") {
     return openaiFromEnv() ?? anthropicFromEnv();
   }
-  if (preferred === "anthropic") {
+  if (preference === "anthropic") {
+    return anthropicFromEnv() ?? openaiFromEnv();
+  }
+  const envPreferred = process.env["AI_PROVIDER"]?.trim() as AiProvider | undefined;
+  if (envPreferred === "openai") {
+    return openaiFromEnv() ?? anthropicFromEnv();
+  }
+  if (envPreferred === "anthropic") {
     return anthropicFromEnv() ?? openaiFromEnv();
   }
   return anthropicFromEnv() ?? openaiFromEnv();

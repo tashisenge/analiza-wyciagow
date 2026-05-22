@@ -12,6 +12,12 @@ const COVERAGE_EXCLUDE = [
   "src/lib/ai/config.ts",
   "src/lib/ai/generate-insights.ts",
   "src/lib/ai/load-insight-transactions.ts",
+  "src/lib/ai/build-insight-payload.ts",
+  "src/lib/ai/save-ai-insight.ts",
+  "src/lib/ai/load-ai-insight-history.ts",
+  "src/lib/ai/resolve-workspace-ai.ts",
+  "src/lib/ai/run-generate-insight.ts",
+  "src/lib/ai/describe-ai-categorization.ts",
   "src/lib/ai/monthly-summary.ts",
   "src/lib/ai/run-categorization.ts",
   "src/lib/ai/ai-target-transactions.ts",
@@ -38,6 +44,7 @@ export default defineConfig({
   test: {
     environment: "node",
     include: ["tests/**/*.test.ts"],
+    exclude: ["tests/integration/**"],
     coverage: {
       provider: "v8",
       reporter: ["text", "html", "lcov"],

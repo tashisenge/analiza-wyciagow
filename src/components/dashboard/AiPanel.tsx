@@ -2,66 +2,39 @@
 
 import { useState } from "react";
 
+import { AiCategorizeHelp } from "@/components/dashboard/AiCategorizeHelp";
+import { AiInsightHistory } from "@/components/dashboard/AiInsightHistory";
+import type { AiInsightHistoryEntry } from "@/components/dashboard/AiInsightHistory";
 import { AiPanelButtons } from "@/components/dashboard/AiPanelButtons";
+import { AiProviderSelect } from "@/components/dashboard/AiProviderSelect";
 import { InfoTip } from "@/components/ui/InfoTip";
 import type { AiActionResult } from "@/server/actions/ai";
 
 interface AiPanelProps {
   aiAvailable: boolean;
-  aiProvider: string | null;
+  aiPreference: string;
+  activeProvider: string | null;
+  availableProviders: string[];
   aiTargetCount: number;
   context: string;
-  initialInsight: string | null;
-  initialInsightAt: string | null;
-}
-
-function formatInsightDate(iso: string | null): string | null {
-  if (!iso) {
-    return null;
-  }
-  return new Date(iso).toLocaleString("pl-PL", {
-    day: "numeric",
-    month: "short",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
-
-function AiInsightBlock({
-  insight,
-  generatedAt,
-}: {
-  insight: string;
-  generatedAt: string | null;
-}): React.JSX.Element {
-  return (
-    <div className="mt-4 rounded-2xl border border-brand-200 bg-white p-4 shadow-soft">
-      <div className="mb-2 flex items-center justify-between gap-2">
-        <h3 className="font-semibold text-brand-900">Ostatnia analiza AI</h3>
-        {generatedAt ? (
-          <span className="text-xs text-slate-500">{generatedAt}</span>
-        ) : null}
-      </div>
-      <pre className="whitespace-pre-wrap font-sans text-sm text-slate-800">
-        {insight}
-      </pre>
-    </div>
-  );
+  insightHistory: AiInsightHistoryEntry[];
+  excludedCategoryCount: number;
 }
 
 export function AiPanel({
   aiAvailable,
-  aiProvider,
+  aiPreference,
+  activeProvider,
+  availableProviders,
   aiTargetCount,
   context,
-  initialInsight,
-  initialInsightAt,
+  insightHistory,
+  excludedCategoryCount,
 }: AiPanelProps): React.JSX.Element {
   const [loading, setLoading] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
-  const [insight, setInsight] = useState<string | null>(initialInsight);
-  const [insightAt, setInsightAt] = useState<string | null>(initialInsightAt);
   const [error, setError] = useState<string | null>(null);
+  const latest = insightHistory[0] ?? null;
 
   async function runAction(
     action: () => Promise<AiActionResult>,
@@ -78,11 +51,6 @@ export function AiPanel({
       return;
     }
     setMessage(result.message);
-    if (result.insight) {
-      setInsight(result.insight);
-      setInsightAt(new Date().toISOString());
-      return;
-    }
     if (reloadOnSuccess) {
       window.location.reload();
     }
@@ -95,15 +63,35 @@ export function AiPanel({
       <h2 className="section-title">
         AI — kategoryzacja i analiza
         <InfoTip label="AI">
-          Automatyczne przypisanie kategorii i krótkie podsumowanie trendów (Claude lub
-          ChatGPT).
+          Wybierz model, generuj analizy bez transferów wewnętrznych; wykluczenia
+          kategorii w ustawieniach.
         </InfoTip>
       </h2>
-      <p className="mt-1 text-sm text-brand-800">
-        {aiAvailable
-          ? `Aktywny provider: ${aiProvider ?? "?"}. Claude lub ChatGPT przypisują kategorie i opisują trendy.`
-          : "Dodaj ANTHROPIC_API_KEY lub OPENAI_API_KEY do pliku .env i zrestartuj serwer (npm run dev)."}
-      </p>
+
+      {aiAvailable ? (
+        <div className="mt-3">
+          <AiProviderSelect
+            preference={aiPreference}
+            activeProvider={activeProvider}
+            availableProviders={availableProviders}
+            disabled={busy}
+          />
+        </div>
+      ) : (
+        <p className="mt-1 text-sm text-brand-800">
+          Dodaj ANTHROPIC_API_KEY lub OPENAI_API_KEY w .env / Vercel i zrestartuj
+          aplikację.
+        </p>
+      )}
+
+      {excludedCategoryCount > 0 ? (
+        <p className="mt-2 text-xs text-slate-600">
+          Z analiz wykluczono {String(excludedCategoryCount)} kategorii —{" "}
+          <a href="/settings" className="link-brand">
+            zmień w ustawieniach
+          </a>
+        </p>
+      ) : null}
 
       <AiPanelButtons
         aiAvailable={aiAvailable}
@@ -116,23 +104,24 @@ export function AiPanel({
         }}
       />
 
+      <AiCategorizeHelp />
+
       {aiTargetCount === 0 && aiAvailable ? (
         <p className="mt-2 text-xs text-brand-700">
-          Kategoryzacja AI: brak transakcji w «Bez kategorii» — użyj mapowania mBank lub
-          zmień kategorie ręcznie na liście transakcji.
+          Brak transakcji w «Bez kategorii» — użyj mapowania mBank lub ręcznej
+          kategoryzacji.
         </p>
       ) : null}
 
-      {message ? (
-        <p className="mt-3 text-sm font-medium text-green-800">{message}</p>
-      ) : null}
+      {message ? <p className="alert-success mt-3">{message}</p> : null}
       {error ? <p className="alert-error mt-3">{error}</p> : null}
-      {insight ? (
-        <AiInsightBlock insight={insight} generatedAt={formatInsightDate(insightAt)} />
+
+      {latest ? (
+        <AiInsightHistory entries={insightHistory} initialSelectedId={latest.id} />
       ) : aiAvailable ? (
         <p className="mt-3 text-sm text-brand-700">
-          Kliknij «Analiza AI», aby wygenerować podsumowanie wydatków — wynik zostanie
-          zapisany i będzie widoczny po odświeżeniu strony.
+          Kliknij «Analiza AI», aby wygenerować pierwsze podsumowanie — zapisze się w
+          historii.
         </p>
       ) : null}
     </section>
