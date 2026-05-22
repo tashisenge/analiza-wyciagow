@@ -11,19 +11,25 @@ interface TxWithCategory {
   mbankCategory: string;
 }
 
-export function buildMonthlySummary(
-  transactions: TxWithCategory[],
-  periodLabel: string,
-): SpendingSummaryForAi {
+function splitCurrentAndPrevious(transactions: TxWithCategory[]): {
+  current: TxWithCategory[];
+  previous: TxWithCategory[];
+} {
   const now = new Date();
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
   const prevStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-
   const current = transactions.filter((tx) => tx.bookedAt >= monthStart);
   const previous = transactions.filter(
     (tx) => tx.bookedAt >= prevStart && tx.bookedAt < monthStart,
   );
+  return { current, previous };
+}
 
+export function buildMonthlySummary(
+  transactions: TxWithCategory[],
+  periodLabel: string,
+): SpendingSummaryForAi {
+  const { current, previous } = splitCurrentAndPrevious(transactions);
   const expenses = current.filter((tx) => Number(tx.amount) < 0);
   const income = current.filter((tx) => Number(tx.amount) > 0);
   const slices = categoryBreakdown(

@@ -10,6 +10,7 @@ import {
 } from "@/lib/research/count-daily-research";
 import { isResearchEligible } from "@/lib/research/is-research-eligible";
 import { normalizeMerchant } from "@/lib/research/normalize-merchant";
+import { toInputJson } from "@/lib/research/parse-research-json";
 import { isResearchCacheFresh, mapCachedResearch } from "@/lib/research/research-cache";
 import { searchTavily, type FetchFn } from "@/lib/research/search-tavily";
 import type { ResearchResult } from "@/lib/research/types";
@@ -116,8 +117,8 @@ async function saveResearch(
   const data = {
     searchQuery: payload.searchQuery,
     summaryMarkdown: payload.summaryMarkdown,
-    alternatives: payload.alternatives,
-    sources: payload.sources,
+    alternatives: toInputJson(payload.alternatives),
+    sources: toInputJson(payload.sources),
     researchedAt,
   };
   await prisma.opportunityResearch.upsert({

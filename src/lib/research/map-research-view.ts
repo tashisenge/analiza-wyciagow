@@ -1,10 +1,10 @@
 import type { OpportunityResearch } from "@prisma/client";
 
-import type {
-  OpportunityResearchView,
-  ResearchAlternative,
-  ResearchSource,
-} from "@/lib/research/types";
+import {
+  parseAlternativesJson,
+  parseSourcesJson,
+} from "@/lib/research/parse-research-json";
+import type { OpportunityResearchView } from "@/lib/research/types";
 
 export function mapResearchToView(
   row: OpportunityResearch | null | undefined,
@@ -14,8 +14,8 @@ export function mapResearchToView(
   }
   return {
     summaryMarkdown: row.summaryMarkdown,
-    alternatives: row.alternatives as ResearchAlternative[],
-    sources: row.sources as ResearchSource[],
+    alternatives: parseAlternativesJson(row.alternatives),
+    sources: parseSourcesJson(row.sources),
     researchedAt: row.researchedAt.toISOString(),
   };
 }

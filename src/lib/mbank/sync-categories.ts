@@ -36,6 +36,25 @@ export async function syncMbankCategories(
   return byName;
 }
 
+interface ApplyCategoriesInput {
+  transactions: Awaited<ReturnType<typeof prisma.transaction.findMany>>;
+  rules: Awaited<ReturnType<typeof prisma.categoryRule.findMany>>;
+  memories: Awaited<ReturnType<typeof prisma.merchantCategoryMemory.findMany>>;
+  byName: Map<string, string>;
+}
+
+async function applyResolvedCategories(input: ApplyCategoriesInput): Promise<number> {
+  let updated = 0;
+  for (const tx of input.transactions) {
+    const categoryId = resolveCategoryId(tx, input.rules, input.memories, input.byName);
+    if (categoryId && categoryId !== tx.categoryId) {
+      await prisma.transaction.update({ where: { id: tx.id }, data: { categoryId } });
+      updated += 1;
+    }
+  }
+  return updated;
+}
+
 export async function assignMbankCategoriesForWorkspace(
   workspaceId: string,
 ): Promise<number> {
@@ -50,18 +69,5 @@ export async function assignMbankCategoriesForWorkspace(
     transactions.map((tx) => tx.mbankCategory),
   );
   const byName = await buildCategoriesByName(workspaceId);
-  let updated = 0;
-
-  for (const tx of transactions) {
-    const categoryId = resolveCategoryId(tx, rules, memories, byName);
-    if (categoryId && categoryId !== tx.categoryId) {
-      await prisma.transaction.update({
-        where: { id: tx.id },
-        data: { categoryId },
-      });
-      updated += 1;
-    }
-  }
-
-  return updated;
+  return applyResolvedCategories({ transactions, rules, memories, byName });
 }
