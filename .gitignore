@@ -1,0 +1,37 @@
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+
+# next
+/.next/
+/out/
+/build
+
+# env
+.env
+.env*.local
+
+# debug
+npm-debug.log*
+.DS_Store
+coverage/
+
+# prisma
+/prisma/*.db
+/prisma/*.db-journal
+
+# test
+/test.db
+/playwright-report/
+/blob-report/
+/test-results/
+/playwright/.auth/
+
+# Dane bankowe (PII) — używaj tests/fixtures/mbank-sample.csv
+lista_operacji*.csv
+
+# IDE
+.idea
+.vscode

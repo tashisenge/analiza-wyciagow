@@ -1,0 +1,17 @@
+mBank S.A. Bankowość Detaliczna;
+#Klient;
+TEST USER;
+
+Lista operacji;
+
+#Za okres:;
+21.05.2025;21.05.2026;
+
+#Waluta;#Wpływy;#Wydatki;
+PLN;1000,00;-500,00;
+
+#Data operacji;#Opis operacji;#Rachunek;#Kategoria;#Kwota;
+2026-05-20;"NETTO  ZAKUP PRZY UŻYCIU KARTY W KRAJU";"osobiste 7711 ... 7243";"Żywność i chemia domowa";-13,38 PLN;;
+2026-05-20;"Bolt  ZAKUP PRZY UŻYCIU KARTY - INTERNET";"osobiste 7711 ... 7243";"Przejazdy";-5,68 PLN;;
+2026-05-21;"KLIENT TESTOWY, PRZELEW WEWNĘTRZNY PRZYCHODZĄCY";"osobiste 7711 ... 7243";"Wpływy - inne";1 900,00 PLN;;
+2026-05-19;"LIDL  ZAKUP PRZY UŻYCIU KARTY W KRAJU";"osobiste 7711 ... 7243";"Żywność i chemia domowa";-347,27 PLN;;

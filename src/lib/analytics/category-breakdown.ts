@@ -1,0 +1,42 @@
+export interface TxForCategoryBreakdown {
+  amount: string;
+  categoryId: string | null;
+  categoryName: string | null;
+}
+
+export interface CategorySlice {
+  categoryId: string | null;
+  categoryName: string;
+  total: number;
+  percent: number;
+}
+
+function isExpense(amount: string): boolean {
+  return Number(amount) < 0;
+}
+
+export function categoryBreakdown(
+  transactions: TxForCategoryBreakdown[],
+): CategorySlice[] {
+  const expenses = transactions.filter((tx) => isExpense(tx.amount));
+  const byCategory = new Map<string, { name: string; total: number }>();
+
+  for (const tx of expenses) {
+    const name = tx.categoryName ?? "Bez kategorii";
+    const key = tx.categoryId ?? `mbank:${name}`;
+    const prev = byCategory.get(key) ?? { name, total: 0 };
+    prev.total += Math.abs(Number(tx.amount));
+    byCategory.set(key, prev);
+  }
+
+  const sum = [...byCategory.values()].reduce((acc, item) => acc + item.total, 0) || 1;
+
+  return [...byCategory.entries()]
+    .map(([categoryId, value]) => ({
+      categoryId: categoryId === "__none__" ? null : categoryId,
+      categoryName: value.name,
+      total: Math.round(value.total * 100) / 100,
+      percent: Math.round((value.total / sum) * 1000) / 10,
+    }))
+    .sort((a, b) => b.total - a.total);
+}
