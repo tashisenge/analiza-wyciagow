@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { auth } from "@/lib/auth";
+import { ensureTransferCategory } from "@/lib/categories/ensure-transfer-category";
 import { prisma } from "@/lib/db";
 import { processCsvImport } from "@/lib/import/process-csv-import";
 import { logActionError } from "@/lib/logger";
@@ -83,6 +84,7 @@ async function runImport(
     workspaceId,
     rows.map((row) => row.mbankCategory),
   );
+  await ensureTransferCategory(workspaceId);
   const categoriesByName = await buildCategoriesByName(workspaceId);
 
   const processed = processCsvImport({

@@ -5,6 +5,7 @@ import type { DateRangeResult } from "@/lib/analytics/date-range";
 import { fetchDashboardOpportunities } from "@/lib/analytics/fetch-dashboard-opportunities";
 import { accountIdsForContext, type ContextFilter } from "@/lib/analytics/filters";
 import { summarizePeriod } from "@/lib/analytics/period-summary";
+import { shouldCountInAnalytics } from "@/lib/analytics/should-count-in-analytics";
 import { topMerchants } from "@/lib/analytics/top-merchants";
 import { prisma } from "@/lib/db";
 import { transactionCategoryLabel } from "@/lib/transaction-category-label";
@@ -116,6 +117,16 @@ async function fetchDashboardRaw(
   };
 }
 
+function analyticsTransactions(transactions: TxWithCategory[]): TxWithCategory[] {
+  return transactions.filter((tx) =>
+    shouldCountInAnalytics({
+      description: tx.description,
+      mbankCategory: tx.mbankCategory,
+      category: tx.category,
+    }),
+  );
+}
+
 function buildDashboardMetrics(
   current: TxWithCategory[],
   previous: TxWithCategory[],
@@ -130,25 +141,30 @@ function buildDashboardMetrics(
   | "merchants"
   | "categorizedPercent"
 > {
+  const currentForAnalytics = analyticsTransactions(current);
+  const previousForAnalytics = analyticsTransactions(previous);
+
   return {
-    summary: summarizePeriod(current.map((tx) => ({ amount: tx.amount.toString() }))),
+    summary: summarizePeriod(
+      currentForAnalytics.map((tx) => ({ amount: tx.amount.toString() })),
+    ),
     previousSummary: summarizePeriod(
-      previous.map((tx) => ({ amount: tx.amount.toString() })),
+      previousForAnalytics.map((tx) => ({ amount: tx.amount.toString() })),
     ),
     slices: categoryBreakdown(
-      current.map((tx) => ({
+      currentForAnalytics.map((tx) => ({
         amount: tx.amount.toString(),
         categoryId: tx.categoryId,
         categoryName: transactionCategoryLabel(tx),
       })),
     ),
-    categoryGroups: mapToCategoryGroups(current),
+    categoryGroups: mapToCategoryGroups(currentForAnalytics),
     merchants: topMerchants(
-      current.map((tx) => ({
+      currentForAnalytics.map((tx) => ({
         counterparty: tx.counterparty,
         amount: tx.amount.toString(),
       })),
-      previous.map((tx) => ({
+      previousForAnalytics.map((tx) => ({
         counterparty: tx.counterparty,
         amount: tx.amount.toString(),
       })),

@@ -4,14 +4,18 @@ import { TransactionFilters } from "@/components/transactions/TransactionFilters
 import { TransactionsTable } from "@/components/transactions/TransactionsTable";
 import { accountIdsForContext, type ContextFilter } from "@/lib/analytics/filters";
 import { auth } from "@/lib/auth";
+import { ensureTransferCategory } from "@/lib/categories/ensure-transfer-category";
 import { prisma } from "@/lib/db";
+import { buildTransferPairHintByTransactionId } from "@/lib/transactions/build-transfer-pair-hints";
+import { isInternalTransfer } from "@/lib/transactions/is-internal-transfer";
 import {
   buildTransactionsReturnTo,
   prismaCategoryFilter,
   transactionActiveFilter,
   type TransactionSearchParams,
 } from "@/lib/transactions/page-filters";
-import { buildSimilarCountByTransactionId } from "@/lib/transactions/similar-transaction-count";
+import { buildSimilarCountsByTransactionId } from "@/lib/transactions/similar-transaction-count";
+import { TRANSFER_BETWEEN_ACCOUNTS_CATEGORY } from "@/lib/transactions/transfer-category";
 import { updateTransactionCategory } from "@/server/actions/transactions";
 
 async function changeCategoryAction(formData: FormData): Promise<void> {
@@ -25,10 +29,12 @@ async function changeCategoryAction(formData: FormData): Promise<void> {
     typeof returnToRaw === "string" && returnToRaw ? returnToRaw : "/transactions";
 
   const applyToSimilar = formData.get("applyToSimilar") === "on";
+  const matchSameAmount = formData.get("matchSameAmount") === "on";
   const createRule = formData.get("createRule") === "on";
 
   const result = await updateTransactionCategory(transactionId, categoryId, {
     applyToSimilar,
+    matchSameAmount,
     createRule,
   });
   if (!result.ok) {
@@ -65,42 +71,74 @@ export default async function TransactionsPage({
   const accountIds = accountIdsForContext(accounts, context);
   const categoryFilter = prismaCategoryFilter(params, workspaceId);
 
-  const [transactions, categories, filterCategory] = await Promise.all([
-    prisma.transaction.findMany({
-      where: {
-        workspaceId,
-        accountId: { in: accountIds },
-        ...(params.uncategorized === "1" ? { categoryId: null } : {}),
-        ...(params.counterparty
-          ? {
-              counterparty: {
-                contains: params.counterparty,
-                mode: "insensitive" as const,
-              },
-            }
-          : {}),
-        ...categoryFilter,
-      },
-      orderBy: { bookedAt: "desc" },
-      take: 200,
-      include: { category: true, account: true },
-    }),
-    prisma.category.findMany({ where: { workspaceId }, orderBy: { name: "asc" } }),
-    params.categoryId
-      ? prisma.category.findFirst({
-          where: { id: params.categoryId, workspaceId },
-          select: { name: true },
-        })
-      : null,
-  ]);
+  const [transactions, categories, filterCategory, transferCategoryId] =
+    await Promise.all([
+      prisma.transaction.findMany({
+        where: {
+          workspaceId,
+          accountId: { in: accountIds },
+          ...(params.uncategorized === "1" ? { categoryId: null } : {}),
+          ...(params.counterparty
+            ? {
+                counterparty: {
+                  contains: params.counterparty,
+                  mode: "insensitive" as const,
+                },
+              }
+            : {}),
+          ...categoryFilter,
+        },
+        orderBy: { bookedAt: "desc" },
+        take: 200,
+        include: { category: true, account: true },
+      }),
+      prisma.category.findMany({ where: { workspaceId }, orderBy: { name: "asc" } }),
+      params.categoryId
+        ? prisma.category.findFirst({
+            where: { id: params.categoryId, workspaceId },
+            select: { name: true },
+          })
+        : null,
+      ensureTransferCategory(workspaceId),
+    ]);
 
   const returnTo = buildTransactionsReturnTo(params);
   const categoryLabel = filterCategory?.name ?? params.categoryName;
-  const similarCounts = buildSimilarCountByTransactionId(transactions);
-  const rows = transactions.map((tx) => ({
-    ...tx,
-    similarCount: similarCounts.get(tx.id) ?? 0,
-  }));
+  const similarCounts = buildSimilarCountsByTransactionId(
+    transactions.map((tx) => ({
+      id: tx.id,
+      counterparty: tx.counterparty,
+      amount: tx.amount.toString(),
+      currency: tx.currency,
+    })),
+  );
+  const transferHints = buildTransferPairHintByTransactionId(
+    transactions.map((tx) => ({
+      id: tx.id,
+      accountId: tx.accountId,
+      accountType: tx.account.type,
+      amount: tx.amount.toString(),
+      currency: tx.currency,
+      bookedAt: tx.bookedAt,
+      description: tx.description,
+    })),
+  );
+  const rows = transactions.map((tx) => {
+    const internal = isInternalTransfer({
+      description: tx.description,
+      mbankCategory: tx.mbankCategory,
+    });
+    return {
+      ...tx,
+      suggestedCategoryId: tx.categoryId ?? (internal ? transferCategoryId : ""),
+      similarCounts: similarCounts.get(tx.id) ?? {
+        byCounterparty: 0,
+        byCounterpartyAndAmount: 0,
+      },
+      isInternalTransfer: internal,
+      transferPairHint: transferHints.get(tx.id) ?? null,
+    };
+  });
 
   return (
     <div className="space-y-4">
@@ -123,9 +161,11 @@ export default async function TransactionsPage({
         </p>
       ) : null}
       <p className="text-sm text-slate-600">
-        Kolumna „Podobne” — ten sam kontrahent na liście. Przy zmianie kategorii możesz
-        zastosować do podobnych bez kategorii; opcjonalnie tworzona jest reguła i pamięć
-        kontrahenta (kolejny import i kategoryzacja).
+        Przelewy własne (wewnętrzne) są oznaczone jako{" "}
+        <strong>{TRANSFER_BETWEEN_ACCOUNTS_CATEGORY}</strong> i nie wliczają się do
+        wydatków na dashboardzie. Kolumna „Podobne”: ten sam kontrahent oraz (osobno) ta
+        sama kwota — przy kategoryzacji możesz zawęzić masowe przypisanie do identycznej
+        kwoty.
       </p>
       <TransactionsTable
         transactions={rows}

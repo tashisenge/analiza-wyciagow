@@ -2,10 +2,8 @@ import type { CategoryRuleInput } from "@/lib/categorization/apply-rules";
 import { matchCategoryRule } from "@/lib/categorization/apply-rules";
 import type { MerchantMemoryInput } from "@/lib/categorization/merchant-memory";
 import { resolveMerchantCategory } from "@/lib/categorization/merchant-memory";
-import {
-  normalizeMbankCategoryName,
-  resolveCategoryIdByName,
-} from "@/lib/mbank-category-map";
+import { resolveInternalTransferCategoryId } from "@/lib/categorization/resolve-internal-transfer";
+import { resolveMbankCategoryId } from "@/lib/categorization/resolve-mbank-category";
 
 export interface TransactionForResolve {
   description: string;
@@ -29,12 +27,14 @@ export function resolveCategoryId(
     return fromMemory;
   }
 
-  if (tx.mbankCategory) {
-    const name = normalizeMbankCategoryName(tx.mbankCategory);
-    if (name) {
-      return resolveCategoryIdByName(name, categoriesByName);
-    }
+  const transferId = resolveInternalTransferCategoryId(
+    tx.description,
+    tx.mbankCategory,
+    categoriesByName,
+  );
+  if (transferId) {
+    return transferId;
   }
 
-  return null;
+  return resolveMbankCategoryId(tx.mbankCategory, categoriesByName);
 }

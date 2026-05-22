@@ -1,4 +1,10 @@
+import {
+  TRANSFER_BETWEEN_ACCOUNTS_CATEGORY,
+  TRANSFER_CATEGORY_COLOR,
+} from "@/lib/transactions/transfer-category";
+
 export const DEFAULT_CATEGORIES = [
+  { name: TRANSFER_BETWEEN_ACCOUNTS_CATEGORY, color: TRANSFER_CATEGORY_COLOR },
   { name: "Żywność", color: "#22c55e" },
   { name: "Transport", color: "#3b82f6" },
   { name: "Mieszkanie", color: "#a855f7" },

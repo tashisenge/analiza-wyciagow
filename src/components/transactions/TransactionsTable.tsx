@@ -5,6 +5,11 @@ interface CategoryOption {
   name: string;
 }
 
+interface SimilarCounts {
+  byCounterparty: number;
+  byCounterpartyAndAmount: number;
+}
+
 interface TransactionRow {
   id: string;
   bookedAt: Date;
@@ -14,9 +19,12 @@ interface TransactionRow {
   amount: { toString(): string };
   currency: string;
   categoryId: string | null;
+  suggestedCategoryId: string;
   category: { name: string } | null;
   account: { type: string };
-  similarCount: number;
+  similarCounts: SimilarCounts;
+  isInternalTransfer: boolean;
+  transferPairHint: string | null;
 }
 
 interface TransactionsTableProps {
@@ -30,6 +38,25 @@ function formatAmount(amount: string, currency: string): string {
   const value = Number(amount);
   const formatted = Number.isFinite(value) ? value.toFixed(2) : amount;
   return `${formatted} ${currency}`;
+}
+
+function renderSimilarBadges(counts: SimilarCounts): React.JSX.Element {
+  if (counts.byCounterparty === 0) {
+    return <span className="text-xs text-slate-400">—</span>;
+  }
+
+  return (
+    <div className="flex flex-col gap-0.5">
+      <span className="rounded bg-amber-50 px-2 py-0.5 text-xs text-amber-900">
+        +{String(counts.byCounterparty)} kontrahent
+      </span>
+      {counts.byCounterpartyAndAmount > 0 ? (
+        <span className="rounded bg-sky-50 px-2 py-0.5 text-xs text-sky-900">
+          +{String(counts.byCounterpartyAndAmount)} kwota
+        </span>
+      ) : null}
+    </div>
+  );
 }
 
 export function TransactionsTable({
@@ -59,49 +86,58 @@ export function TransactionsTable({
               </td>
             </tr>
           ) : (
-            transactions.map((tx) => (
-              <tr key={tx.id} className="border-b align-top last:border-0">
-                <td className="px-3 py-2 whitespace-nowrap">
-                  {tx.bookedAt.toISOString().slice(0, 10)}
-                </td>
-                <td className="max-w-xs px-3 py-2">
-                  <p className="font-medium text-slate-900">{tx.counterparty || "—"}</p>
-                  <p className="truncate text-xs text-slate-500" title={tx.description}>
-                    {tx.description}
-                  </p>
-                  {tx.mbankCategory ? (
-                    <p className="text-xs text-slate-400">mBank: {tx.mbankCategory}</p>
-                  ) : null}
-                </td>
-                <td className="px-3 py-2 whitespace-nowrap">
-                  {formatAmount(tx.amount.toString(), tx.currency)}
-                </td>
-                <td className="px-3 py-2 capitalize">{tx.account.type}</td>
-                <td className="px-3 py-2 whitespace-nowrap">
-                  {tx.similarCount > 0 ? (
-                    <span className="rounded bg-amber-50 px-2 py-0.5 text-xs text-amber-900">
-                      +{String(tx.similarCount)}
-                    </span>
-                  ) : (
-                    <span className="text-xs text-slate-400">—</span>
-                  )}
-                </td>
-                <td className="min-w-[11rem] px-3 py-2">
-                  {tx.category ? (
-                    <p className="mb-1 text-xs text-emerald-700">{tx.category.name}</p>
-                  ) : null}
-                  <CategoryAssignForm
-                    transactionId={tx.id}
-                    categories={categories}
-                    defaultCategoryId={tx.categoryId ?? ""}
-                    similarCount={tx.similarCount}
-                    counterparty={tx.counterparty}
-                    action={changeCategoryAction}
-                    returnTo={returnTo}
-                  />
-                </td>
-              </tr>
-            ))
+            transactions.map((tx) => {
+              const amountLabel = formatAmount(tx.amount.toString(), tx.currency);
+              return (
+                <tr key={tx.id} className="border-b align-top last:border-0">
+                  <td className="px-3 py-2 whitespace-nowrap">
+                    {tx.bookedAt.toISOString().slice(0, 10)}
+                  </td>
+                  <td className="max-w-xs px-3 py-2">
+                    {tx.isInternalTransfer ? (
+                      <span className="mb-1 inline-block rounded bg-sky-100 px-2 py-0.5 text-xs text-sky-900">
+                        Transfer między kontami
+                      </span>
+                    ) : null}
+                    <p className="font-medium text-slate-900">{tx.counterparty || "—"}</p>
+                    <p className="truncate text-xs text-slate-500" title={tx.description}>
+                      {tx.description}
+                    </p>
+                    {tx.transferPairHint ? (
+                      <p className="text-xs text-sky-700">{tx.transferPairHint}</p>
+                    ) : null}
+                    {tx.mbankCategory ? (
+                      <p className="text-xs text-slate-400">mBank: {tx.mbankCategory}</p>
+                    ) : null}
+                  </td>
+                  <td className="px-3 py-2 whitespace-nowrap">{amountLabel}</td>
+                  <td className="px-3 py-2 capitalize">{tx.account.type}</td>
+                  <td className="px-3 py-2 whitespace-nowrap">
+                    {tx.isInternalTransfer ? (
+                      <span className="text-xs text-slate-400">transfer</span>
+                    ) : (
+                      renderSimilarBadges(tx.similarCounts)
+                    )}
+                  </td>
+                  <td className="min-w-[11rem] px-3 py-2">
+                    {tx.category ? (
+                      <p className="mb-1 text-xs text-emerald-700">{tx.category.name}</p>
+                    ) : null}
+                    <CategoryAssignForm
+                      transactionId={tx.id}
+                      categories={categories}
+                      defaultCategoryId={tx.suggestedCategoryId}
+                      similarCounts={tx.similarCounts}
+                      counterparty={tx.counterparty}
+                      amountLabel={amountLabel}
+                      isInternalTransfer={tx.isInternalTransfer}
+                      action={changeCategoryAction}
+                      returnTo={returnTo}
+                    />
+                  </td>
+                </tr>
+              );
+            })
           )}
         </tbody>
       </table>

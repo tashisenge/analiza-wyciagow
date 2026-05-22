@@ -5,12 +5,19 @@ interface CategoryOption {
   name: string;
 }
 
+interface SimilarCounts {
+  byCounterparty: number;
+  byCounterpartyAndAmount: number;
+}
+
 interface CategoryAssignFormProps {
   transactionId: string;
   categories: CategoryOption[];
   defaultCategoryId: string;
-  similarCount: number;
+  similarCounts: SimilarCounts;
   counterparty: string;
+  amountLabel: string;
+  isInternalTransfer: boolean;
   action: (formData: FormData) => Promise<void>;
   returnTo?: string;
 }
@@ -19,12 +26,21 @@ export function CategoryAssignForm({
   transactionId,
   categories,
   defaultCategoryId,
-  similarCount,
+  similarCounts,
   counterparty,
+  amountLabel,
+  isInternalTransfer,
   action,
   returnTo = "/transactions",
 }: CategoryAssignFormProps): React.JSX.Element {
-  const showSimilar = similarCount > 0 && counterparty.trim().length > 0;
+  const showSimilar =
+    similarCounts.byCounterparty > 0 &&
+    counterparty.trim().length > 0 &&
+    !isInternalTransfer;
+  const showAmountMatch =
+    showSimilar &&
+    similarCounts.byCounterpartyAndAmount > 0 &&
+    similarCounts.byCounterpartyAndAmount < similarCounts.byCounterparty;
 
   return (
     <form action={action} className="space-y-1">
@@ -50,8 +66,20 @@ export function CategoryAssignForm({
       {showSimilar ? (
         <label className="flex items-center gap-1 text-xs text-slate-600">
           <input type="checkbox" name="applyToSimilar" defaultChecked />
-          Do {String(similarCount)} podobnych (bez kategorii)
+          Do {String(similarCounts.byCounterparty)} podobnych (kontrahent)
         </label>
+      ) : null}
+      {showAmountMatch ? (
+        <label className="flex items-center gap-1 text-xs text-slate-600">
+          <input type="checkbox" name="matchSameAmount" />
+          Tylko {String(similarCounts.byCounterpartyAndAmount)} z kwotą {amountLabel}
+        </label>
+      ) : null}
+      {showSimilar &&
+      similarCounts.byCounterpartyAndAmount === similarCounts.byCounterparty ? (
+        <p className="text-xs text-slate-500">
+          Wszystkie podobne mają tę samą kwotę ({amountLabel})
+        </p>
       ) : null}
       {showSimilar ? (
         <label className="flex items-center gap-1 text-xs text-slate-600">

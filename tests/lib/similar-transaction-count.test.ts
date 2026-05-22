@@ -1,21 +1,22 @@
 import { describe, expect, it } from "vitest";
 
-import { buildSimilarCountByTransactionId } from "@/lib/transactions/similar-transaction-count";
+import { buildSimilarCountsByTransactionId } from "@/lib/transactions/similar-transaction-count";
 
-describe("buildSimilarCountByTransactionId", () => {
-  it("counts other rows with same counterparty", () => {
-    const map = buildSimilarCountByTransactionId([
-      { id: "a", counterparty: "NETFLIX" },
-      { id: "b", counterparty: "NETFLIX" },
-      { id: "c", counterparty: "LIDL" },
+describe("buildSimilarCountsByTransactionId", () => {
+  it("counts counterparty and amount matches separately", () => {
+    const map = buildSimilarCountsByTransactionId([
+      { id: "a", counterparty: "NETFLIX", amount: "-49.00", currency: "PLN" },
+      { id: "b", counterparty: "NETFLIX", amount: "-49.00", currency: "PLN" },
+      { id: "c", counterparty: "NETFLIX", amount: "-99.00", currency: "PLN" },
     ]);
-    expect(map.get("a")).toBe(1);
-    expect(map.get("b")).toBe(1);
-    expect(map.get("c")).toBe(0);
+    expect(map.get("a")).toEqual({ byCounterparty: 2, byCounterpartyAndAmount: 1 });
+    expect(map.get("c")).toEqual({ byCounterparty: 2, byCounterpartyAndAmount: 0 });
   });
 
   it("returns zero for empty counterparty", () => {
-    const map = buildSimilarCountByTransactionId([{ id: "x", counterparty: "  " }]);
-    expect(map.get("x")).toBe(0);
+    const map = buildSimilarCountsByTransactionId([
+      { id: "x", counterparty: "  ", amount: "10.00", currency: "PLN" },
+    ]);
+    expect(map.get("x")).toEqual({ byCounterparty: 0, byCounterpartyAndAmount: 0 });
   });
 });

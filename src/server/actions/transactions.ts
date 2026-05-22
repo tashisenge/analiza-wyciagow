@@ -36,7 +36,10 @@ interface CollectSimilarIdsOptions {
   workspaceId: string;
   transactionId: string;
   counterparty: string;
+  amount: string;
+  currency: string;
   applyToSimilar: boolean;
+  matchSameAmount: boolean;
 }
 
 async function collectSimilarIds(options: CollectSimilarIdsOptions): Promise<string[]> {
@@ -49,6 +52,9 @@ async function collectSimilarIds(options: CollectSimilarIdsOptions): Promise<str
     counterparty: options.counterparty,
     excludeTransactionId: options.transactionId,
     onlyUncategorized: true,
+    amount: options.amount,
+    currency: options.currency,
+    matchSameAmount: options.matchSameAmount,
   });
 }
 
@@ -112,6 +118,7 @@ async function loadCategoryUpdateTarget(
 
 export interface UpdateCategoryOptions {
   applyToSimilar?: boolean;
+  matchSameAmount?: boolean;
   createRule?: boolean;
 }
 
@@ -135,7 +142,10 @@ export async function updateTransactionCategory(
       workspaceId,
       transactionId,
       counterparty: target.data.transaction.counterparty,
+      amount: target.data.transaction.amount.toString(),
+      currency: target.data.transaction.currency,
       applyToSimilar: options?.applyToSimilar ?? false,
+      matchSameAmount: options?.matchSameAmount ?? false,
     });
     const idsToUpdate = [transactionId, ...similarIds];
     await persistCategoryAssignment({
