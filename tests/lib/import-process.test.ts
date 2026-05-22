@@ -22,6 +22,23 @@ describe("processCsvImport", () => {
     expect(result.skippedCount).toBe(0);
   });
 
+  it("skips duplicate rows within one CSV", () => {
+    const csv = readFileSync(FIXTURE, "utf-8");
+    const lines = csv.split("\n");
+    const firstTxLine = lines.find((line) => line.startsWith("2026-05-20;")) ?? "";
+    const duplicateRow = `${csv.trim()}\n${firstTxLine}`;
+    const result = processCsvImport({
+      csvContent: duplicateRow,
+      accountId: "acc_dom",
+      existingHashes: new Set(),
+      rules: [],
+      memories: [],
+      categoriesByName: new Map([["Żywność", "cat-food"]]),
+    });
+    expect(result.toInsert).toHaveLength(4);
+    expect(result.skippedCount).toBe(1);
+  });
+
   it("skips duplicate hashes", () => {
     const csv = readFileSync(FIXTURE, "utf-8");
     const first = processCsvImport({

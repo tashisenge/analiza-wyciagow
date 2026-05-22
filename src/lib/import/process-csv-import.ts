@@ -21,29 +21,49 @@ export interface ImportProcessResult {
   skippedCount: number;
 }
 
+type PreparedRow = ImportProcessResult["toInsert"][number];
+
+function rowDedupeHash(row: ParsedMbankRow, accountId: string): string {
+  return buildTransactionDedupeHash({
+    bookedAt: row.bookedAt,
+    amount: row.amount,
+    description: row.description,
+    accountId,
+  });
+}
+
+function prepareImportRow(
+  row: ParsedMbankRow,
+  input: ImportProcessInput,
+  seenHashes: Set<string>,
+): PreparedRow | null {
+  const dedupeHash = rowDedupeHash(row, input.accountId);
+  if (seenHashes.has(dedupeHash)) {
+    return null;
+  }
+  seenHashes.add(dedupeHash);
+  const categoryId = categorizeTransaction(
+    row,
+    input.rules,
+    input.memories,
+    input.categoriesByName,
+  );
+  return { ...row, dedupeHash, categoryId };
+}
+
 export function processCsvImport(input: ImportProcessInput): ImportProcessResult {
   const rows = input.rows ?? parseMbankCsv(input.csvContent);
   const toInsert: ImportProcessResult["toInsert"] = [];
+  const seenHashes = new Set(input.existingHashes);
   let skippedCount = 0;
 
   for (const row of rows) {
-    const dedupeHash = buildTransactionDedupeHash({
-      bookedAt: row.bookedAt,
-      amount: row.amount,
-      description: row.description,
-      accountId: input.accountId,
-    });
-    if (input.existingHashes.has(dedupeHash)) {
+    const prepared = prepareImportRow(row, input, seenHashes);
+    if (!prepared) {
       skippedCount += 1;
       continue;
     }
-    const categoryId = categorizeTransaction(
-      row,
-      input.rules,
-      input.memories,
-      input.categoriesByName,
-    );
-    toInsert.push({ ...row, dedupeHash, categoryId });
+    toInsert.push(prepared);
   }
 
   return { rows, toInsert, skippedCount };
