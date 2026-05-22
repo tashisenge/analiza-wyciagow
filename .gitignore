@@ -35,3 +35,5 @@ lista_operacji*.csv
 # IDE
 .idea
 .vscode
+.cursor/
+tsconfig.tsbuildinfo
