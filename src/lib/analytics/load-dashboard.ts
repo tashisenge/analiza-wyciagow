@@ -9,6 +9,7 @@ import { shouldCountInAnalytics } from "@/lib/analytics/should-count-in-analytic
 import { topMerchants } from "@/lib/analytics/top-merchants";
 import { prisma } from "@/lib/db";
 import { transactionCategoryLabel } from "@/lib/transaction-category-label";
+import { buildPairedOwnAccountTransferKeys } from "@/lib/transactions/match-own-account-transfer-pairs";
 
 type TxWithCategory = Awaited<
   ReturnType<typeof prisma.transaction.findMany<{ include: { category: true } }>>
@@ -118,12 +119,17 @@ async function fetchDashboardRaw(
 }
 
 function analyticsTransactions(transactions: TxWithCategory[]): TxWithCategory[] {
+  const pairedKeys = buildPairedOwnAccountTransferKeys(
+    transactions.map((tx) => ({
+      key: tx.id,
+      accountId: tx.accountId,
+      amount: tx.amount,
+      currency: tx.currency,
+      bookedAt: tx.bookedAt,
+    })),
+  );
   return transactions.filter((tx) =>
-    shouldCountInAnalytics({
-      description: tx.description,
-      mbankCategory: tx.mbankCategory,
-      category: tx.category,
-    }),
+    shouldCountInAnalytics({ transactionKey: tx.id, category: tx.category }, pairedKeys),
   );
 }
 

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 
+import { AmountValue } from "@/components/privacy/AmountValue";
 import type { OptimizationActionResult } from "@/server/actions/optimization";
 import {
   deleteCategoryBudget,
@@ -118,7 +119,9 @@ export function BudgetEditor({
               <div className="flex justify-between text-sm">
                 <span className="font-medium">{row.budget.category.name}</span>
                 <span className={over ? "text-red-700" : "text-slate-600"}>
-                  {row.spent.toFixed(2)} / {max.toFixed(2)} PLN
+                  <AmountValue>
+                    {row.spent.toFixed(2)} / {max.toFixed(2)} PLN
+                  </AmountValue>
                 </span>
               </div>
               <div className="mt-2 h-2 rounded bg-slate-100">

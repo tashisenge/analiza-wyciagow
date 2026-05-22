@@ -1,3 +1,4 @@
+import { AmountValue } from "@/components/privacy/AmountValue";
 import { CategoryAssignForm } from "@/components/transactions/CategoryAssignForm";
 
 interface CategoryOption {
@@ -23,7 +24,7 @@ interface TransactionRow {
   category: { name: string } | null;
   account: { type: string };
   similarCounts: SimilarCounts;
-  isInternalTransfer: boolean;
+  isOwnAccountTransfer: boolean;
   transferPairHint: string | null;
 }
 
@@ -94,7 +95,7 @@ export function TransactionsTable({
                     {tx.bookedAt.toISOString().slice(0, 10)}
                   </td>
                   <td className="max-w-xs px-3 py-2">
-                    {tx.isInternalTransfer ? (
+                    {tx.isOwnAccountTransfer ? (
                       <span className="mb-1 inline-block rounded bg-sky-100 px-2 py-0.5 text-xs text-sky-900">
                         Transfer między kontami
                       </span>
@@ -110,10 +111,12 @@ export function TransactionsTable({
                       <p className="text-xs text-slate-400">mBank: {tx.mbankCategory}</p>
                     ) : null}
                   </td>
-                  <td className="px-3 py-2 whitespace-nowrap">{amountLabel}</td>
+                  <td className="px-3 py-2 whitespace-nowrap">
+                    <AmountValue>{amountLabel}</AmountValue>
+                  </td>
                   <td className="px-3 py-2 capitalize">{tx.account.type}</td>
                   <td className="px-3 py-2 whitespace-nowrap">
-                    {tx.isInternalTransfer ? (
+                    {tx.isOwnAccountTransfer ? (
                       <span className="text-xs text-slate-400">transfer</span>
                     ) : (
                       renderSimilarBadges(tx.similarCounts)
@@ -130,7 +133,8 @@ export function TransactionsTable({
                       similarCounts={tx.similarCounts}
                       counterparty={tx.counterparty}
                       amountLabel={amountLabel}
-                      isInternalTransfer={tx.isInternalTransfer}
+                      isOwnAccountTransfer={tx.isOwnAccountTransfer}
+                      hasCategory={Boolean(tx.categoryId)}
                       action={changeCategoryAction}
                       returnTo={returnTo}
                     />

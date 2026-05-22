@@ -2,6 +2,7 @@
 
 import { Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 
+import { useAmountTooltipLabel } from "@/components/privacy/use-amount-tooltip-label";
 import type { CategorySlice } from "@/lib/analytics/category-breakdown";
 
 const COLORS = [
@@ -22,6 +23,7 @@ interface CategoryChartProps {
 }
 
 export function CategoryChart({ slices }: CategoryChartProps): React.JSX.Element {
+  const formatTooltip = useAmountTooltipLabel();
   if (slices.length === 0) {
     return <p className="text-sm text-slate-500">Brak wydatków w tym okresie.</p>;
   }
@@ -43,7 +45,7 @@ export function CategoryChart({ slices }: CategoryChartProps): React.JSX.Element
         />
         <Tooltip
           formatter={(value) =>
-            typeof value === "number" ? `${value.toFixed(2)} PLN` : String(value ?? "")
+            typeof value === "number" ? formatTooltip(value) : String(value ?? "")
           }
         />
       </PieChart>

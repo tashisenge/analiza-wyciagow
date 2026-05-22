@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 
+import { AmountValue } from "@/components/privacy/AmountValue";
 import type { CategoryTransactionGroup } from "@/lib/analytics/category-transactions";
 
 interface CategoryBreakdownPanelProps {
@@ -51,7 +52,8 @@ export function CategoryBreakdownPanel({
             >
               <span className="font-medium">{group.categoryName}</span>
               <span className="text-slate-600">
-                {group.total.toFixed(2)} PLN ({String(percent)}%)
+                <AmountValue>{group.total.toFixed(2)} PLN</AmountValue> ({String(percent)}
+                %)
                 <span className="ml-2 text-indigo-600">{expanded ? "▲" : "▼"}</span>
               </span>
             </button>
@@ -64,7 +66,9 @@ export function CategoryBreakdownPanel({
                         {tx.bookedAt} · {tx.counterparty}
                       </span>
                       <span className="whitespace-nowrap font-medium text-red-700">
-                        {Math.abs(Number(tx.amount)).toFixed(2)} PLN
+                        <AmountValue>
+                          {Math.abs(Number(tx.amount)).toFixed(2)} PLN
+                        </AmountValue>
                       </span>
                     </li>
                   ))}

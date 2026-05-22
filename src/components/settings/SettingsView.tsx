@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { PrivacyAmountsToggle } from "@/components/privacy/PrivacyAmountsToggle";
 import { CopyInviteButton } from "@/components/settings/CopyInviteButton";
 
 interface AccountRow {
@@ -46,6 +47,11 @@ export function SettingsView({
           Wszystkie transakcje zostały usunięte. Kategorie i konta zostały.
         </p>
       ) : null}
+
+      <section className="rounded-lg border bg-white p-4">
+        <h2 className="mb-3 font-semibold">Prywatność przy pokazywaniu ekranu</h2>
+        <PrivacyAmountsToggle />
+      </section>
 
       <section className="rounded-lg border bg-white p-4">
         <h2 className="font-semibold">Zaproszenie partnera</h2>

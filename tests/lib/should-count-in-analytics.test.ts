@@ -4,29 +4,33 @@ import { shouldCountInAnalytics } from "@/lib/analytics/should-count-in-analytic
 import { TRANSFER_BETWEEN_ACCOUNTS_CATEGORY } from "@/lib/transactions/transfer-category";
 
 describe("shouldCountInAnalytics", () => {
-  it("excludes transfer category", () => {
+  it("excludes paired own-account transfer", () => {
     expect(
-      shouldCountInAnalytics({
-        description: "Sklep",
-        category: { name: TRANSFER_BETWEEN_ACCOUNTS_CATEGORY },
-      }),
+      shouldCountInAnalytics(
+        { transactionKey: "tx-1", category: { name: "Żywność" } },
+        new Set(["tx-1"]),
+      ),
     ).toBe(false);
   });
 
-  it("excludes internal transfer by description", () => {
+  it("excludes transfer category", () => {
     expect(
-      shouldCountInAnalytics({
-        description: "X, PRZELEW WEWNĘTRZNY PRZYCHODZĄCY",
-      }),
+      shouldCountInAnalytics(
+        {
+          transactionKey: "tx-2",
+          category: { name: TRANSFER_BETWEEN_ACCOUNTS_CATEGORY },
+        },
+        new Set(),
+      ),
     ).toBe(false);
   });
 
   it("includes regular expense", () => {
     expect(
-      shouldCountInAnalytics({
-        description: "NETTO ZAKUP PRZY UŻYCIU KARTY",
-        category: { name: "Żywność" },
-      }),
+      shouldCountInAnalytics(
+        { transactionKey: "tx-3", category: { name: "Żywność" } },
+        new Set(),
+      ),
     ).toBe(true);
   });
 });

@@ -3,7 +3,9 @@ import { join } from "path";
 
 import { describe, expect, it } from "vitest";
 
+import { buildImportPairedTransferKeys } from "@/lib/import/build-import-transfer-pairs";
 import { processCsvImport } from "@/lib/import/process-csv-import";
+import { TRANSFER_BETWEEN_ACCOUNTS_CATEGORY } from "@/lib/transactions/transfer-category";
 
 const FIXTURE = join(process.cwd(), "tests/fixtures/mbank-sample.csv");
 
@@ -60,5 +62,40 @@ describe("processCsvImport", () => {
     });
     expect(second.toInsert).toHaveLength(0);
     expect(second.skippedCount).toBe(4);
+  });
+
+  it("assigns transfer category only for rows paired with other account", () => {
+    const csv = readFileSync(FIXTURE, "utf-8");
+    const bookedAt = new Date("2026-05-21");
+    const rows = processCsvImport({
+      csvContent: csv,
+      accountId: "acc_dom",
+      existingHashes: new Set(),
+      rules: [],
+      memories: [],
+      categoriesByName: new Map([[TRANSFER_BETWEEN_ACCOUNTS_CATEGORY, "cat-transfer"]]),
+    }).rows;
+    const pairedKeys = buildImportPairedTransferKeys("acc_dom", rows, [
+      {
+        dedupeHash: "firma-out",
+        accountId: "acc_firma",
+        amount: "-1900.00",
+        currency: "PLN",
+        bookedAt,
+      },
+    ]);
+    const result = processCsvImport({
+      csvContent: csv,
+      accountId: "acc_dom",
+      existingHashes: new Set(),
+      rules: [],
+      memories: [],
+      categoriesByName: new Map([[TRANSFER_BETWEEN_ACCOUNTS_CATEGORY, "cat-transfer"]]),
+      pairedImportKeys: pairedKeys,
+    });
+    const transferRow = result.toInsert.find((row) => row.amount === "1900.00");
+    expect(transferRow?.categoryId).toBe("cat-transfer");
+    const shopRow = result.toInsert.find((row) => row.counterparty === "LIDL");
+    expect(shopRow?.categoryId).not.toBe("cat-transfer");
   });
 });

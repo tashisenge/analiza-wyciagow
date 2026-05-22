@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { AppNav } from "@/components/AppNav";
+import { AppPrivacyShell } from "@/components/privacy/AppPrivacyShell";
 import { auth } from "@/lib/auth";
 
 export default async function AppLayout({
@@ -13,9 +14,11 @@ export default async function AppLayout({
     redirect("/login");
   }
   return (
-    <div className="min-h-screen">
-      <AppNav />
-      <div className="mx-auto max-w-6xl p-4">{children}</div>
-    </div>
+    <AppPrivacyShell>
+      <div className="min-h-screen">
+        <AppNav />
+        <div className="mx-auto max-w-6xl p-4">{children}</div>
+      </div>
+    </AppPrivacyShell>
   );
 }

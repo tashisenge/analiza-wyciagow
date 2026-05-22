@@ -1,3 +1,4 @@
+import { AmountValue } from "@/components/privacy/AmountValue";
 import { percentChange, type PeriodSummary } from "@/lib/analytics/period-summary";
 
 interface PeriodSummaryCardsProps {
@@ -31,7 +32,7 @@ export function PeriodSummaryCards({
         <div className="rounded-lg border bg-white p-4">
           <p className="text-xs text-slate-500">Wydatki</p>
           <p className="text-xl font-semibold text-red-700">
-            {summary.totalExpenses.toFixed(2)} PLN
+            <AmountValue>{summary.totalExpenses.toFixed(2)} PLN</AmountValue>
           </p>
           <ChangeBadge
             value={percentChange(summary.totalExpenses, previous.totalExpenses)}
@@ -40,13 +41,15 @@ export function PeriodSummaryCards({
         <div className="rounded-lg border bg-white p-4">
           <p className="text-xs text-slate-500">Wpływy</p>
           <p className="text-xl font-semibold text-green-700">
-            {summary.totalIncome.toFixed(2)} PLN
+            <AmountValue>{summary.totalIncome.toFixed(2)} PLN</AmountValue>
           </p>
           <ChangeBadge value={percentChange(summary.totalIncome, previous.totalIncome)} />
         </div>
         <div className="rounded-lg border bg-white p-4">
           <p className="text-xs text-slate-500">Bilans</p>
-          <p className="text-xl font-semibold">{summary.net.toFixed(2)} PLN</p>
+          <p className="text-xl font-semibold">
+            <AmountValue>{summary.net.toFixed(2)} PLN</AmountValue>
+          </p>
           <ChangeBadge value={percentChange(summary.net, previous.net)} />
         </div>
       </div>

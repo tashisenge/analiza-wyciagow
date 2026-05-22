@@ -9,6 +9,7 @@ export interface TransactionForResolve {
   description: string;
   counterparty: string;
   mbankCategory?: string;
+  isPairedOwnAccountTransfer?: boolean;
 }
 
 export function resolveCategoryId(
@@ -28,8 +29,7 @@ export function resolveCategoryId(
   }
 
   const transferId = resolveInternalTransferCategoryId(
-    tx.description,
-    tx.mbankCategory,
+    tx.isPairedOwnAccountTransfer ?? false,
     categoriesByName,
   );
   if (transferId) {

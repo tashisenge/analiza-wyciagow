@@ -6,8 +6,8 @@ import { accountIdsForContext, type ContextFilter } from "@/lib/analytics/filter
 import { auth } from "@/lib/auth";
 import { ensureTransferCategory } from "@/lib/categories/ensure-transfer-category";
 import { prisma } from "@/lib/db";
-import { buildTransferPairHintByTransactionId } from "@/lib/transactions/build-transfer-pair-hints";
-import { isInternalTransfer } from "@/lib/transactions/is-internal-transfer";
+import { buildTransactionTableRows } from "@/lib/transactions/build-transaction-table-rows";
+import { loadPairedOwnAccountTransferKeys } from "@/lib/transactions/load-workspace-transfer-pairs";
 import {
   buildTransactionsReturnTo,
   prismaCategoryFilter,
@@ -45,11 +45,11 @@ async function changeCategoryAction(formData: FormData): Promise<void> {
   }
   if (result.updatedCount && result.updatedCount > 1) {
     const separator = returnTo.includes("?") ? "&" : "?";
-    redirect(
-      `${returnTo}${separator}msg=${encodeURIComponent(
-        `Zaktualizowano ${String(result.updatedCount)} transakcji (w tym podobne).`,
-      )}`,
-    );
+    const cleared = !categoryId.trim();
+    const message = cleared
+      ? `Usunięto kategorię z ${String(result.updatedCount)} transakcji.`
+      : `Zaktualizowano ${String(result.updatedCount)} transakcji (w tym podobne).`;
+    redirect(`${returnTo}${separator}msg=${encodeURIComponent(message)}`);
   }
   redirect(returnTo);
 }
@@ -112,32 +112,22 @@ export default async function TransactionsPage({
       currency: tx.currency,
     })),
   );
-  const transferHints = buildTransferPairHintByTransactionId(
-    transactions.map((tx) => ({
+  const pairedTransferKeys = await loadPairedOwnAccountTransferKeys({
+    workspaceId,
+    accountIds,
+    anchorTransactions: transactions.map((tx) => ({
       id: tx.id,
       accountId: tx.accountId,
-      accountType: tx.account.type,
-      amount: tx.amount.toString(),
+      amount: tx.amount,
       currency: tx.currency,
       bookedAt: tx.bookedAt,
-      description: tx.description,
     })),
-  );
-  const rows = transactions.map((tx) => {
-    const internal = isInternalTransfer({
-      description: tx.description,
-      mbankCategory: tx.mbankCategory,
-    });
-    return {
-      ...tx,
-      suggestedCategoryId: tx.categoryId ?? (internal ? transferCategoryId : ""),
-      similarCounts: similarCounts.get(tx.id) ?? {
-        byCounterparty: 0,
-        byCounterpartyAndAmount: 0,
-      },
-      isInternalTransfer: internal,
-      transferPairHint: transferHints.get(tx.id) ?? null,
-    };
+  });
+  const rows = buildTransactionTableRows({
+    transactions,
+    transferCategoryId,
+    similarCounts,
+    pairedTransferKeys,
   });
 
   return (
@@ -161,11 +151,11 @@ export default async function TransactionsPage({
         </p>
       ) : null}
       <p className="text-sm text-slate-600">
-        Przelewy własne (wewnętrzne) są oznaczone jako{" "}
-        <strong>{TRANSFER_BETWEEN_ACCOUNTS_CATEGORY}</strong> i nie wliczają się do
-        wydatków na dashboardzie. Kolumna „Podobne”: ten sam kontrahent oraz (osobno) ta
-        sama kwota — przy kategoryzacji możesz zawęzić masowe przypisanie do identycznej
-        kwoty.
+        Transfer między <strong>Twoimi kontami</strong> wykrywamy tylko gdy w bazie jest
+        para (przeciwna kwota, inne konto, ten sam dzień ±5 dni) — wtedy kategoria{" "}
+        <strong>{TRANSFER_BETWEEN_ACCOUNTS_CATEGORY}</strong> i brak wpływu na dashboard.
+        Wybierz „— wybierz —” lub <strong>Usuń kategorię</strong>, aby wyczyścić
+        przypisanie. „Podobne”: kontrahent i opcjonalnie ta sama kwota.
       </p>
       <TransactionsTable
         transactions={rows}

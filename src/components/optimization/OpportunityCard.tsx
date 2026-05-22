@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import { ResearchAlternatives } from "@/components/optimization/ResearchAlternatives";
+import { AmountValue } from "@/components/privacy/AmountValue";
 import type { OpportunityResearchView } from "@/lib/research/types";
 import type { OptimizationActionResult } from "@/server/actions/optimization";
 import { updateOpportunityStatus } from "@/server/actions/optimization";
@@ -78,7 +79,7 @@ export function OpportunityCard({
         </div>
         {savings !== null ? (
           <p className="text-sm font-medium text-emerald-700">
-            ~{savings.toFixed(2)} PLN/mies.
+            <AmountValue>~{savings.toFixed(2)} PLN/mies.</AmountValue>
           </p>
         ) : null}
       </div>

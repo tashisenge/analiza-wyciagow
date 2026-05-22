@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { AmountValue } from "@/components/privacy/AmountValue";
 import type { DashboardOpportunity } from "@/lib/analytics/load-dashboard";
 
 interface OptimizeWidgetProps {
@@ -54,7 +55,7 @@ export function OptimizeWidget({
               {savings !== null ? (
                 <span className="text-emerald-700">
                   {" "}
-                  — ~{savings.toFixed(2)} PLN/mies.
+                  — <AmountValue>~{savings.toFixed(2)} PLN/mies.</AmountValue>
                 </span>
               ) : null}
             </li>

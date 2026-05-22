@@ -11,6 +11,7 @@ export interface ImportProcessInput {
   rules: CategoryRuleInput[];
   memories: MerchantMemoryInput[];
   categoriesByName: Map<string, string>;
+  pairedImportKeys?: Set<string>;
   /** Jeśli podane — pomija ponowne parsowanie CSV (np. po sync kategorii mBank). */
   rows?: ParsedMbankRow[];
 }
@@ -43,7 +44,10 @@ function prepareImportRow(
   }
   seenHashes.add(dedupeHash);
   const categoryId = categorizeTransaction(
-    row,
+    {
+      ...row,
+      isPairedOwnAccountTransfer: input.pairedImportKeys?.has(dedupeHash) ?? false,
+    },
     input.rules,
     input.memories,
     input.categoriesByName,

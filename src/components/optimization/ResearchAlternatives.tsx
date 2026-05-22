@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 
+import { AmountValue } from "@/components/privacy/AmountValue";
 import type { OpportunityResearchView } from "@/lib/research/types";
 import type { ResearchActionResult } from "@/server/actions/research";
 import { researchOpportunityAlternatives } from "@/server/actions/research";
@@ -99,7 +100,13 @@ function ResearchResultView({
             <li key={alt.name}>
               <span className="font-medium">{alt.name}</span>
               {alt.estimatedMonthlyPln !== null ? (
-                <span> — ~{alt.estimatedMonthlyPln.toFixed(2)} PLN/mies.</span>
+                <span>
+                  {" "}
+                  —{" "}
+                  <AmountValue>
+                    ~{alt.estimatedMonthlyPln.toFixed(2)} PLN/mies.
+                  </AmountValue>
+                </span>
               ) : null}
               {alt.note ? <span className="text-slate-600"> ({alt.note})</span> : null}
             </li>

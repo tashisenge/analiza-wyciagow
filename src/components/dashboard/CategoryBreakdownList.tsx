@@ -1,3 +1,4 @@
+import { AmountValue } from "@/components/privacy/AmountValue";
 import type { CategorySlice } from "@/lib/analytics/category-breakdown";
 
 interface CategoryBreakdownListProps {
@@ -16,7 +17,8 @@ export function CategoryBreakdownList({
         >
           <span>{slice.categoryName}</span>
           <span>
-            {slice.total.toFixed(2)} PLN ({String(slice.percent)}%)
+            <AmountValue>{slice.total.toFixed(2)} PLN</AmountValue> (
+            {String(slice.percent)}%)
           </span>
         </li>
       ))}

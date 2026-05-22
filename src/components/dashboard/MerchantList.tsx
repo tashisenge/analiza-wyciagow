@@ -1,3 +1,4 @@
+import { AmountValue } from "@/components/privacy/AmountValue";
 import type { MerchantRow } from "@/lib/analytics/top-merchants";
 
 interface MerchantListProps {
@@ -14,7 +15,7 @@ export function MerchantList({ merchants }: MerchantListProps): React.JSX.Elemen
         >
           <span>{row.counterparty}</span>
           <span>
-            {row.total.toFixed(2)} PLN
+            <AmountValue>{row.total.toFixed(2)} PLN</AmountValue>
             {row.changePercent !== null ? ` (${String(row.changePercent)}% m/m)` : ""}
           </span>
         </li>

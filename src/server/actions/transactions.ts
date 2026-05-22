@@ -1,6 +1,6 @@
 "use server";
 
-import type { Category, Transaction } from "@prisma/client";
+import type { Transaction } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 
 import { auth } from "@/lib/auth";
@@ -51,28 +51,29 @@ async function collectSimilarIds(options: CollectSimilarIdsOptions): Promise<str
     workspaceId: options.workspaceId,
     counterparty: options.counterparty,
     excludeTransactionId: options.transactionId,
-    onlyUncategorized: true,
+    onlyUncategorized: false,
     amount: options.amount,
     currency: options.currency,
     matchSameAmount: options.matchSameAmount,
   });
 }
 
-interface PersistCategoryAssignmentOptions {
+interface ApplyCategoryOptions {
   workspaceId: string;
   idsToUpdate: string[];
-  categoryId: string;
+  categoryId: string | null;
   counterparty: string;
   createRule: boolean;
 }
 
-async function persistCategoryAssignment(
-  options: PersistCategoryAssignmentOptions,
-): Promise<void> {
+async function applyCategoryToTransactions(options: ApplyCategoryOptions): Promise<void> {
   await prisma.transaction.updateMany({
     where: { workspaceId: options.workspaceId, id: { in: options.idsToUpdate } },
     data: { categoryId: options.categoryId },
   });
+  if (!options.categoryId) {
+    return;
+  }
   await rememberMerchantCategory(
     options.workspaceId,
     options.counterparty,
@@ -89,37 +90,70 @@ async function persistCategoryAssignment(
   });
 }
 
-interface CategoryUpdateTarget {
-  transaction: Transaction;
-  category: Category;
-}
-
-async function loadCategoryUpdateTarget(
+async function loadTransaction(
   workspaceId: string,
   transactionId: string,
-  categoryId: string,
-): Promise<{ ok: true; data: CategoryUpdateTarget } | { ok: false; error: string }> {
-  const transaction = await prisma.transaction.findFirst({
+): Promise<Transaction | null> {
+  return prisma.transaction.findFirst({
     where: { id: transactionId, workspaceId },
   });
-  if (!transaction) {
-    return { ok: false, error: "Nieznaleziono transakcji" };
-  }
+}
 
+async function validateCategoryId(
+  workspaceId: string,
+  categoryId: string,
+): Promise<string | null> {
   const category = await prisma.category.findFirst({
     where: { id: categoryId, workspaceId },
+    select: { id: true },
   });
   if (!category) {
-    return { ok: false, error: "Nieprawidłowa kategoria" };
+    return "Nieprawidłowa kategoria";
   }
+  return null;
+}
 
-  return { ok: true, data: { transaction, category } };
+function revalidateCategoryPaths(): void {
+  revalidatePath("/transactions");
+  revalidatePath("/dashboard");
+  revalidatePath("/categories");
 }
 
 export interface UpdateCategoryOptions {
   applyToSimilar?: boolean;
   matchSameAmount?: boolean;
   createRule?: boolean;
+}
+
+interface PerformCategoryUpdateInput {
+  workspaceId: string;
+  transaction: Transaction;
+  categoryId: string | null;
+  options?: UpdateCategoryOptions;
+}
+
+async function performCategoryUpdate(
+  input: PerformCategoryUpdateInput,
+): Promise<{ ok: true; updatedCount: number } | { ok: false; error: string }> {
+  const clearing = !input.categoryId;
+  const similarIds = await collectSimilarIds({
+    workspaceId: input.workspaceId,
+    transactionId: input.transaction.id,
+    counterparty: input.transaction.counterparty,
+    amount: input.transaction.amount.toString(),
+    currency: input.transaction.currency,
+    applyToSimilar: input.options?.applyToSimilar ?? false,
+    matchSameAmount: input.options?.matchSameAmount ?? false,
+  });
+  const idsToUpdate = [input.transaction.id, ...similarIds];
+  await applyCategoryToTransactions({
+    workspaceId: input.workspaceId,
+    idsToUpdate,
+    categoryId: input.categoryId,
+    counterparty: input.transaction.counterparty,
+    createRule: clearing ? false : (input.options?.createRule ?? false),
+  });
+  return { ok: true, updatedCount: idsToUpdate.length };
 }
 
 export async function updateTransactionCategory(
@@ -132,40 +166,41 @@ export async function updateTransactionCategory(
     return { ok: false, error: "Brak sesji" };
   }
 
+  const clearing = !categoryId.trim();
+
   try {
-    const target = await loadCategoryUpdateTarget(workspaceId, transactionId, categoryId);
-    if (!target.ok) {
-      return { ok: false, error: target.error };
+    const transaction = await loadTransaction(workspaceId, transactionId);
+    if (!transaction) {
+      return { ok: false, error: "Nieznaleziono transakcji" };
     }
 
-    const similarIds = await collectSimilarIds({
-      workspaceId,
-      transactionId,
-      counterparty: target.data.transaction.counterparty,
-      amount: target.data.transaction.amount.toString(),
-      currency: target.data.transaction.currency,
-      applyToSimilar: options?.applyToSimilar ?? false,
-      matchSameAmount: options?.matchSameAmount ?? false,
-    });
-    const idsToUpdate = [transactionId, ...similarIds];
-    await persistCategoryAssignment({
-      workspaceId,
-      idsToUpdate,
-      categoryId,
-      counterparty: target.data.transaction.counterparty,
-      createRule: options?.createRule ?? false,
-    });
+    const categoryError = clearing
+      ? null
+      : await validateCategoryId(workspaceId, categoryId);
+    if (categoryError) {
+      return { ok: false, error: categoryError };
+    }
 
-    revalidatePath("/transactions");
-    revalidatePath("/dashboard");
-    revalidatePath("/categories");
-    return { ok: true, updatedCount: idsToUpdate.length };
+    const result = await performCategoryUpdate({
+      workspaceId,
+      transaction,
+      categoryId: clearing ? null : categoryId,
+      options,
+    });
+    if (!result.ok) {
+      return { ok: false, error: result.error };
+    }
+
+    revalidateCategoryPaths();
+    return { ok: true, updatedCount: result.updatedCount };
   } catch (error) {
     return {
       ok: false,
       error: logActionError("transactions.updateCategory", error, {
         context: { workspaceId, transactionId },
-        fallbackMessage: "Nie udało się zapisać kategorii",
+        fallbackMessage: clearing
+          ? "Nie udało się usunąć kategorii"
+          : "Nie udało się zapisać kategorii",
       }),
     };
   }

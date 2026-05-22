@@ -29,6 +29,9 @@ const COVERAGE_EXCLUDE = [
   "src/lib/optimization/load-optimization-data.ts",
   "src/lib/optimization/load-budget-spent.ts",
   "src/lib/optimization/upsert-opportunities.ts",
+  "src/lib/transactions/load-workspace-transfer-pairs.ts",
+  "src/lib/transactions/build-transaction-table-rows.ts",
+  "src/lib/transactions/find-similar-transaction-ids.ts",
 ];
 
 export default defineConfig({

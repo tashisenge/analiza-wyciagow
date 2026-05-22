@@ -5,3 +5,27 @@
 body {
   @apply bg-slate-50 text-slate-900 antialiased;
 }
+
+html[data-hide-amounts="1"] .amount-value {
+  position: relative;
+  display: inline-block;
+  min-width: 4.5rem;
+}
+
+html[data-hide-amounts="1"] .amount-value .amount-value-text {
+  visibility: hidden;
+  filter: blur(14px);
+  user-select: none;
+}
+
+html[data-hide-amounts="1"] .amount-value::after {
+  content: "••••••";
+  position: absolute;
+  left: 0;
+  top: 0;
+  color: rgb(100 116 139);
+  filter: blur(3px);
+  letter-spacing: 0.12em;
+  user-select: none;
+  visibility: visible;
+}

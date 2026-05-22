@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+import { PrivacyAmountsToggle } from "@/components/privacy/PrivacyAmountsToggle";
+
 const links = [
   { href: "/dashboard", label: "Dashboard" },
   { href: "/optimize", label: "Optymalizacja" },
@@ -11,7 +13,7 @@ const links = [
 
 export function AppNav(): React.JSX.Element {
   return (
-    <nav className="flex flex-wrap gap-2 border-b border-slate-200 bg-white px-4 py-3">
+    <nav className="flex flex-wrap items-center gap-2 border-b border-slate-200 bg-white px-4 py-3">
       {links.map((link) => (
         <Link
           key={link.href}
@@ -21,6 +23,9 @@ export function AppNav(): React.JSX.Element {
           {link.label}
         </Link>
       ))}
+      <div className="ml-auto">
+        <PrivacyAmountsToggle compact />
+      </div>
     </nav>
   );
 }

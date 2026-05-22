@@ -1,7 +1,8 @@
-import { isInternalTransfer } from "@/lib/transactions/is-internal-transfer";
-import { normalizeAmountForMatch } from "@/lib/transactions/normalize-amount-for-match";
-
-const MAX_DAY_GAP_MS = 5 * 24 * 60 * 60 * 1000;
+import {
+  buildPairedOwnAccountTransferKeys,
+  findOwnAccountTransferPartnerKey,
+  type OwnAccountTransferRef,
+} from "@/lib/transactions/match-own-account-transfer-pairs";
 
 export interface TransferPairTransactionRef {
   id: string;
@@ -10,49 +11,16 @@ export interface TransferPairTransactionRef {
   amount: string | { toString(): string };
   currency: string;
   bookedAt: Date;
-  description: string;
 }
 
-function amountsAreOppositePair(left: number, right: number): boolean {
-  return (
-    Math.sign(left) !== 0 &&
-    Math.sign(right) !== 0 &&
-    Math.sign(left) !== Math.sign(right)
-  );
-}
-
-function isTransferPairMatch(
-  left: TransferPairTransactionRef,
-  right: TransferPairTransactionRef,
-): boolean {
-  if (left.accountId === right.accountId || left.currency !== right.currency) {
-    return false;
-  }
-  if (normalizeAmountForMatch(right.amount) !== normalizeAmountForMatch(left.amount)) {
-    return false;
-  }
-  const leftAmount = Number(left.amount.toString());
-  const rightAmount = Number(right.amount.toString());
-  if (!amountsAreOppositePair(leftAmount, rightAmount)) {
-    return false;
-  }
-  const dayGap = Math.abs(left.bookedAt.getTime() - right.bookedAt.getTime());
-  return dayGap <= MAX_DAY_GAP_MS;
-}
-
-function findTransferPartner(
-  left: TransferPairTransactionRef,
-  candidates: TransferPairTransactionRef[],
-): TransferPairTransactionRef | null {
-  for (const right of candidates) {
-    if (right.id === left.id) {
-      continue;
-    }
-    if (isTransferPairMatch(left, right)) {
-      return right;
-    }
-  }
-  return null;
+function toOwnAccountRef(tx: TransferPairTransactionRef): OwnAccountTransferRef {
+  return {
+    key: tx.id,
+    accountId: tx.accountId,
+    amount: tx.amount,
+    currency: tx.currency,
+    bookedAt: tx.bookedAt,
+  };
 }
 
 function storeTransferPairHints(
@@ -74,15 +42,16 @@ export function buildTransferPairHintByTransactionId(
   transactions: TransferPairTransactionRef[],
 ): Map<string, string> {
   const hints = new Map<string, string>();
-  const candidates = transactions.filter((tx) =>
-    isInternalTransfer({ description: tx.description }),
-  );
+  const refs = transactions.map(toOwnAccountRef);
+  const pairedKeys = buildPairedOwnAccountTransferKeys(refs);
+  const byId = new Map(transactions.map((tx) => [tx.id, tx]));
 
-  for (const left of candidates) {
-    if (hints.has(left.id)) {
+  for (const left of transactions) {
+    if (!pairedKeys.has(left.id) || hints.has(left.id)) {
       continue;
     }
-    const right = findTransferPartner(left, candidates);
+    const partnerKey = findOwnAccountTransferPartnerKey(toOwnAccountRef(left), refs);
+    const right = partnerKey ? byId.get(partnerKey) : undefined;
     if (right) {
       storeTransferPairHints(hints, left, right);
     }

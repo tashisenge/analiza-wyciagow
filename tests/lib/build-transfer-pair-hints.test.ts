@@ -12,7 +12,6 @@ describe("buildTransferPairHintByTransactionId", () => {
         amount: "-1000.00",
         currency: "PLN",
         bookedAt: new Date("2026-05-21"),
-        description: "Adam, PRZELEW WEWNĘTRZNY WYSYŁANY",
       },
       {
         id: "in",
@@ -21,11 +20,24 @@ describe("buildTransferPairHintByTransactionId", () => {
         amount: "1000.00",
         currency: "PLN",
         bookedAt: new Date("2026-05-21"),
-        description: "Adam, PRZELEW WEWNĘTRZNY PRZYCHODZĄCY",
       },
     ]);
 
     expect(hints.get("out")).toContain("dom");
     expect(hints.get("in")).toContain("firma");
+  });
+
+  it("returns empty when no matching pair", () => {
+    const hints = buildTransferPairHintByTransactionId([
+      {
+        id: "solo",
+        accountId: "a1",
+        accountType: "firma",
+        amount: "-100.00",
+        currency: "PLN",
+        bookedAt: new Date("2026-05-21"),
+      },
+    ]);
+    expect(hints.size).toBe(0);
   });
 });
