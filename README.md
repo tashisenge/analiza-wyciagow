@@ -4,10 +4,19 @@ Aplikacja do zrozumienia wydatków (firma + dom) na podstawie eksportów mBank.
 
 ## Dokumentacja
 
-- Spec: `docs/superpowers/specs/2026-05-21-analiza-wyciagow-design.md`
-- Optymalizacja budżetu: `docs/superpowers/specs/2026-05-22-budget-optimization.md`
-- Plan: `docs/superpowers/plans/2026-05-21-mvp-analiza-wyciagow.md`
-- Testy: `docs/testing-strategy.md`
+**Indeks:** [`docs/README.md`](docs/README.md) — przewodnik użytkownika, architektura, model danych, deploy.
+
+| Temat                   | Link                                                                                                                           |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| Przewodnik użytkownika  | [`docs/user-guide.md`](docs/user-guide.md)                                                                                     |
+| Optymalizacja budżetu   | [`docs/optimization.md`](docs/optimization.md)                                                                                 |
+| Przewodnik deweloperski | [`docs/developer-guide.md`](docs/developer-guide.md)                                                                           |
+| Architektura            | [`docs/architecture.md`](docs/architecture.md)                                                                                 |
+| Model danych            | [`docs/data-model.md`](docs/data-model.md)                                                                                     |
+| Import mBank            | [`docs/import-mbank.md`](docs/import-mbank.md)                                                                                 |
+| Deploy Vercel + Neon    | [`docs/deploy-vercel-neon.md`](docs/deploy-vercel-neon.md)                                                                     |
+| Testy                   | [`docs/testing-strategy.md`](docs/testing-strategy.md)                                                                         |
+| Spec produktu           | [`docs/superpowers/specs/2026-05-21-analiza-wyciagow-design.md`](docs/superpowers/specs/2026-05-21-analiza-wyciagow-design.md) |
 
 ## Wymagania
 

@@ -12,6 +12,7 @@
 # env
 .env
 .env*.local
+.env.vercel*
 
 # debug
 npm-debug.log*
@@ -37,3 +38,4 @@ lista_operacji*.csv
 .vscode
 .cursor/
 tsconfig.tsbuildinfo
+.vercel
