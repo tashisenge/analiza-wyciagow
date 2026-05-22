@@ -21,44 +21,30 @@ export default async function LoginPage({
 
   return (
     <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center gap-4 p-8">
-      <h1 className="text-2xl font-bold">Logowanie</h1>
+      <h1 className="page-title">Logowanie</h1>
+      <p className="page-lead -mt-2">
+        Analiza wyciągów mBank — dom i firma w jednym miejscu.
+      </p>
       {params.registered === "1" ? (
-        <p className="rounded bg-green-50 px-3 py-2 text-sm text-green-800">
-          Konto utworzone — możesz się zalogować.
-        </p>
+        <p className="alert-success">Konto utworzone — możesz się zalogować.</p>
       ) : null}
-      {params.error ? (
-        <p className="rounded bg-red-50 px-3 py-2 text-sm text-red-700">{params.error}</p>
-      ) : null}
-      <form action={loginAction} className="flex flex-col gap-3">
+      {params.error ? <p className="alert-error">{params.error}</p> : null}
+      <form action={loginAction} className="section-card flex flex-col gap-3">
         <label className="flex flex-col gap-1 text-sm">
           Email
-          <input
-            name="email"
-            type="email"
-            required
-            className="rounded border border-slate-300 px-3 py-2"
-          />
+          <input name="email" type="email" required className="input-field" />
         </label>
         <label className="flex flex-col gap-1 text-sm">
           Hasło
-          <input
-            name="password"
-            type="password"
-            required
-            className="rounded border border-slate-300 px-3 py-2"
-          />
+          <input name="password" type="password" required className="input-field" />
         </label>
-        <button
-          type="submit"
-          className="rounded-lg bg-indigo-600 px-4 py-2 text-white hover:bg-indigo-700"
-        >
+        <button type="submit" className="btn-primary">
           Zaloguj się
         </button>
       </form>
       <p className="text-sm text-slate-600">
         Nie masz konta?{" "}
-        <Link href="/register" className="text-indigo-600 underline">
+        <Link href="/register" className="link-brand">
           Zarejestruj się
         </Link>
       </p>

@@ -72,7 +72,7 @@ export function OpportunityCard({
     <article className="rounded-lg border border-slate-200 bg-white p-4">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
-          <span className="text-xs font-medium uppercase text-indigo-600">
+          <span className="text-xs font-medium uppercase text-brand-600">
             {TYPE_LABELS[opportunity.type] ?? opportunity.type}
           </span>
           <h3 className="font-semibold text-slate-900">{opportunity.title}</h3>
@@ -90,7 +90,7 @@ export function OpportunityCard({
         </span>
       ) : null}
       <div className="mt-3 flex flex-wrap gap-2">
-        <a href={txHref} className="text-sm text-indigo-600 underline">
+        <a href={txHref} className="link-brand text-sm">
           Zobacz transakcje
         </a>
         {!showVerifiedBadge ? (

@@ -1,7 +1,9 @@
 import { redirect } from "next/navigation";
 
 import { TransactionFilters } from "@/components/transactions/TransactionFilters";
+import { TransactionsHelpPanel } from "@/components/transactions/TransactionsHelpPanel";
 import { TransactionsTable } from "@/components/transactions/TransactionsTable";
+import { PageHeader } from "@/components/ui/PageHeader";
 import { accountIdsForContext, type ContextFilter } from "@/lib/analytics/filters";
 import { auth } from "@/lib/auth";
 import { ensureTransferCategory } from "@/lib/categories/ensure-transfer-category";
@@ -15,7 +17,6 @@ import {
   type TransactionSearchParams,
 } from "@/lib/transactions/page-filters";
 import { buildSimilarCountsByTransactionId } from "@/lib/transactions/similar-transaction-count";
-import { TRANSFER_BETWEEN_ACCOUNTS_CATEGORY } from "@/lib/transactions/transfer-category";
 import { updateTransactionCategory } from "@/server/actions/transactions";
 
 async function changeCategoryAction(formData: FormData): Promise<void> {
@@ -132,31 +133,23 @@ export default async function TransactionsPage({
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-bold">Transakcje</h1>
-      <TransactionFilters active={transactionActiveFilter(params)} />
+      <PageHeader
+        title="Transakcje"
+        lead="Kategoryzuj pojedynczo lub masowo po kontrahencie. Zmiana kategorii zapisuje się od razu."
+        tip="Lista pokazuje do 200 ostatnich pozycji z wybranych kont."
+        actions={<TransactionFilters active={transactionActiveFilter(params)} />}
+      />
       {categoryLabel ? (
         <p className="text-sm text-slate-600">
           Filtr: kategoria <strong>{categoryLabel}</strong> —{" "}
-          <a href="/transactions" className="text-indigo-600 underline">
+          <a href="/transactions" className="link-brand">
             wyczyść filtr
           </a>
         </p>
       ) : null}
-      {params.error ? (
-        <p className="rounded bg-red-50 px-3 py-2 text-sm text-red-800">{params.error}</p>
-      ) : null}
-      {params.msg ? (
-        <p className="rounded bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
-          {params.msg}
-        </p>
-      ) : null}
-      <p className="text-sm text-slate-600">
-        Transfer między <strong>Twoimi kontami</strong> wykrywamy tylko gdy w bazie jest
-        para (przeciwna kwota, inne konto, ten sam dzień ±5 dni) — wtedy kategoria{" "}
-        <strong>{TRANSFER_BETWEEN_ACCOUNTS_CATEGORY}</strong> i brak wpływu na dashboard.
-        Wybierz „— wybierz —” lub <strong>Usuń kategorię</strong>, aby wyczyścić
-        przypisanie. „Podobne”: kontrahent i opcjonalnie ta sama kwota.
-      </p>
+      {params.error ? <p className="alert-error">{params.error}</p> : null}
+      {params.msg ? <p className="alert-success">{params.msg}</p> : null}
+      <TransactionsHelpPanel />
       <TransactionsTable
         transactions={rows}
         categories={categories}

@@ -48,11 +48,11 @@ function renderSimilarBadges(counts: SimilarCounts): React.JSX.Element {
 
   return (
     <div className="flex flex-col gap-0.5">
-      <span className="rounded bg-amber-50 px-2 py-0.5 text-xs text-amber-900">
+      <span className="rounded-lg bg-accent-50 px-2 py-0.5 text-xs text-accent-600">
         +{String(counts.byCounterparty)} kontrahent
       </span>
       {counts.byCounterpartyAndAmount > 0 ? (
-        <span className="rounded bg-sky-50 px-2 py-0.5 text-xs text-sky-900">
+        <span className="rounded-lg bg-brand-50 px-2 py-0.5 text-xs text-brand-800">
           +{String(counts.byCounterpartyAndAmount)} kwota
         </span>
       ) : null}
@@ -67,9 +67,9 @@ export function TransactionsTable({
   changeCategoryAction,
 }: TransactionsTableProps): React.JSX.Element {
   return (
-    <div className="overflow-x-auto rounded-lg border bg-white">
+    <div className="section-card overflow-x-auto p-0">
       <table className="min-w-full text-left text-sm">
-        <thead className="border-b bg-slate-50">
+        <thead className="border-b border-calm-200 bg-calm-50">
           <tr>
             <th className="px-3 py-2">Data</th>
             <th className="px-3 py-2">Operacja</th>
@@ -96,7 +96,7 @@ export function TransactionsTable({
                   </td>
                   <td className="max-w-xs px-3 py-2">
                     {tx.isOwnAccountTransfer ? (
-                      <span className="mb-1 inline-block rounded bg-sky-100 px-2 py-0.5 text-xs text-sky-900">
+                      <span className="mb-1 inline-block rounded-lg bg-brand-100 px-2 py-0.5 text-xs text-brand-900">
                         Transfer między kontami
                       </span>
                     ) : null}
@@ -105,7 +105,7 @@ export function TransactionsTable({
                       {tx.description}
                     </p>
                     {tx.transferPairHint ? (
-                      <p className="text-xs text-sky-700">{tx.transferPairHint}</p>
+                      <p className="text-xs text-brand-700">{tx.transferPairHint}</p>
                     ) : null}
                     {tx.mbankCategory ? (
                       <p className="text-xs text-slate-400">mBank: {tx.mbankCategory}</p>
@@ -124,7 +124,9 @@ export function TransactionsTable({
                   </td>
                   <td className="min-w-[11rem] px-3 py-2">
                     {tx.category ? (
-                      <p className="mb-1 text-xs text-emerald-700">{tx.category.name}</p>
+                      <p className="mb-1 text-xs font-medium text-brand-700">
+                        {tx.category.name}
+                      </p>
                     ) : null}
                     <CategoryAssignForm
                       transactionId={tx.id}

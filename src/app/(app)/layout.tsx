@@ -17,7 +17,7 @@ export default async function AppLayout({
     <AppPrivacyShell>
       <div className="min-h-screen">
         <AppNav />
-        <div className="mx-auto max-w-6xl p-4">{children}</div>
+        <main className="app-main">{children}</main>
       </div>
     </AppPrivacyShell>
   );

@@ -20,27 +20,19 @@ export default async function RegisterPage({
   const params = await searchParams;
   return (
     <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center gap-4 p-8">
-      <h1 className="text-2xl font-bold">Rejestracja</h1>
-      {params.error ? (
-        <p className="rounded bg-red-50 px-3 py-2 text-sm text-red-700">{params.error}</p>
-      ) : null}
-      <form action={registerAction} className="flex flex-col gap-3">
+      <h1 className="page-title">Rejestracja</h1>
+      <p className="page-lead -mt-2">
+        Załóż workspace lub dołącz kodem zaproszenia od partnera.
+      </p>
+      {params.error ? <p className="alert-error">{params.error}</p> : null}
+      <form action={registerAction} className="section-card flex flex-col gap-3">
         <label className="flex flex-col gap-1 text-sm">
           Imię
-          <input
-            name="name"
-            type="text"
-            className="rounded border border-slate-300 px-3 py-2"
-          />
+          <input name="name" type="text" className="input-field" />
         </label>
         <label className="flex flex-col gap-1 text-sm">
           Email
-          <input
-            name="email"
-            type="email"
-            required
-            className="rounded border border-slate-300 px-3 py-2"
-          />
+          <input name="email" type="email" required className="input-field" />
         </label>
         <label className="flex flex-col gap-1 text-sm">
           Hasło (min. 8 znaków)
@@ -49,27 +41,20 @@ export default async function RegisterPage({
             type="password"
             required
             minLength={8}
-            className="rounded border border-slate-300 px-3 py-2"
+            className="input-field"
           />
         </label>
         <label className="flex flex-col gap-1 text-sm">
-          Kod zaproszenia (opcjonalnie — dla partnera)
-          <input
-            name="inviteCode"
-            type="text"
-            className="rounded border border-slate-300 px-3 py-2"
-          />
+          Kod zaproszenia (opcjonalnie)
+          <input name="inviteCode" type="text" className="input-field" />
         </label>
-        <button
-          type="submit"
-          className="rounded-lg bg-indigo-600 px-4 py-2 text-white hover:bg-indigo-700"
-        >
+        <button type="submit" className="btn-primary">
           Utwórz konto
         </button>
       </form>
       <p className="text-sm text-slate-600">
         Masz konto?{" "}
-        <Link href="/login" className="text-indigo-600 underline">
+        <Link href="/login" className="link-brand">
           Zaloguj się
         </Link>
       </p>

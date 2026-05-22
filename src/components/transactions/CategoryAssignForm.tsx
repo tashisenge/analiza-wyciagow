@@ -1,6 +1,7 @@
 "use client";
 
 import { AmountValue } from "@/components/privacy/AmountValue";
+import { InfoTip } from "@/components/ui/InfoTip";
 
 interface CategoryOption {
   id: string;
@@ -47,13 +48,14 @@ export function CategoryAssignForm({
     similarCounts.byCounterpartyAndAmount < similarCounts.byCounterparty;
 
   return (
-    <form action={action} className="space-y-1">
+    <form action={action} className="space-y-1.5">
       <input type="hidden" name="transactionId" value={transactionId} />
       <input type="hidden" name="returnTo" value={returnTo} />
       <select
         name="categoryId"
         defaultValue={defaultCategoryId}
-        className="w-full rounded border px-2 py-1 text-xs"
+        className="input-field text-xs"
+        aria-label="Kategoria"
         onChange={(event) => {
           event.currentTarget.form?.requestSubmit();
         }}
@@ -69,6 +71,9 @@ export function CategoryAssignForm({
         <label className="flex items-center gap-1 text-xs text-slate-600">
           <input type="checkbox" name="applyToSimilar" defaultChecked />
           Do {String(similarCounts.byCounterparty)} podobnych (kontrahent)
+          <InfoTip label="Masowa kategoryzacja">
+            Ustaw tę samą kategorię dla wszystkich transakcji tego kontrahenta na liście.
+          </InfoTip>
         </label>
       ) : null}
       {showAmountMatch ? (
@@ -76,6 +81,9 @@ export function CategoryAssignForm({
           <input type="checkbox" name="matchSameAmount" />
           Tylko {String(similarCounts.byCounterpartyAndAmount)} z kwotą{" "}
           <AmountValue>{amountLabel}</AmountValue>
+          <InfoTip label="Filtr kwoty">
+            Zawęż masowe przypisanie do transakcji o identycznej kwocie.
+          </InfoTip>
         </label>
       ) : null}
       {showSimilar &&
@@ -87,7 +95,10 @@ export function CategoryAssignForm({
       {showSimilar ? (
         <label className="flex items-center gap-1 text-xs text-slate-600">
           <input type="checkbox" name="createRule" />
-          Reguła: kontrahent „{counterparty.trim().slice(0, 24)}”
+          Reguła: „{counterparty.trim().slice(0, 24)}”
+          <InfoTip label="Reguła kategorii">
+            Przyszłe importy z tym kontrahentem dostaną tę kategorię automatycznie.
+          </InfoTip>
         </label>
       ) : null}
       {hasCategory ? (
@@ -95,7 +106,7 @@ export function CategoryAssignForm({
           type="submit"
           name="categoryId"
           value=""
-          className="text-xs text-red-700 underline"
+          className="text-xs font-medium text-red-700 underline decoration-red-200 hover:text-red-800"
         >
           Usuń kategorię
         </button>

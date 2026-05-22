@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import { AiPanelButtons } from "@/components/dashboard/AiPanelButtons";
+import { InfoTip } from "@/components/ui/InfoTip";
 import type { AiActionResult } from "@/server/actions/ai";
 
 interface AiPanelProps {
@@ -34,9 +35,9 @@ function AiInsightBlock({
   generatedAt: string | null;
 }): React.JSX.Element {
   return (
-    <div className="mt-4 rounded-lg border border-indigo-200 bg-white p-4">
+    <div className="mt-4 rounded-2xl border border-brand-200 bg-white p-4 shadow-soft">
       <div className="mb-2 flex items-center justify-between gap-2">
-        <h3 className="font-semibold text-indigo-900">Ostatnia analiza AI</h3>
+        <h3 className="font-semibold text-brand-900">Ostatnia analiza AI</h3>
         {generatedAt ? (
           <span className="text-xs text-slate-500">{generatedAt}</span>
         ) : null}
@@ -90,11 +91,15 @@ export function AiPanel({
   const busy = loading !== null;
 
   return (
-    <section className="rounded-lg border border-indigo-200 bg-indigo-50/50 p-4">
-      <h2 className="text-lg font-semibold text-indigo-900">
+    <section className="section-card border-brand-200 bg-gradient-to-br from-brand-50/80 to-calm-50">
+      <h2 className="section-title">
         AI — kategoryzacja i analiza
+        <InfoTip label="AI">
+          Automatyczne przypisanie kategorii i krótkie podsumowanie trendów (Claude lub
+          ChatGPT).
+        </InfoTip>
       </h2>
-      <p className="mt-1 text-sm text-indigo-800">
+      <p className="mt-1 text-sm text-brand-800">
         {aiAvailable
           ? `Aktywny provider: ${aiProvider ?? "?"}. Claude lub ChatGPT przypisują kategorie i opisują trendy.`
           : "Dodaj ANTHROPIC_API_KEY lub OPENAI_API_KEY do pliku .env i zrestartuj serwer (npm run dev)."}
@@ -112,7 +117,7 @@ export function AiPanel({
       />
 
       {aiTargetCount === 0 && aiAvailable ? (
-        <p className="mt-2 text-xs text-indigo-700">
+        <p className="mt-2 text-xs text-brand-700">
           Kategoryzacja AI: brak transakcji w «Bez kategorii» — użyj mapowania mBank lub
           zmień kategorie ręcznie na liście transakcji.
         </p>
@@ -121,13 +126,11 @@ export function AiPanel({
       {message ? (
         <p className="mt-3 text-sm font-medium text-green-800">{message}</p>
       ) : null}
-      {error ? (
-        <p className="mt-3 rounded bg-red-50 px-2 py-1 text-sm text-red-800">{error}</p>
-      ) : null}
+      {error ? <p className="alert-error mt-3">{error}</p> : null}
       {insight ? (
         <AiInsightBlock insight={insight} generatedAt={formatInsightDate(insightAt)} />
       ) : aiAvailable ? (
-        <p className="mt-3 text-sm text-indigo-700">
+        <p className="mt-3 text-sm text-brand-700">
           Kliknij «Analiza AI», aby wygenerować podsumowanie wydatków — wynik zostanie
           zapisany i będzie widoczny po odświeżeniu strony.
         </p>

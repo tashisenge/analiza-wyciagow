@@ -6,16 +6,16 @@ import { useAmountTooltipLabel } from "@/components/privacy/use-amount-tooltip-l
 import type { CategorySlice } from "@/lib/analytics/category-breakdown";
 
 const COLORS = [
-  "#6366f1",
-  "#22c55e",
+  "#0d9488",
+  "#2dd4bf",
   "#f97316",
-  "#ec4899",
-  "#3b82f6",
-  "#a855f7",
-  "#14b8a6",
-  "#eab308",
-  "#ef4444",
+  "#a78bfa",
+  "#34d399",
+  "#38bdf8",
+  "#fb7185",
+  "#fbbf24",
   "#64748b",
+  "#99f6e4",
 ];
 
 interface CategoryChartProps {

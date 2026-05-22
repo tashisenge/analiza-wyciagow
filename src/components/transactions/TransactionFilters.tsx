@@ -1,29 +1,39 @@
-import Link from "next/link";
+import { FilterChip } from "@/components/ui/FilterChip";
+import { InfoTip } from "@/components/ui/InfoTip";
 
 const FILTERS = [
-  { key: "all", label: "Wszystkie", query: "" },
-  { key: "uncategorized", label: "Bez kategorii", query: "uncategorized=1" },
-  { key: "firma", label: "Firma", query: "context=firma" },
-  { key: "dom", label: "Dom", query: "context=dom" },
+  { key: "all", label: "Wszystkie", query: "", tip: "Pełna lista (max 200)." },
+  {
+    key: "uncategorized",
+    label: "Bez kategorii",
+    query: "uncategorized=1",
+    tip: "Tylko transakcje bez przypisanej kategorii.",
+  },
+  { key: "firma", label: "Firma", query: "context=firma", tip: "Konto firmowe." },
+  { key: "dom", label: "Dom", query: "context=dom", tip: "Konto domowe." },
 ] as const;
 
 export function TransactionFilters({ active }: { active: string }): React.JSX.Element {
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="flex flex-wrap items-center gap-2">
+      <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
+        Filtr
+        <InfoTip label="Filtry listy">
+          Zawęż listę przed masową kategoryzacją. Kliknij nagłówek kolumny „Podobne” w
+          pomocy poniżej.
+        </InfoTip>
+      </span>
       {FILTERS.map((filter) => {
         const href = filter.query ? `/transactions?${filter.query}` : "/transactions";
         return (
-          <Link
+          <FilterChip
             key={filter.key}
             href={href}
-            className={`rounded-lg px-3 py-1.5 text-sm ${
-              active === filter.key
-                ? "bg-indigo-600 text-white"
-                : "border bg-white text-slate-700 hover:bg-slate-50"
-            }`}
+            active={active === filter.key}
+            title={filter.tip}
           >
             {filter.label}
-          </Link>
+          </FilterChip>
         );
       })}
     </div>

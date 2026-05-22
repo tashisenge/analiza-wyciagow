@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { ContextToggle } from "@/components/dashboard/ContextToggle";
 import { BudgetEditor } from "@/components/optimization/BudgetEditor";
 import { OptimizePanel } from "@/components/optimization/OptimizePanel";
+import { PageHeader } from "@/components/ui/PageHeader";
 import type { ContextFilter } from "@/lib/analytics/filters";
 import { auth } from "@/lib/auth";
 import { loadOptimizePageData } from "@/lib/optimization/load-optimization-data";
@@ -24,10 +25,12 @@ export default async function OptimizePage({
 
   return (
     <div className="space-y-8">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <h1 className="text-2xl font-bold">Optymalizacja budżetu</h1>
-        <ContextToggle active={context} basePath="/optimize" />
-      </div>
+      <PageHeader
+        title="Optymalizacja budżetu"
+        lead="Sugestie oszczędności, limity kategorii i śledzenie wdrożonych zmian."
+        tip="Kontekst filtruje konta tak jak na dashboardzie."
+        actions={<ContextToggle active={context} basePath="/optimize" />}
+      />
 
       <p className="text-sm text-slate-600">
         Wykryte możliwości oszczędności, limity kategorii i śledzenie wdrożonych zmian.

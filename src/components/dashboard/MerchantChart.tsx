@@ -38,7 +38,7 @@ export function MerchantChart({ merchants }: MerchantChartProps): React.JSX.Elem
             return [`${formatTooltip(num)} (${changeLabel})`, "Suma"];
           }}
         />
-        <Bar dataKey="total" fill="#6366f1" radius={[0, 4, 4, 0]} />
+        <Bar dataKey="total" fill="#0d9488" radius={[0, 4, 4, 0]} />
       </BarChart>
     </ResponsiveContainer>
   );

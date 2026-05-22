@@ -1,9 +1,10 @@
-import Link from "next/link";
+import { FilterChip } from "@/components/ui/FilterChip";
+import { InfoTip } from "@/components/ui/InfoTip";
 
 const PERIODS = [
-  { key: "month", label: "Miesiąc" },
-  { key: "quarter", label: "Kwartał" },
-  { key: "year", label: "Rok" },
+  { key: "month", label: "Miesiąc", tip: "Bieżący miesiąc vs poprzedni." },
+  { key: "quarter", label: "Kwartał", tip: "Ostatnie 3 miesiące." },
+  { key: "year", label: "Rok", tip: "Ostatnie 12 miesięcy." },
 ] as const;
 
 export function DateRangeToggle({
@@ -14,19 +15,22 @@ export function DateRangeToggle({
   context: string;
 }): React.JSX.Element {
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="flex flex-wrap items-center gap-2">
+      <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
+        Okres
+      </span>
+      <InfoTip label="Zakres dat">
+        Porównujemy wybrany okres z poprzednim o tej samej długości.
+      </InfoTip>
       {PERIODS.map((period) => (
-        <Link
+        <FilterChip
           key={period.key}
           href={`/dashboard?context=${context}&period=${period.key}`}
-          className={`rounded-lg px-3 py-1.5 text-sm ${
-            active === period.key
-              ? "bg-indigo-600 text-white"
-              : "border bg-white text-slate-700 hover:bg-slate-50"
-          }`}
+          active={active === period.key}
+          title={period.tip}
         >
           {period.label}
-        </Link>
+        </FilterChip>
       ))}
     </div>
   );

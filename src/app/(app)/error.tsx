@@ -30,11 +30,7 @@ export default function AppError({
       <p className="mt-2 text-sm text-slate-600">
         Błąd został zapisany w logach serwera / konsoli. Spróbuj ponownie.
       </p>
-      <button
-        type="button"
-        onClick={reset}
-        className="mt-6 rounded-lg bg-indigo-600 px-4 py-2 text-sm text-white hover:bg-indigo-700"
-      >
+      <button type="button" onClick={reset} className="btn-primary mt-6">
         Spróbuj ponownie
       </button>
     </main>

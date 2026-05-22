@@ -121,7 +121,7 @@ function ResearchResultView({
                 href={source.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-indigo-600 underline"
+                className="link-brand"
               >
                 {source.title}
               </a>

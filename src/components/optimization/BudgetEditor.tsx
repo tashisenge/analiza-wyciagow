@@ -103,7 +103,7 @@ export function BudgetEditor({
           type="button"
           disabled={loading}
           onClick={() => void saveBudget()}
-          className="rounded bg-indigo-600 px-3 py-1 text-sm text-white"
+          className="btn-primary px-3 py-1"
         >
           Zapisz limit
         </button>
@@ -126,7 +126,7 @@ export function BudgetEditor({
               </div>
               <div className="mt-2 h-2 rounded bg-slate-100">
                 <div
-                  className={`h-2 rounded ${over ? "bg-red-500" : "bg-indigo-500"}`}
+                  className={`h-2 rounded ${over ? "bg-red-500" : "bg-brand-500"}`}
                   style={{ width: `${String(percent)}%` }}
                 />
               </div>

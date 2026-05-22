@@ -2,6 +2,8 @@ import Link from "next/link";
 
 import { PrivacyAmountsToggle } from "@/components/privacy/PrivacyAmountsToggle";
 import { CopyInviteButton } from "@/components/settings/CopyInviteButton";
+import { InfoTip } from "@/components/ui/InfoTip";
+import { PageHeader } from "@/components/ui/PageHeader";
 
 interface AccountRow {
   id: string;
@@ -37,24 +39,30 @@ export function SettingsView({
 }: SettingsViewProps): React.JSX.Element {
   return (
     <div className="space-y-8">
-      <h1 className="text-2xl font-bold">Ustawienia</h1>
+      <PageHeader
+        title="Ustawienia"
+        lead="Konta, zaproszenia partnera i opcje prywatności."
+      />
 
-      {error ? (
-        <p className="rounded bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>
-      ) : null}
+      {error ? <p className="alert-error">{error}</p> : null}
       {deleted ? (
-        <p className="rounded bg-green-50 px-3 py-2 text-sm text-green-800">
+        <p className="alert-success">
           Wszystkie transakcje zostały usunięte. Kategorie i konta zostały.
         </p>
       ) : null}
 
-      <section className="rounded-lg border bg-white p-4">
-        <h2 className="mb-3 font-semibold">Prywatność przy pokazywaniu ekranu</h2>
+      <section className="section-card">
+        <h2 className="section-title mb-3">Prywatność przy pokazywaniu ekranu</h2>
         <PrivacyAmountsToggle />
       </section>
 
-      <section className="rounded-lg border bg-white p-4">
-        <h2 className="font-semibold">Zaproszenie partnera</h2>
+      <section className="section-card">
+        <h2 className="section-title">
+          Zaproszenie partnera
+          <InfoTip label="Kod zaproszenia">
+            Partner rejestruje się z tym kodem — trafi do tego samego workspace.
+          </InfoTip>
+        </h2>
         <p className="mt-1 text-sm text-slate-600">
           Drugi użytkownik rejestruje się z tym kodem w polu „Kod zaproszenia”:
         </p>
@@ -64,23 +72,20 @@ export function SettingsView({
         <CopyInviteButton code={inviteCode} />
       </section>
 
-      <section className="rounded-lg border bg-white p-4">
-        <h2 className="mb-3 font-semibold">Nowe konto bankowe</h2>
+      <section className="section-card">
+        <h2 className="section-title mb-3">Nowe konto bankowe</h2>
         <form action={createAccountAction} className="flex flex-wrap gap-2">
           <input
             name="name"
             required
             placeholder="Nazwa konta"
-            className="rounded border px-3 py-2 text-sm"
+            className="input-field max-w-xs"
           />
-          <select name="type" className="rounded border px-3 py-2 text-sm">
+          <select name="type" className="input-field w-auto">
             <option value="dom">Dom</option>
             <option value="firma">Firma</option>
           </select>
-          <button
-            type="submit"
-            className="rounded-lg bg-indigo-600 px-4 py-2 text-sm text-white"
-          >
+          <button type="submit" className="btn-primary">
             Dodaj konto
           </button>
         </form>

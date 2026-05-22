@@ -1,5 +1,7 @@
 import { redirect } from "next/navigation";
 
+import { InfoTip } from "@/components/ui/InfoTip";
+import { PageHeader } from "@/components/ui/PageHeader";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { importCsv } from "@/server/actions/import";
@@ -33,17 +35,20 @@ export default async function ImportPage({
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold">Import CSV z mBank</h1>
-      <p className="text-sm text-slate-600">
-        Pobierz plik: Finanse → Zestawienie operacji → CSV (format „Lista operacji”).
-      </p>
-      <form
-        action={importAction}
-        className="flex max-w-md flex-col gap-3 rounded-lg border bg-white p-4"
-      >
+      <PageHeader
+        title="Import CSV"
+        lead="Pobierz plik z mBank: Finanse → Zestawienie operacji → CSV (Lista operacji)."
+        tip="Duplikaty są pomijane na podstawie hash transakcji."
+      />
+      <form action={importAction} className="section-card flex max-w-md flex-col gap-3">
         <label className="flex flex-col gap-1 text-sm">
-          Konto
-          <select name="accountId" required className="rounded border px-3 py-2">
+          <span className="flex items-center gap-0.5">
+            Konto
+            <InfoTip label="Konto docelowe">
+              Wybierz konto dom lub firma — transakcje trafią pod ten kontekst.
+            </InfoTip>
+          </span>
+          <select name="accountId" required className="input-field">
             {accounts.map((account) => (
               <option key={account.id} value={account.id}>
                 {account.name} ({account.type})
@@ -55,18 +60,16 @@ export default async function ImportPage({
           Plik CSV
           <input name="file" type="file" accept=".csv" required className="text-sm" />
         </label>
-        <button
-          type="submit"
-          className="rounded-lg bg-indigo-600 px-4 py-2 text-white hover:bg-indigo-700"
-        >
+        <button type="submit" className="btn-primary">
           Importuj
         </button>
       </form>
-      {params.error ? <p className="text-sm text-red-600">{params.error}</p> : null}
+      {params.error ? <p className="alert-error">{params.error}</p> : null}
       {params.ok ? (
-        <p className="text-sm text-green-700">
+        <p className="alert-success">
           Zaimportowano {params.ok} transakcji (pominięto duplikaty:{" "}
-          {params.skipped ?? "0"}).
+          {params.skipped ?? "0"}
+          ).
         </p>
       ) : null}
     </div>

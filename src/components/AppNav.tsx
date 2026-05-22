@@ -1,31 +1,14 @@
-import Link from "next/link";
-
-import { PrivacyAmountsToggle } from "@/components/privacy/PrivacyAmountsToggle";
-
-const links = [
-  { href: "/dashboard", label: "Dashboard" },
-  { href: "/optimize", label: "Optymalizacja" },
-  { href: "/transactions", label: "Transakcje" },
-  { href: "/import", label: "Import" },
-  { href: "/categories", label: "Kategorie" },
-  { href: "/settings", label: "Ustawienia" },
-] as const;
+import { AppNavLinks } from "@/components/AppNavLinks";
 
 export function AppNav(): React.JSX.Element {
   return (
-    <nav className="flex flex-wrap items-center gap-2 border-b border-slate-200 bg-white px-4 py-3">
-      {links.map((link) => (
-        <Link
-          key={link.href}
-          href={link.href}
-          className="rounded px-3 py-1 text-sm font-medium text-slate-700 hover:bg-slate-100"
-        >
-          {link.label}
-        </Link>
-      ))}
-      <div className="ml-auto">
-        <PrivacyAmountsToggle compact />
+    <header className="sticky top-0 z-40 border-b border-calm-200/80 bg-white/90 backdrop-blur-md">
+      <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-2 px-4 py-3 sm:px-6">
+        <a href="/dashboard" className="mr-2 text-sm font-bold text-brand-800">
+          Analiza wyciągów
+        </a>
+        <AppNavLinks />
       </div>
-    </nav>
+    </header>
   );
 }

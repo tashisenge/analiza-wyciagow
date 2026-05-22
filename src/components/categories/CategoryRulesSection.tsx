@@ -52,10 +52,7 @@ export function CategoryRulesSection({
             defaultValue={0}
             className="rounded border px-3 py-2 text-sm"
           />
-          <button
-            type="submit"
-            className="rounded-lg bg-indigo-600 px-4 py-2 text-sm text-white"
-          >
+          <button type="submit" className="btn-primary">
             Dodaj regułę
           </button>
         </form>

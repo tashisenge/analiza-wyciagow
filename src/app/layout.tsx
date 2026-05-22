@@ -1,7 +1,14 @@
 import type { Metadata } from "next";
+import { Outfit } from "next/font/google";
 import Script from "next/script";
 
 import "./globals.css";
+
+const fontSans = Outfit({
+  subsets: ["latin", "latin-ext"],
+  variable: "--font-sans",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "Analiza wyciągów",
@@ -14,7 +21,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>): React.JSX.Element {
   return (
-    <html lang="pl" suppressHydrationWarning>
+    <html lang="pl" className={fontSans.variable} suppressHydrationWarning>
       <head>
         <Script
           id="privacy-amounts-init"
@@ -24,7 +31,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body>{children}</body>
+      <body className="font-sans">{children}</body>
     </html>
   );
 }

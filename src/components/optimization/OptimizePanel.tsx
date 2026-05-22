@@ -42,7 +42,7 @@ export function OptimizePanel({
           type="button"
           disabled={loading}
           onClick={() => void refresh()}
-          className="rounded bg-indigo-600 px-4 py-2 text-sm text-white"
+          className="btn-primary"
         >
           {loading ? "Odświeżanie…" : "Odśwież możliwości"}
         </button>

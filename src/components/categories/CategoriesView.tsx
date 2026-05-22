@@ -1,4 +1,5 @@
 import { CategoryRulesSection } from "@/components/categories/CategoryRulesSection";
+import { PageHeader } from "@/components/ui/PageHeader";
 
 interface CategoryRow {
   id: string;
@@ -36,10 +37,12 @@ export function CategoriesView({
 }: CategoriesViewProps): React.JSX.Element {
   return (
     <div className="space-y-8">
-      <h1 className="text-2xl font-bold">Kategorie i reguły</h1>
-      {error ? (
-        <p className="rounded bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>
-      ) : null}
+      <PageHeader
+        title="Kategorie i reguły"
+        lead="Twórz własne kategorie i reguły dopasowania przy imporcie."
+        tip="Reguły mają priorytet — wyższy numer wygrywa przy konflikcie."
+      />
+      {error ? <p className="alert-error">{error}</p> : null}
 
       <section className="rounded-lg border bg-white p-4">
         <h2 className="mb-3 font-semibold">Nowa kategoria</h2>
@@ -56,10 +59,7 @@ export function CategoriesView({
             defaultValue="#6366f1"
             className="h-10 w-12 cursor-pointer rounded border"
           />
-          <button
-            type="submit"
-            className="rounded-lg bg-indigo-600 px-4 py-2 text-sm text-white"
-          >
+          <button type="submit" className="btn-primary">
             Dodaj
           </button>
         </form>

@@ -16,11 +16,11 @@ export function OptimizeWidget({
 }: OptimizeWidgetProps): React.JSX.Element {
   if (opportunities.length === 0 && budgetOverrunCount === 0) {
     return (
-      <section className="rounded-lg border border-emerald-200 bg-emerald-50/50 p-4">
-        <h2 className="font-semibold text-emerald-900">Optymalizacja budżetu</h2>
-        <p className="mt-1 text-sm text-emerald-800">
+      <section className="section-card border-brand-200 bg-brand-50/60">
+        <h2 className="section-title text-brand-900">Optymalizacja budżetu</h2>
+        <p className="mt-1 text-sm text-brand-800">
           Brak wykrytych możliwości —{" "}
-          <Link href={`/optimize?context=${context}`} className="underline">
+          <Link href={`/optimize?context=${context}`} className="link-brand">
             odśwież na stronie optymalizacji
           </Link>
         </p>
@@ -29,13 +29,10 @@ export function OptimizeWidget({
   }
 
   return (
-    <section className="rounded-lg border border-emerald-200 bg-emerald-50/50 p-4">
+    <section className="section-card border-brand-200 bg-brand-50/60">
       <div className="flex items-center justify-between gap-2">
-        <h2 className="font-semibold text-emerald-900">Top możliwości oszczędności</h2>
-        <Link
-          href={`/optimize?context=${context}`}
-          className="text-sm text-emerald-800 underline"
-        >
+        <h2 className="section-title text-brand-900">Top możliwości oszczędności</h2>
+        <Link href={`/optimize?context=${context}`} className="link-brand text-sm">
           Wszystkie →
         </Link>
       </div>

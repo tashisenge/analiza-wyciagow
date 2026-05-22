@@ -54,7 +54,7 @@ export function CategoryBreakdownPanel({
               <span className="text-slate-600">
                 <AmountValue>{group.total.toFixed(2)} PLN</AmountValue> ({String(percent)}
                 %)
-                <span className="ml-2 text-indigo-600">{expanded ? "▲" : "▼"}</span>
+                <span className="ml-2 text-brand-600">{expanded ? "▲" : "▼"}</span>
               </span>
             </button>
             {expanded ? (
@@ -75,7 +75,7 @@ export function CategoryBreakdownPanel({
                 </ul>
                 <Link
                   href={transactionsFilterHref(group, context)}
-                  className="mt-2 inline-block text-xs font-medium text-indigo-600 hover:underline"
+                  className="link-brand mt-2 inline-block text-xs"
                 >
                   Wszystkie transakcje w tej kategorii →
                 </Link>

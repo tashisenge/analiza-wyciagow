@@ -36,7 +36,7 @@ export function AiPanelButtons({
         onClick={() => {
           onRun(applyMbankMapping, "map", true);
         }}
-        className="rounded-lg bg-white px-3 py-2 text-sm font-medium shadow-sm hover:bg-slate-50 disabled:opacity-50"
+        className="btn-secondary disabled:opacity-50"
       >
         {loading === "map" ? "…" : "Przypisz kategorie mBank (1:1, darmowe)"}
       </button>
@@ -53,7 +53,7 @@ export function AiPanelButtons({
         onClick={() => {
           onRun(aiCategorizeUncategorized, "cat", true);
         }}
-        className="rounded-lg bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+        className="btn-primary disabled:opacity-50"
       >
         {loading === "cat" ? "…" : `Kategoryzuj AI (${String(aiTargetCount)})`}
       </button>
@@ -64,7 +64,7 @@ export function AiPanelButtons({
         onClick={() => {
           onRun(() => aiGenerateInsights(context), "insight", false);
         }}
-        className="rounded-lg bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+        className="btn-primary disabled:opacity-50"
       >
         {loading === "insight" ? "…" : "Analiza AI (ten miesiąc)"}
       </button>
