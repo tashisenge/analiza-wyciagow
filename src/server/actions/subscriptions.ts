@@ -18,6 +18,7 @@ function revalidateSubscriptionPaths(): void {
   revalidatePath("/transactions");
   revalidatePath("/dashboard");
   revalidatePath("/optimize");
+  revalidatePath("/recurring");
 }
 
 export async function markCounterpartyAsSubscription(

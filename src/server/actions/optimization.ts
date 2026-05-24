@@ -26,6 +26,7 @@ async function getWorkspaceId(): Promise<string | null> {
 function revalidateOptimizationPages(): void {
   revalidatePath("/optimize");
   revalidatePath("/dashboard");
+  revalidatePath("/recurring");
 }
 
 export async function refreshOptimizationOpportunities(

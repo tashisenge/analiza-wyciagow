@@ -18,6 +18,11 @@ const LINKS = [
     tip: "Sugestie oszczędności, budżety i research alternatyw.",
   },
   {
+    href: "/recurring",
+    label: "Regularne",
+    tip: "Wykryte powtarzalne płatności i subskrypcje — akceptacja sugestii.",
+  },
+  {
     href: "/transactions",
     label: "Transakcje",
     tip: "Lista operacji, kategoryzacja i podobne transakcje.",
