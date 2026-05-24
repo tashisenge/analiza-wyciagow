@@ -13,7 +13,7 @@
   }
 
   body {
-    @apply bg-calm-50 font-sans text-slate-800 antialiased;
+    @apply overflow-x-clip bg-calm-50 font-sans text-slate-800 antialiased;
     background-image: radial-gradient(
       ellipse 120% 80% at 50% -20%,
       rgba(45, 212, 191, 0.12),
@@ -104,12 +104,12 @@
   }
 
   .tip-bubble {
-    @apply pointer-events-none absolute bottom-full left-1/2 z-50 mb-2 w-56 -translate-x-1/2 rounded-xl border border-calm-200 bg-white px-3 py-2 text-left text-xs font-normal leading-snug text-slate-700 opacity-0 shadow-card transition-opacity duration-150;
+    @apply pointer-events-none absolute bottom-full left-1/2 z-50 mb-2 hidden w-56 max-w-[calc(100vw-2rem)] -translate-x-1/2 rounded-xl border border-calm-200 bg-white px-3 py-2 text-left text-xs font-normal leading-snug text-slate-700 opacity-0 shadow-card transition-opacity duration-150;
   }
 
   .tip-wrap:hover .tip-bubble,
   .tip-wrap:focus-within .tip-bubble {
-    @apply opacity-100;
+    @apply block opacity-100;
   }
 }
 
