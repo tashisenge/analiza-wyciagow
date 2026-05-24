@@ -6,6 +6,7 @@ import { CategoryBreakdownPanel } from "@/components/dashboard/CategoryBreakdown
 import { DashboardCategorySection } from "@/components/dashboard/CategoryChart";
 import { ContextToggle } from "@/components/dashboard/ContextToggle";
 import { DateRangeToggle } from "@/components/dashboard/DateRangeToggle";
+import { DiscretionaryWidget } from "@/components/dashboard/DiscretionaryWidget";
 import { MerchantChart } from "@/components/dashboard/MerchantChart";
 import { MerchantList } from "@/components/dashboard/MerchantList";
 import {
@@ -135,6 +136,17 @@ export default async function DashboardPage({
         summary={data.summary}
         previous={data.previousSummary}
         periodLabel={range.label}
+      />
+
+      <DiscretionaryWidget
+        context={context}
+        period={period}
+        year={year}
+        month={month}
+        summary={data.discretionarySummary}
+        monthlyLimit={data.discretionaryMonthlyLimit}
+        limitUsedPercent={data.discretionaryLimitUsedPercent}
+        hasDiscretionaryCategories={data.hasDiscretionaryCategories}
       />
 
       <DashboardTrendSection data={data} range={range} year={year} />

@@ -2,13 +2,23 @@
 
 import { useRouter } from "next/navigation";
 
-import { buildDashboardHref } from "@/lib/analytics/dashboard-params";
+import { buildDashboardHref, buildPeriodHref } from "@/lib/analytics/dashboard-params";
+
+function pickerHref(
+  basePath: string,
+  options: { context: string; period: string; year: number; month?: number },
+): string {
+  return basePath === "/dashboard"
+    ? buildDashboardHref(options)
+    : buildPeriodHref(basePath, options);
+}
 
 interface MonthPickerProps {
   context: string;
   period: string;
   year: number;
   month: number;
+  basePath?: string;
 }
 
 export function MonthPicker({
@@ -16,6 +26,7 @@ export function MonthPicker({
   period,
   year,
   month,
+  basePath = "/dashboard",
 }: MonthPickerProps): React.JSX.Element {
   const router = useRouter();
   const value = `${String(year)}-${String(month).padStart(2, "0")}`;
@@ -39,7 +50,7 @@ export function MonthPicker({
             return;
           }
           router.push(
-            buildDashboardHref({
+            pickerHref(basePath, {
               context,
               period,
               year: Number.parseInt(nextYear, 10),
@@ -56,12 +67,14 @@ interface YearPickerProps {
   context: string;
   period: string;
   year: number;
+  basePath?: string;
 }
 
 export function YearPicker({
   context,
   period,
   year,
+  basePath = "/dashboard",
 }: YearPickerProps): React.JSX.Element {
   const router = useRouter();
   const nowYear = new Date().getFullYear();
@@ -81,7 +94,7 @@ export function YearPicker({
         className="rounded-lg border border-calm-200 bg-white px-2 py-1 text-sm text-slate-800"
         onChange={(event) => {
           router.push(
-            buildDashboardHref({
+            pickerHref(basePath, {
               context,
               period,
               year: Number.parseInt(event.target.value, 10),

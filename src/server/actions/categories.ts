@@ -120,6 +120,8 @@ export async function setCategoryOptimizationExclusion(
     });
     revalidatePath("/categories");
     revalidatePath("/optimize");
+    revalidatePath("/opcjonalne");
+    revalidatePath("/dashboard");
     return { ok: true };
   } catch (error) {
     return {

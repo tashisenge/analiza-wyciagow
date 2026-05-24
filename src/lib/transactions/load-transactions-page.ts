@@ -61,6 +61,7 @@ function buildTransactionsWhere(
     workspaceId,
     accountId: { in: accountIds },
     ...(params.uncategorized === "1" ? { categoryId: null } : {}),
+    ...(params.discretionary === "1" ? { category: { isDiscretionary: true } } : {}),
     ...(params.counterparty
       ? {
           counterparty: {

@@ -1,6 +1,6 @@
 import { FilterChip } from "@/components/ui/FilterChip";
 import { InfoTip } from "@/components/ui/InfoTip";
-import { buildDashboardHref } from "@/lib/analytics/dashboard-params";
+import { buildDashboardHref, buildPeriodHref } from "@/lib/analytics/dashboard-params";
 import type { ContextFilter } from "@/lib/analytics/filters";
 
 const CONTEXTS: { value: ContextFilter; label: string; tip: string }[] = [
@@ -38,7 +38,12 @@ export function ContextToggle({
           href={
             basePath === "/dashboard"
               ? buildDashboardHref({ context: ctx.value, period, year, month })
-              : `${basePath}?context=${ctx.value}`
+              : buildPeriodHref(basePath, {
+                  context: ctx.value,
+                  period,
+                  year,
+                  month,
+                })
           }
           active={active === ctx.value}
           title={ctx.tip}

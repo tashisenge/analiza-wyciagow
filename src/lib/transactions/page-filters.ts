@@ -2,6 +2,7 @@ import { appendTransactionSearchParams } from "@/lib/transactions/build-transact
 
 export interface TransactionSearchParams {
   uncategorized?: string;
+  discretionary?: string;
   context?: string;
   categoryId?: string;
   categoryName?: string;
@@ -19,6 +20,9 @@ export function transactionActiveFilter(params: TransactionSearchParams): string
   }
   if (params.categoryId || params.categoryName) {
     return "category";
+  }
+  if (params.discretionary === "1") {
+    return "discretionary";
   }
   if (params.uncategorized === "1") {
     return "uncategorized";
