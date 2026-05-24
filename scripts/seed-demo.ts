@@ -1,5 +1,5 @@
-import { readFileSync } from "fs";
-import { join } from "path";
+import { existsSync, readFileSync } from "fs";
+import { basename, join } from "path";
 
 import bcrypt from "bcryptjs";
 
@@ -16,10 +16,21 @@ import { parseMbankCsv } from "../src/lib/mbank-csv";
 import { seedCategoriesForWorkspace } from "../src/lib/seed-default-categories";
 import { buildTransactionDedupeHash } from "../src/lib/transaction-hash";
 
-const CSV_PATH = join(
+const LOCAL_CSV_PATH = join(
   process.cwd(),
   "lista_operacji_250521_260521_202605211403211364.csv",
 );
+const FIXTURE_CSV_PATH = join(process.cwd(), "tests/fixtures/mbank-sample.csv");
+
+function resolveDemoCsvPath(): string {
+  if (process.env.DEMO_CSV_PATH) {
+    return process.env.DEMO_CSV_PATH;
+  }
+  if (existsSync(LOCAL_CSV_PATH)) {
+    return LOCAL_CSV_PATH;
+  }
+  return FIXTURE_CSV_PATH;
+}
 
 async function ensureDemoWorkspace(): Promise<{
   workspaceId: string;
@@ -71,7 +82,8 @@ async function ensureDemoWorkspace(): Promise<{
 }
 
 async function importFullCsv(workspaceId: string, accountId: string): Promise<void> {
-  const csv = readFileSync(CSV_PATH, "utf-8");
+  const csvPath = resolveDemoCsvPath();
+  const csv = readFileSync(csvPath, "utf-8");
   const rows = parseMbankCsv(csv);
   console.log(`\nW pliku CSV: ${String(rows.length)} transakcji`);
 
@@ -96,7 +108,7 @@ async function importFullCsv(workspaceId: string, accountId: string): Promise<vo
     data: {
       workspaceId,
       accountId,
-      fileName: "lista_operacji_250521_260521.csv",
+      fileName: basename(csvPath),
       newCount: 0,
       skippedCount: 0,
     },
