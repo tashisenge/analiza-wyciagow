@@ -8,6 +8,7 @@ import type {
 import type { MonthPoint } from "@/lib/analytics/monthly-trend";
 import type { PeriodSummary } from "@/lib/analytics/period-summary";
 import type { topMerchants } from "@/lib/analytics/top-merchants";
+import type { DiscretionaryPeriodSummary } from "@/lib/discretionary/types";
 
 export interface DashboardOpportunity {
   id: string;
@@ -34,4 +35,8 @@ export interface DashboardData {
   yearlyMonths: YearlyMonthSummary[];
   recurringPayments: RecurringPaymentRow[];
   markedSubscriptions: SubscriptionSummaryRow[];
+  discretionarySummary: DiscretionaryPeriodSummary;
+  discretionaryMonthlyLimit: number | null;
+  discretionaryLimitUsedPercent: number | null;
+  hasDiscretionaryCategories: boolean;
 }

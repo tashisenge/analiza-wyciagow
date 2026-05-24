@@ -13,6 +13,7 @@ interface CategoryRow {
   color: string;
   isDefault: boolean;
   excludeFromOptimization: boolean;
+  isDiscretionary: boolean;
   transactionCount: number;
 }
 
@@ -35,7 +36,37 @@ interface CategoriesViewProps {
     categoryId: string,
     excludeFromOptimization: boolean,
   ) => Promise<void>;
+  toggleDiscretionaryAction: (categoryId: string, isDiscretionary: boolean) => Promise<void>;
   error?: string;
+}
+
+function DiscretionaryToggle({
+  categoryId,
+  isDiscretionary,
+  toggleAction,
+}: {
+  categoryId: string;
+  isDiscretionary: boolean;
+  toggleAction: (categoryId: string, isDiscretionary: boolean) => Promise<void>;
+}): React.JSX.Element {
+  const [pending, startTransition] = useTransition();
+
+  return (
+    <label className="flex cursor-pointer items-center gap-1.5 text-xs text-slate-600">
+      <input
+        type="checkbox"
+        checked={isDiscretionary}
+        disabled={pending}
+        onChange={(event) => {
+          startTransition(() => {
+            void toggleAction(categoryId, event.target.checked);
+          });
+        }}
+        className="rounded border-slate-300"
+      />
+      Opcjonalny
+    </label>
+  );
 }
 
 function FixedExpenseToggle({
@@ -75,6 +106,7 @@ export function CategoriesView({
   createRuleAction,
   deleteRuleAction,
   toggleOptimizationExclusionAction,
+  toggleDiscretionaryAction,
   error,
 }: CategoriesViewProps): React.JSX.Element {
   return (
@@ -130,6 +162,11 @@ export function CategoriesView({
                       stały wydatek
                     </span>
                   ) : null}
+                  {category.isDiscretionary ? (
+                    <span className="ml-2 rounded-full bg-orange-100 px-2 py-0.5 text-xs text-orange-800">
+                      opcjonalny
+                    </span>
+                  ) : null}
                 </span>
                 <Link
                   href={`/transactions?categoryId=${category.id}`}
@@ -140,6 +177,11 @@ export function CategoriesView({
                 </Link>
               </span>
               <span className="flex shrink-0 items-center gap-3">
+                <DiscretionaryToggle
+                  categoryId={category.id}
+                  isDiscretionary={category.isDiscretionary}
+                  toggleAction={toggleDiscretionaryAction}
+                />
                 <FixedExpenseToggle
                   categoryId={category.id}
                   excludeFromOptimization={category.excludeFromOptimization}

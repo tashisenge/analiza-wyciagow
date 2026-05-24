@@ -15,6 +15,7 @@ export function appendTransactionSearchParams(
   search: TransactionSearchParams,
 ): void {
   setIfPresent(params, "uncategorized", search.uncategorized);
+  setIfPresent(params, "discretionary", search.discretionary);
   setIfPresent(params, "context", search.context);
   setIfPresent(params, "categoryId", search.categoryId);
   setIfPresent(params, "categoryName", search.categoryName);

@@ -34,6 +34,7 @@ Przełącznik **firma / dom / razem** filtruje wszystkie liczby i wykresy.
 | Top kontrahenci       | Najwięksi odbiorcy pieniędzy, zmiana m/m               |
 | Baner „bez kategorii” | Ile transakcji wymaga ręcznego ogarnięcia              |
 | Widget optymalizacji  | Top 3 możliwości oszczędności + link do pełnej listy   |
+| Wydatki opcjonalne    | Suma „głupot”, udział w wydatkach, limit miesięczny    |
 | Panel AI              | Mapowanie mBank, batch kategoryzacji, analiza tekstowa |
 
 **Zakres dat:** miesiąc / kwartał / rok (przełącznik nad wykresami).
@@ -53,8 +54,17 @@ Przełącznik **firma / dom / razem** filtruje wszystkie liczby i wykresy.
 Na stronie **Kategorie**:
 
 - **Dodaj kategorię** — własna nazwa i kolor.
+- **Wydatek opcjonalny** — checkbox przy kategorii; wydatki z tej kategorii trafiają do raportu na `/opcjonalne` (domyślnie włączone dla „Rozrywka”).
 - **Reguła** — np. pole „Opis” zawiera „LIDL” → kategoria „Żywność”.
 - Reguły mają **wyższy priorytet** niż pamięć kontrahenta i mapowanie mBank.
+
+### Wydatki opcjonalne (para, jeden workspace)
+
+1. Na **Kategorie** zaznacz, które kategorie są opcjonalne (np. Rozrywka, Restauracje).
+2. Na **Opcjonalne** (`/opcjonalne`) ustaw **limit miesięczny** dla kontekstu firma/dom/razem.
+3. Co miesiąc: dashboard → widget „Wydatki opcjonalne” → szczegóły → jedna wspólna decyzja, co ograniczyć.
+4. Aplikacja **nie rozdziela** wydatków na osoby — to jeden wspólny widok. Jeśli chcecie oznaczać „kto”, użyjcie **tagów** (np. `Adam`, `Żona`) na transakcjach.
+5. Filtr **Tylko opcjonalne** na liście transakcji: `/transactions?discretionary=1`.
 
 Kolejność przypisania kategorii przy imporcie:
 

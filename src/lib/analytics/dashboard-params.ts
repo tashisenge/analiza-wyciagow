@@ -67,3 +67,25 @@ export function buildDashboardHref(options: {
   }
   return `/dashboard?${search.toString()}`;
 }
+
+export function buildPeriodHref(
+  basePath: string,
+  options: {
+    context: string;
+    period: string;
+    year?: number;
+    month?: number;
+  },
+): string {
+  const search = new URLSearchParams({
+    context: options.context,
+    period: options.period,
+  });
+  if (options.year !== undefined) {
+    search.set("year", String(options.year));
+  }
+  if (options.month !== undefined) {
+    search.set("month", String(options.month));
+  }
+  return `${basePath}?${search.toString()}`;
+}

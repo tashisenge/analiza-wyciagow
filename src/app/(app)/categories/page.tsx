@@ -14,6 +14,7 @@ import {
   deleteRule,
   setCategoryOptimizationExclusion,
 } from "@/server/actions/categories";
+import { setCategoryDiscretionary } from "@/server/actions/discretionary";
 
 async function createCategoryAction(formData: FormData): Promise<void> {
   "use server";
@@ -71,6 +72,18 @@ async function toggleOptimizationExclusionAction(
   redirect("/categories");
 }
 
+async function toggleDiscretionaryAction(
+  categoryId: string,
+  isDiscretionary: boolean,
+): Promise<void> {
+  "use server";
+  const result = await setCategoryDiscretionary(categoryId, isDiscretionary);
+  if (!result.ok) {
+    redirect(`/categories?error=${encodeURIComponent(result.error)}`);
+  }
+  redirect("/categories");
+}
+
 export default async function CategoriesPage({
   searchParams,
 }: {
@@ -114,6 +127,7 @@ export default async function CategoriesPage({
       createRuleAction={createRuleAction}
       deleteRuleAction={deleteRuleAction}
       toggleOptimizationExclusionAction={toggleOptimizationExclusionAction}
+      toggleDiscretionaryAction={toggleDiscretionaryAction}
     />
   );
 }

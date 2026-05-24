@@ -10,6 +10,7 @@ export async function seedCategoriesForWorkspace(
     color: string;
     isDefault: boolean;
     excludeFromOptimization: boolean;
+    isDiscretionary: boolean;
   }) => Promise<unknown>,
 ): Promise<void> {
   for (const category of DEFAULT_CATEGORIES) {
@@ -19,6 +20,7 @@ export async function seedCategoriesForWorkspace(
       color: category.color,
       isDefault: true,
       excludeFromOptimization: category.excludeFromOptimization,
+      isDiscretionary: category.isDiscretionary,
     });
   }
 }

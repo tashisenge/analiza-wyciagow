@@ -23,6 +23,11 @@ const LINKS = [
     tip: "Wykryte powtarzalne płatności i subskrypcje — akceptacja sugestii.",
   },
   {
+    href: "/opcjonalne",
+    label: "Opcjonalne",
+    tip: "Wydatki, na które możecie się zgodzić, że da się je ograniczyć.",
+  },
+  {
     href: "/transactions",
     label: "Transakcje",
     tip: "Lista operacji, kategoryzacja i podobne transakcje.",

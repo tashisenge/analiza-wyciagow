@@ -20,6 +20,7 @@ import {
   splitByPeriod,
 } from "@/lib/analytics/load-dashboard-metrics";
 import { prisma } from "@/lib/db";
+import { loadDiscretionaryPageData } from "@/lib/discretionary/load-discretionary-page";
 
 export async function loadDashboardData(
   workspaceId: string,
@@ -29,9 +30,10 @@ export async function loadDashboardData(
   const accounts = await prisma.account.findMany({ where: { workspaceId } });
   const accountIds = accountIdsForContext(accounts, context);
   const raw = await fetchDashboardRaw(workspaceId, accountIds, range, context);
-  const [recurringOpportunities, subscriptionMarkers] = await Promise.all([
+  const [recurringOpportunities, subscriptionMarkers, discretionary] = await Promise.all([
     fetchRecurringOpportunities(workspaceId, context),
     loadSubscriptionMarkers(workspaceId),
+    loadDiscretionaryPageData(workspaceId, context, range),
   ]);
   const { recurringPayments, markedSubscriptions } = buildRecurringDashboardData(
     recurringOpportunities,
@@ -57,6 +59,10 @@ export async function loadDashboardData(
     yearlyMonths,
     recurringPayments,
     markedSubscriptions,
+    discretionarySummary: discretionary.summary,
+    discretionaryMonthlyLimit: discretionary.monthlyLimit,
+    discretionaryLimitUsedPercent: discretionary.limitUsedPercent,
+    hasDiscretionaryCategories: discretionary.discretionaryCategoryIds.length > 0,
   };
 }
 
