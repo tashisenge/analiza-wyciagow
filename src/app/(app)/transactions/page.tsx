@@ -2,10 +2,11 @@ import { redirect } from "next/navigation";
 
 import { TransactionFilters } from "@/components/transactions/TransactionFilters";
 import { TransactionsHelpPanel } from "@/components/transactions/TransactionsHelpPanel";
-import { TransactionsTable } from "@/components/transactions/TransactionsTable";
+import { TransactionsPageClient } from "@/components/transactions/TransactionsPageClient";
 import { PageHeader } from "@/components/ui/PageHeader";
 import type { ContextFilter } from "@/lib/analytics/filters";
 import { auth } from "@/lib/auth";
+import type { BulkCategoryFilters } from "@/lib/transactions/bulk-category-types";
 import { loadTransactionsPageData } from "@/lib/transactions/load-transactions-page";
 import {
   buildTransactionsReturnTo,
@@ -63,6 +64,14 @@ export default async function TransactionsPage({
   const context = (params.context ?? "razem") as ContextFilter;
   const pageData = await loadTransactionsPageData(session.user.workspaceId, context, params);
   const returnTo = buildTransactionsReturnTo(params);
+  const bulkFilters: BulkCategoryFilters = {
+    counterpartyContains: params.counterparty,
+    mbankCategory: params.mbankCategory,
+    uncategorizedOnly: params.uncategorized === "1",
+    dateFrom: params.dateFrom,
+    dateTo: params.dateTo,
+    context: context === "razem" ? "razem" : context,
+  };
 
   return (
     <div className="space-y-4">
@@ -91,11 +100,12 @@ export default async function TransactionsPage({
       {params.error ? <p className="alert-error">{params.error}</p> : null}
       {params.msg ? <p className="alert-success">{params.msg}</p> : null}
       <TransactionsHelpPanel />
-      <TransactionsTable
-        transactions={pageData.rows}
+      <TransactionsPageClient
+        rows={pageData.rows}
         categories={pageData.categories}
         allTags={pageData.allTags}
         returnTo={returnTo}
+        bulkFilters={bulkFilters}
         changeCategoryAction={changeCategoryAction}
       />
     </div>

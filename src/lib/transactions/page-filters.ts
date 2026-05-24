@@ -1,3 +1,5 @@
+import { appendTransactionSearchParams } from "@/lib/transactions/build-transactions-url";
+
 export interface TransactionSearchParams {
   uncategorized?: string;
   context?: string;
@@ -5,6 +7,9 @@ export interface TransactionSearchParams {
   categoryName?: string;
   counterparty?: string;
   tagId?: string;
+  mbankCategory?: string;
+  dateFrom?: string;
+  dateTo?: string;
   msg?: string;
 }
 
@@ -29,24 +34,7 @@ export function transactionActiveFilter(params: TransactionSearchParams): string
 
 export function buildTransactionsReturnTo(params: TransactionSearchParams): string {
   const search = new URLSearchParams();
-  if (params.uncategorized === "1") {
-    search.set("uncategorized", "1");
-  }
-  if (params.context) {
-    search.set("context", params.context);
-  }
-  if (params.categoryId) {
-    search.set("categoryId", params.categoryId);
-  }
-  if (params.categoryName) {
-    search.set("categoryName", params.categoryName);
-  }
-  if (params.counterparty) {
-    search.set("counterparty", params.counterparty);
-  }
-  if (params.tagId) {
-    search.set("tagId", params.tagId);
-  }
+  appendTransactionSearchParams(search, params);
   const query = search.toString();
   return query ? `/transactions?${query}` : "/transactions";
 }

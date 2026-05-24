@@ -14,6 +14,7 @@ import {
   type TransactionSearchParams,
 } from "@/lib/transactions/page-filters";
 import { buildSimilarCountsByTransactionId } from "@/lib/transactions/similar-transaction-count";
+import { transactionListExtraWhere } from "@/lib/transactions/transaction-list-extra-where";
 
 const transactionPageInclude = {
   category: true,
@@ -73,6 +74,7 @@ async function fetchTransactionsBundle(
           ...(params.counterparty
             ? { counterparty: { contains: params.counterparty, mode: "insensitive" as const } }
             : {}),
+          ...transactionListExtraWhere(params),
           ...(params.tagId ? { tags: { some: { tagId: params.tagId } } } : {}),
           ...categoryFilter,
         },

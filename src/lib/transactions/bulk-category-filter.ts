@@ -17,6 +17,49 @@ function parseDateEnd(isoDate: string): Date {
   return new Date(`${isoDate}T23:59:59.999Z`);
 }
 
+function applyCounterpartyFilter(
+  where: Prisma.TransactionWhereInput,
+  counterpartyContains?: string,
+): void {
+  if (!counterpartyContains?.trim()) {
+    return;
+  }
+  where.counterparty = {
+    contains: counterpartyContains.trim(),
+    mode: "insensitive",
+  };
+}
+
+function applyMbankCategoryFilter(
+  where: Prisma.TransactionWhereInput,
+  mbankCategory?: string,
+): void {
+  if (!mbankCategory?.trim()) {
+    return;
+  }
+  where.mbankCategory = {
+    equals: mbankCategory.trim(),
+    mode: "insensitive",
+  };
+}
+
+function applyDateRangeFilter(
+  where: Prisma.TransactionWhereInput,
+  dateFrom?: string,
+  dateTo?: string,
+): void {
+  if (!dateFrom && !dateTo) {
+    return;
+  }
+  where.bookedAt = {};
+  if (dateFrom) {
+    where.bookedAt.gte = parseDateStart(dateFrom);
+  }
+  if (dateTo) {
+    where.bookedAt.lte = parseDateEnd(dateTo);
+  }
+}
+
 export function buildBulkCategoryWhere(
   input: BuildBulkCategoryWhereInput,
 ): Prisma.TransactionWhereInput {
@@ -31,33 +74,14 @@ export function buildBulkCategoryWhere(
     where.id = { in: transactionIds };
   }
 
-  if (filters.counterpartyContains?.trim()) {
-    where.counterparty = {
-      contains: filters.counterpartyContains.trim(),
-      mode: "insensitive",
-    };
-  }
-
-  if (filters.mbankCategory?.trim()) {
-    where.mbankCategory = {
-      equals: filters.mbankCategory.trim(),
-      mode: "insensitive",
-    };
-  }
+  applyCounterpartyFilter(where, filters.counterpartyContains);
+  applyMbankCategoryFilter(where, filters.mbankCategory);
 
   if (filters.uncategorizedOnly) {
     where.categoryId = null;
   }
 
-  if (filters.dateFrom || filters.dateTo) {
-    where.bookedAt = {};
-    if (filters.dateFrom) {
-      where.bookedAt.gte = parseDateStart(filters.dateFrom);
-    }
-    if (filters.dateTo) {
-      where.bookedAt.lte = parseDateEnd(filters.dateTo);
-    }
-  }
+  applyDateRangeFilter(where, filters.dateFrom, filters.dateTo);
 
   return where;
 }

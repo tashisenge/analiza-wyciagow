@@ -24,4 +24,13 @@ describe("page-filters", () => {
   it("detects active filter for uncategorized", () => {
     expect(transactionActiveFilter({ uncategorized: "1" })).toBe("uncategorized");
   });
+
+  it("builds return URL with date range", () => {
+    const url = buildTransactionsReturnTo({
+      dateFrom: "2026-01-01",
+      dateTo: "2026-01-31",
+    });
+    expect(url).toContain("dateFrom=2026-01-01");
+    expect(url).toContain("dateTo=2026-01-31");
+  });
 });
