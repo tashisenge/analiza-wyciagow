@@ -58,6 +58,7 @@ jobs:
       DATABASE_URL: postgresql://analiza:analiza@localhost:5432/analiza_wyciagow
       DIRECT_URL: postgresql://analiza:analiza@localhost:5432/analiza_wyciagow
       AUTH_SECRET: ci-test-secret-min-32-chars-long!!
+      AUTH_URL: http://localhost:3100
       NEXTAUTH_URL: http://localhost:3100
       PLAYWRIGHT_BASE_URL: http://localhost:3100
     steps:
