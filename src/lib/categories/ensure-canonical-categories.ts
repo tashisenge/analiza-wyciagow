@@ -1,8 +1,40 @@
 import {
   DEFAULT_CATEGORIES,
   isCanonicalCategoryName,
+  type DefaultCategoryDef,
 } from "@/lib/categories/default-categories";
 import { prisma } from "@/lib/db";
+
+type ExistingCategory = Awaited<ReturnType<typeof prisma.category.findMany>>[number];
+
+async function createCanonicalCategory(
+  workspaceId: string,
+  def: DefaultCategoryDef,
+): Promise<void> {
+  await prisma.category.create({
+    data: {
+      workspaceId,
+      name: def.name,
+      color: def.color,
+      isDefault: true,
+      excludeFromOptimization: def.excludeFromOptimization,
+    },
+  });
+}
+
+async function syncExcludeFromOptimization(
+  found: ExistingCategory,
+  def: DefaultCategoryDef,
+): Promise<void> {
+  if (found.excludeFromOptimization === def.excludeFromOptimization) {
+    return;
+  }
+
+  await prisma.category.update({
+    where: { id: found.id },
+    data: { excludeFromOptimization: def.excludeFromOptimization },
+  });
+}
 
 /** Tworzy brakujące kanoniczne kategorie i ustawia flagi stałych wydatków. */
 export async function ensureCanonicalCategories(workspaceId: string): Promise<void> {
@@ -11,26 +43,11 @@ export async function ensureCanonicalCategories(workspaceId: string): Promise<vo
 
   for (const def of DEFAULT_CATEGORIES) {
     const found = byName.get(def.name);
-
     if (!found) {
-      await prisma.category.create({
-        data: {
-          workspaceId,
-          name: def.name,
-          color: def.color,
-          isDefault: true,
-          excludeFromOptimization: def.excludeFromOptimization,
-        },
-      });
+      await createCanonicalCategory(workspaceId, def);
       continue;
     }
-
-    if (found.excludeFromOptimization !== def.excludeFromOptimization) {
-      await prisma.category.update({
-        where: { id: found.id },
-        data: { excludeFromOptimization: def.excludeFromOptimization },
-      });
-    }
+    await syncExcludeFromOptimization(found, def);
   }
 }
 

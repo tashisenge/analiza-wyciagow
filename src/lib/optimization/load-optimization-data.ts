@@ -3,15 +3,15 @@ import type { Prisma } from "@prisma/client";
 import type { ContextFilter } from "@/lib/analytics/filters";
 import { prisma } from "@/lib/db";
 import {
-  dismissFixedCategoryOpportunities,
-  optimizableTransactionsWhere,
-  visibleOpenOpportunityWhere,
-} from "@/lib/optimization/filter-transactions";
-import {
   fetchAccountIds,
   fetchBudgetsForContext,
   sixMonthsAgo,
 } from "@/lib/optimization/fetch-optimization-inputs";
+import {
+  dismissFixedCategoryOpportunities,
+  optimizableTransactionsWhere,
+  visibleOpenOpportunityWhere,
+} from "@/lib/optimization/filter-transactions";
 import { loadBudgetSpentRows } from "@/lib/optimization/load-budget-spent";
 import { mapTransactionsForOptimization } from "@/lib/optimization/map-transactions";
 import { runDetectionForMonth } from "@/lib/optimization/run-detection";

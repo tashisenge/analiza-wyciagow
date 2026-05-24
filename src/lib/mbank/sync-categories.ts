@@ -1,8 +1,8 @@
-import { resolveCategoryId } from "@/lib/categorization/resolve-category";
 import {
   deleteEmptyOrphanCategories,
   ensureCanonicalCategories,
 } from "@/lib/categories/ensure-canonical-categories";
+import { resolveCategoryId } from "@/lib/categorization/resolve-category";
 import { prisma } from "@/lib/db";
 
 export async function buildCategoriesByName(

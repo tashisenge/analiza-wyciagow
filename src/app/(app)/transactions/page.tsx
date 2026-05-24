@@ -6,8 +6,8 @@ import { TransactionsPageClient } from "@/components/transactions/TransactionsPa
 import { PageHeader } from "@/components/ui/PageHeader";
 import type { ContextFilter } from "@/lib/analytics/filters";
 import { auth } from "@/lib/auth";
-import type { BulkCategoryFilters } from "@/lib/transactions/bulk-category-types";
 import { buildTransactionsHref } from "@/lib/transactions/build-transactions-url";
+import type { BulkCategoryFilters } from "@/lib/transactions/bulk-category-types";
 import { loadTransactionsPageData } from "@/lib/transactions/load-transactions-page";
 import {
   buildTransactionsReturnTo,

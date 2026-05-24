@@ -35,7 +35,7 @@ export function buildTransactionsHref(
     string | undefined,
   ][]) {
     if (value === undefined || value === "") {
-      delete merged[key];
+      merged[key] = undefined;
     } else {
       merged[key] = value;
     }

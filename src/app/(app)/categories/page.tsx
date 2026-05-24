@@ -2,8 +2,8 @@ import { redirect } from "next/navigation";
 
 import { CategoriesView } from "@/components/categories/CategoriesView";
 import { auth } from "@/lib/auth";
-import { CANONICAL_CATEGORY_NAMES } from "@/lib/categories/default-categories";
 import { loadCategoryTransactionCounts } from "@/lib/categories/category-transaction-counts";
+import { CANONICAL_CATEGORY_NAMES } from "@/lib/categories/default-categories";
 import { ensureCanonicalCategories } from "@/lib/categories/ensure-canonical-categories";
 import { prisma } from "@/lib/db";
 import { assignMbankCategoriesForWorkspace } from "@/lib/mbank/sync-categories";
@@ -84,7 +84,7 @@ export default async function CategoriesPage({
   const workspaceId = session.user.workspaceId;
 
   await ensureCanonicalCategories(workspaceId);
-  let categoryCount = await prisma.category.count({ where: { workspaceId } });
+  const categoryCount = await prisma.category.count({ where: { workspaceId } });
   if (categoryCount > CANONICAL_CATEGORY_NAMES.length + 2) {
     await assignMbankCategoriesForWorkspace(workspaceId);
   }

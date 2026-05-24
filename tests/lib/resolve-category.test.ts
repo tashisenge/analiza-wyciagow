@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { resolveCategoryId } from "@/lib/categorization/resolve-category";
 import { shouldExcludeCategoryFromOptimization } from "@/lib/categories/canonical-categories";
+import { resolveCategoryId } from "@/lib/categorization/resolve-category";
 import { TRANSFER_BETWEEN_ACCOUNTS_CATEGORY } from "@/lib/transactions/transfer-category";
 
 describe("resolveCategoryId", () => {
