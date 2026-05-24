@@ -1,10 +1,11 @@
 import type { Prisma } from "@prisma/client";
 
 import { normalizeMbankCategoryName } from "@/lib/mbank/category-names";
+import { buildBulkCategoryWhere } from "@/lib/transactions/bulk-category-filter";
+import type { BulkCategoryFilters } from "@/lib/transactions/bulk-category-types";
 
-export function buildReviewQueueWhere(workspaceId: string): Prisma.TransactionWhereInput {
+function reviewQueueOrClause(): Prisma.TransactionWhereInput {
   return {
-    workspaceId,
     OR: [
       { mbankCategory: { contains: "bez kategorii", mode: "insensitive" } },
       {
@@ -17,6 +18,25 @@ export function buildReviewQueueWhere(workspaceId: string): Prisma.TransactionWh
         ],
       },
     ],
+  };
+}
+
+export function buildReviewQueueWhere(
+  workspaceId: string,
+  accountIds: string[],
+  filters: Pick<
+    BulkCategoryFilters,
+    "counterpartyContains" | "mbankCategory" | "dateFrom" | "dateTo" | "uncategorizedOnly"
+  > = {},
+): Prisma.TransactionWhereInput {
+  const scoped = buildBulkCategoryWhere({
+    workspaceId,
+    accountIds,
+    filters,
+  });
+
+  return {
+    AND: [reviewQueueOrClause(), scoped],
   };
 }
 

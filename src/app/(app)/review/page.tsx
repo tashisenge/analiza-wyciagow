@@ -1,15 +1,20 @@
 import { redirect } from "next/navigation";
 
+import { ReviewFilters } from "@/components/review/ReviewFilters";
 import { ReviewPageClient } from "@/components/review/ReviewPageClient";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { loadReviewQueue } from "@/lib/review/load-review-queue";
+import {
+  parseReviewQueueFilters,
+  type ReviewSearchParams,
+} from "@/lib/review/review-queue-filters";
 
 export default async function ReviewPage({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string }>;
+  searchParams: Promise<ReviewSearchParams>;
 }): Promise<React.JSX.Element> {
   const session = await auth();
   if (!session?.user) {
@@ -18,10 +23,11 @@ export default async function ReviewPage({
 
   const params = await searchParams;
   const page = Math.max(1, Number.parseInt(params.page ?? "1", 10) || 1);
+  const filters = parseReviewQueueFilters(params);
   const workspaceId = session.user.workspaceId;
 
   const [queue, categories] = await Promise.all([
-    loadReviewQueue(workspaceId, page),
+    loadReviewQueue(workspaceId, page, filters),
     prisma.category.findMany({ where: { workspaceId }, orderBy: { name: "asc" } }),
   ]);
 
@@ -32,10 +38,12 @@ export default async function ReviewPage({
         lead="Porównaj kategorie banku z aplikacją. AI podpowiada — Ty decydujesz."
         tip="Pozycje z «Bez kategorii» mBank, rozbieżności nazw lub brak kategorii app mimo danych banku."
       />
+      <ReviewFilters filters={filters} />
       <ReviewPageClient
         items={queue.items}
         total={queue.total}
         page={queue.page}
+        filters={filters}
         categories={categories}
       />
     </div>

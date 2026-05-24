@@ -1,5 +1,6 @@
 import { isReviewRow } from "@/lib/review/build-review-queue-where";
 import type { ReviewQueueItem } from "@/lib/review/load-review-queue";
+import { getReviewReason, type ReviewReason } from "@/lib/review/review-queue-filters";
 
 interface ReviewCandidate {
   id: string;
@@ -27,7 +28,10 @@ function toReviewItem(tx: ReviewCandidate): ReviewQueueItem {
   };
 }
 
-export function mapReviewItems(candidates: ReviewCandidate[]): ReviewQueueItem[] {
+export function mapReviewItems(
+  candidates: ReviewCandidate[],
+  reason?: ReviewReason,
+): ReviewQueueItem[] {
   return candidates
     .filter((tx) =>
       isReviewRow({
@@ -36,5 +40,17 @@ export function mapReviewItems(candidates: ReviewCandidate[]): ReviewQueueItem[]
         categoryName: tx.category?.name ?? null,
       }),
     )
+    .filter((tx) => {
+      if (!reason) {
+        return true;
+      }
+      return (
+        getReviewReason({
+          mbankCategory: tx.mbankCategory,
+          categoryId: tx.categoryId,
+          categoryName: tx.category?.name ?? null,
+        }) === reason
+      );
+    })
     .map(toReviewItem);
 }

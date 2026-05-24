@@ -10,6 +10,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { logActionError } from "@/lib/logger";
 import { countReviewQueue, loadReviewQueue } from "@/lib/review/load-review-queue";
+import type { ReviewQueueFilters } from "@/lib/review/review-queue-filters";
 import { persistReviewDecision } from "@/lib/review/persist-review-decision";
 
 export type ReviewActionResult =
@@ -45,7 +46,10 @@ export async function getReviewQueueCount(): Promise<number> {
   return countReviewQueue(workspaceId);
 }
 
-export async function aiVerifyReviewBatch(page = 1): Promise<AiVerifyBatchResult> {
+export async function aiVerifyReviewBatch(
+  page = 1,
+  filters: ReviewQueueFilters = {},
+): Promise<AiVerifyBatchResult> {
   const workspaceId = await getWorkspaceId();
   if (!workspaceId) {
     return { ok: false, error: "Brak sesji" };
@@ -60,7 +64,7 @@ export async function aiVerifyReviewBatch(page = 1): Promise<AiVerifyBatchResult
   }
 
   try {
-    const { items } = await loadReviewQueue(workspaceId, page);
+    const { items } = await loadReviewQueue(workspaceId, page, filters);
     if (items.length === 0) {
       return { ok: false, error: "Kolejka weryfikacji jest pusta" };
     }
