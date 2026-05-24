@@ -6,6 +6,7 @@ import { TransactionsPageClient } from "@/components/transactions/TransactionsPa
 import { PageHeader } from "@/components/ui/PageHeader";
 import type { ContextFilter } from "@/lib/analytics/filters";
 import { auth } from "@/lib/auth";
+import { ensurePersonTags } from "@/lib/tags/ensure-person-tags";
 import { buildTransactionsHref } from "@/lib/transactions/build-transactions-url";
 import type { BulkCategoryFilters } from "@/lib/transactions/bulk-category-types";
 import { loadTransactionsPageData } from "@/lib/transactions/load-transactions-page";
@@ -63,6 +64,7 @@ export default async function TransactionsPage({
   }
   const params = await searchParams;
   const context = (params.context ?? "razem") as ContextFilter;
+  await ensurePersonTags(session.user.workspaceId);
   const pageData = await loadTransactionsPageData(
     session.user.workspaceId,
     context,
@@ -89,6 +91,7 @@ export default async function TransactionsPage({
             active={transactionActiveFilter(params)}
             params={params}
             categories={pageData.categories}
+            tags={pageData.allTags}
           />
         }
       />
@@ -115,8 +118,22 @@ export default async function TransactionsPage({
       {pageData.filterTagName ? (
         <p className="text-sm text-slate-600">
           Filtr: tag <strong>{pageData.filterTagName}</strong> —{" "}
-          <a href="/transactions" className="link-brand">
-            wyczyść filtr
+          <a
+            href={buildTransactionsHref(params, { tagId: undefined })}
+            className="link-brand"
+          >
+            wyczyść filtr tagu
+          </a>
+        </p>
+      ) : null}
+      {params.discretionary === "1" ? (
+        <p className="text-sm text-slate-600">
+          Filtr: tylko wydatki <strong>opcjonalne</strong> —{" "}
+          <a
+            href={buildTransactionsHref(params, { discretionary: undefined })}
+            className="link-brand"
+          >
+            wyczyść
           </a>
         </p>
       ) : null}

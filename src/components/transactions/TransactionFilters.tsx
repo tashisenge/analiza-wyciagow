@@ -5,6 +5,7 @@ import { useTransition } from "react";
 
 import { FilterChip } from "@/components/ui/FilterChip";
 import { InfoTip } from "@/components/ui/InfoTip";
+import { PERSON_TAG_NAMES } from "@/lib/tags/ensure-person-tags";
 import { buildTransactionsHref } from "@/lib/transactions/build-transactions-url";
 import type { TransactionSearchParams } from "@/lib/transactions/page-filters";
 
@@ -13,10 +14,16 @@ interface CategoryOption {
   name: string;
 }
 
+interface TagOption {
+  id: string;
+  name: string;
+}
+
 interface TransactionFiltersProps {
   active: string;
   params: TransactionSearchParams;
   categories: CategoryOption[];
+  tags: TagOption[];
 }
 
 const QUICK_FILTERS = [
@@ -25,6 +32,11 @@ const QUICK_FILTERS = [
     key: "uncategorized",
     label: "Bez kategorii",
     tip: "Tylko transakcje bez przypisanej kategorii.",
+  },
+  {
+    key: "discretionary",
+    label: "Opcjonalne",
+    tip: "Tylko kategorie oznaczone jako opcjonalne.",
   },
   { key: "firma", label: "Firma", tip: "Konto firmowe." },
   { key: "dom", label: "Dom", tip: "Konto domowe." },
@@ -42,28 +54,53 @@ function quickFilterHref(
         uncategorized: "1",
         categoryId: undefined,
         categoryName: undefined,
+        discretionary: undefined,
+        tagId: undefined,
+      });
+    case "discretionary":
+      return buildTransactionsHref(params, {
+        discretionary: "1",
+        uncategorized: undefined,
+        categoryId: undefined,
+        categoryName: undefined,
+        tagId: undefined,
       });
     case "firma":
       return buildTransactionsHref(params, {
         context: "firma",
         uncategorized: undefined,
+        discretionary: undefined,
       });
     case "dom":
       return buildTransactionsHref(params, {
         context: "dom",
         uncategorized: undefined,
+        discretionary: undefined,
       });
   }
+}
+
+function tagFilterHref(params: TransactionSearchParams, tagId: string): string {
+  return buildTransactionsHref(params, {
+    tagId,
+    uncategorized: undefined,
+    categoryId: undefined,
+    categoryName: undefined,
+  });
 }
 
 export function TransactionFilters({
   active,
   params,
   categories,
+  tags,
 }: TransactionFiltersProps): React.JSX.Element {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const selectedCategoryId = params.categoryId ?? "";
+  const personTags = PERSON_TAG_NAMES.map((name) => tags.find((tag) => tag.name === name)).filter(
+    (tag): tag is TagOption => tag !== undefined,
+  );
 
   function onCategoryChange(categoryId: string): void {
     startTransition(() => {
@@ -91,8 +128,8 @@ export function TransactionFilters({
       <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
         Filtr
         <InfoTip label="Filtry listy">
-          Wybierz kategorię, żeby przejrzeć przypisania. Filtry dat i kontekstu zachowują się
-          w URL.
+          Szybkie filtry, tagi osób (Adam / Żona) i kategorie. Parametry dat i kontekstu zostają w
+          URL.
         </InfoTip>
       </span>
       {QUICK_FILTERS.map((filter) => (
@@ -103,6 +140,16 @@ export function TransactionFilters({
           title={filter.tip}
         >
           {filter.label}
+        </FilterChip>
+      ))}
+      {personTags.map((tag) => (
+        <FilterChip
+          key={tag.id}
+          href={tagFilterHref(params, tag.id)}
+          active={params.tagId === tag.id}
+          title={`Transakcje oznaczone tagiem ${tag.name}`}
+        >
+          {tag.name}
         </FilterChip>
       ))}
       <label className="flex items-center gap-1.5 text-xs text-slate-600">

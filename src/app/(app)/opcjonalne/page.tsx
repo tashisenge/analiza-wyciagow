@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { ContextToggle } from "@/components/dashboard/ContextToggle";
 import { DateRangeToggle } from "@/components/dashboard/DateRangeToggle";
 import { MonthPicker, YearPicker } from "@/components/dashboard/PeriodPicker";
+import { DiscretionaryLimitAlert } from "@/components/discretionary/DiscretionaryLimitAlert";
 import { DiscretionaryLimitEditor } from "@/components/discretionary/DiscretionaryLimitEditor";
 import { DiscretionaryMerchantsTable } from "@/components/discretionary/DiscretionaryMerchantsTable";
 import { DiscretionarySummaryCards } from "@/components/discretionary/DiscretionarySummaryCards";
@@ -73,6 +74,12 @@ export default async function OpcjonalnePage({
             />
           </div>
         }
+      />
+
+      <DiscretionaryLimitAlert
+        totalPln={data.summary.totalPln}
+        monthlyLimit={data.monthlyLimit}
+        limitUsedPercent={data.limitUsedPercent}
       />
 
       {data.coveragePercent < 80 ? (
