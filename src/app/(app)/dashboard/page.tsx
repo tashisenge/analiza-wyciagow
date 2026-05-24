@@ -24,6 +24,7 @@ import type { DashboardData } from "@/lib/analytics/dashboard-types";
 import type { resolveDateRange } from "@/lib/analytics/date-range";
 import { loadDashboardPageContext } from "@/lib/analytics/load-dashboard-page";
 import { auth } from "@/lib/auth";
+import { countReviewQueue } from "@/lib/review/load-review-queue";
 
 function DashboardTrendSection({
   data,
@@ -99,6 +100,7 @@ export default async function DashboardPage({
   const params = await searchParams;
   const page = await loadDashboardPageContext(params, session.user.workspaceId);
   const { context, period, year, month, range, data, aiStatus, insightHistory } = page;
+  const reviewCount = await countReviewQueue(session.user.workspaceId);
 
   return (
     <div className="space-y-8">
@@ -143,6 +145,15 @@ export default async function DashboardPage({
             className="link-brand"
           >
             ogarnij teraz
+          </Link>
+        </p>
+      ) : null}
+
+      {reviewCount > 0 ? (
+        <p className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-900">
+          {reviewCount} transakcji do weryfikacji mBank —{" "}
+          <Link href="/review" className="link-brand font-medium">
+            przejdź do kolejki
           </Link>
         </p>
       ) : null}

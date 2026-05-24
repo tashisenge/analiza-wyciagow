@@ -23,6 +23,11 @@ const LINKS = [
     tip: "Lista operacji, kategoryzacja i podobne transakcje.",
   },
   {
+    href: "/review",
+    label: "Weryfikacja",
+    tip: "Kolejka rozbieżności kategorii mBank vs aplikacja.",
+  },
+  {
     href: "/import",
     label: "Import",
     tip: "Wgranie CSV z mBanku na wybrane konto.",

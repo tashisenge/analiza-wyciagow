@@ -11,6 +11,7 @@ const appRoutes = [
   "/dashboard?period=year&context=firma",
   "/transactions",
   "/transactions?uncategorized=1",
+  "/review",
   "/import",
   "/categories",
   "/settings",
