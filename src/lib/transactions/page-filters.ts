@@ -4,10 +4,14 @@ export interface TransactionSearchParams {
   categoryId?: string;
   categoryName?: string;
   counterparty?: string;
+  tagId?: string;
   msg?: string;
 }
 
 export function transactionActiveFilter(params: TransactionSearchParams): string {
+  if (params.tagId) {
+    return "tag";
+  }
   if (params.categoryId || params.categoryName) {
     return "category";
   }
@@ -39,6 +43,9 @@ export function buildTransactionsReturnTo(params: TransactionSearchParams): stri
   }
   if (params.counterparty) {
     search.set("counterparty", params.counterparty);
+  }
+  if (params.tagId) {
+    search.set("tagId", params.tagId);
   }
   const query = search.toString();
   return query ? `/transactions?${query}` : "/transactions";

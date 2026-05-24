@@ -1,18 +1,23 @@
 import { FilterChip } from "@/components/ui/FilterChip";
 import { InfoTip } from "@/components/ui/InfoTip";
+import { buildDashboardHref } from "@/lib/analytics/dashboard-params";
 
 const PERIODS = [
-  { key: "month", label: "Miesiąc", tip: "Bieżący miesiąc vs poprzedni." },
-  { key: "quarter", label: "Kwartał", tip: "Ostatnie 3 miesiące." },
-  { key: "year", label: "Rok", tip: "Ostatnie 12 miesięcy." },
+  { key: "month", label: "Miesiąc", tip: "Wybrany miesiąc vs poprzedni." },
+  { key: "quarter", label: "Kwartał", tip: "Bieżący kwartał vs poprzedni." },
+  { key: "year", label: "Rok", tip: "Pełny rok kalendarzowy lub YTD." },
 ] as const;
 
 export function DateRangeToggle({
   active,
   context,
+  year,
+  month,
 }: {
   active: string;
   context: string;
+  year?: number;
+  month?: number;
 }): React.JSX.Element {
   return (
     <div className="flex flex-wrap items-center gap-2">
@@ -25,7 +30,12 @@ export function DateRangeToggle({
       {PERIODS.map((period) => (
         <FilterChip
           key={period.key}
-          href={`/dashboard?context=${context}&period=${period.key}`}
+          href={buildDashboardHref({
+            context,
+            period: period.key,
+            year: period.key === "year" ? year : undefined,
+            month: period.key === "month" ? month : undefined,
+          })}
           active={active === period.key}
           title={period.tip}
         >

@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 import { AmountValue } from "@/components/privacy/AmountValue";
-import type { DashboardOpportunity } from "@/lib/analytics/load-dashboard";
+import type { DashboardOpportunity } from "@/lib/analytics/dashboard-types";
 
 interface OptimizeWidgetProps {
   context: string;

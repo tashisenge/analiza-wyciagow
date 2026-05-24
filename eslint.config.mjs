@@ -122,7 +122,13 @@ export default tseslint.config(
     },
   },
   {
-    files: ["src/lib/analytics/load-dashboard.ts"],
+    files: [
+      "src/lib/analytics/load-dashboard.ts",
+      "src/lib/analytics/load-dashboard-metrics.ts",
+      "src/lib/analytics/load-dashboard-extras.ts",
+      "src/lib/analytics/load-dashboard-page.ts",
+      "src/lib/transactions/load-transactions-page.ts",
+    ],
     rules: {
       "max-lines-per-function": [
         "error",

@@ -1,5 +1,7 @@
 import { AmountValue } from "@/components/privacy/AmountValue";
 import { CategoryAssignForm } from "@/components/transactions/CategoryAssignForm";
+import { SubscriptionToggle } from "@/components/transactions/SubscriptionToggle";
+import { TransactionTagsForm } from "@/components/transactions/TransactionTagsForm";
 
 interface CategoryOption {
   id: string;
@@ -26,11 +28,20 @@ interface TransactionRow {
   similarCounts: SimilarCounts;
   isOwnAccountTransfer: boolean;
   transferPairHint: string | null;
+  tags: { id: string; name: string; color: string }[];
+  isSubscription: boolean;
+}
+
+interface TagOption {
+  id: string;
+  name: string;
+  color: string;
 }
 
 interface TransactionsTableProps {
   transactions: TransactionRow[];
   categories: CategoryOption[];
+  allTags: TagOption[];
   returnTo: string;
   changeCategoryAction: (formData: FormData) => Promise<void>;
 }
@@ -63,6 +74,7 @@ function renderSimilarBadges(counts: SimilarCounts): React.JSX.Element {
 export function TransactionsTable({
   transactions,
   categories,
+  allTags,
   returnTo,
   changeCategoryAction,
 }: TransactionsTableProps): React.JSX.Element {
@@ -77,12 +89,13 @@ export function TransactionsTable({
             <th className="px-3 py-2">Konto</th>
             <th className="px-3 py-2">Podobne</th>
             <th className="px-3 py-2">Kategoria</th>
+            <th className="px-3 py-2">Tagi</th>
           </tr>
         </thead>
         <tbody>
           {transactions.length === 0 ? (
             <tr>
-              <td colSpan={6} className="px-3 py-6 text-center text-slate-500">
+              <td colSpan={7} className="px-3 py-6 text-center text-slate-500">
                 Brak transakcji dla wybranych filtrów.
               </td>
             </tr>
@@ -110,6 +123,10 @@ export function TransactionsTable({
                     {tx.mbankCategory ? (
                       <p className="text-xs text-slate-400">mBank: {tx.mbankCategory}</p>
                     ) : null}
+                    <SubscriptionToggle
+                      counterparty={tx.counterparty}
+                      isMarked={tx.isSubscription}
+                    />
                   </td>
                   <td className="px-3 py-2 whitespace-nowrap">
                     <AmountValue>{amountLabel}</AmountValue>
@@ -139,6 +156,26 @@ export function TransactionsTable({
                       hasCategory={Boolean(tx.categoryId)}
                       action={changeCategoryAction}
                       returnTo={returnTo}
+                    />
+                  </td>
+                  <td className="min-w-[10rem] px-3 py-2">
+                    {tx.tags.length > 0 ? (
+                      <div className="mb-1 flex flex-wrap gap-1">
+                        {tx.tags.map((tag) => (
+                          <span
+                            key={tag.id}
+                            className="rounded-full px-2 py-0.5 text-xs text-white"
+                            style={{ backgroundColor: tag.color }}
+                          >
+                            {tag.name}
+                          </span>
+                        ))}
+                      </div>
+                    ) : null}
+                    <TransactionTagsForm
+                      transactionId={tx.id}
+                      allTags={allTags}
+                      selectedTagIds={tx.tags.map((tag) => tag.id)}
                     />
                   </td>
                 </tr>

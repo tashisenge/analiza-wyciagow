@@ -1,5 +1,5 @@
+import type { DashboardOpportunity } from "@/lib/analytics/dashboard-types";
 import type { ContextFilter } from "@/lib/analytics/filters";
-import type { DashboardOpportunity } from "@/lib/analytics/load-dashboard";
 import { prisma } from "@/lib/db";
 
 async function fetchTopOpen(
@@ -10,7 +10,13 @@ async function fetchTopOpen(
     where: { workspaceId, status: "OPEN", accountContext: context },
     orderBy: { estimatedMonthlySavings: "desc" },
     take: 3,
-    select: { id: true, title: true, type: true, estimatedMonthlySavings: true },
+    select: {
+      id: true,
+      title: true,
+      type: true,
+      counterparty: true,
+      estimatedMonthlySavings: true,
+    },
   });
 }
 

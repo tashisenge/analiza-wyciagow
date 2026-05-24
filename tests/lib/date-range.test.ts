@@ -20,4 +20,24 @@ describe("resolveDateRange", () => {
     const range = resolveDateRange("quarter", new Date("2026-05-15"));
     expect(range.currentStart.getMonth()).toBe(3);
   });
+
+  it("supports anchored month", () => {
+    const range = resolveDateRange("month", new Date("2026-05-15"), { year: 2026, month: 3 });
+    expect(range.currentStart.getMonth()).toBe(2);
+    expect(range.currentEnd.getMonth()).toBe(2);
+    expect(range.label.toLowerCase()).toContain("marz");
+  });
+
+  it("supports full calendar year", () => {
+    const range = resolveDateRange("year", new Date("2026-05-15"), { year: 2025 });
+    expect(range.isFullYear).toBe(true);
+    expect(range.currentStart.getFullYear()).toBe(2025);
+    expect(range.currentEnd.getMonth()).toBe(11);
+  });
+
+  it("uses YTD for current year", () => {
+    const range = resolveDateRange("year", new Date("2026-05-15"), { year: 2026 });
+    expect(range.isFullYear).toBe(false);
+    expect(range.currentEnd.getMonth()).toBe(4);
+  });
 });

@@ -4,19 +4,14 @@ import { TransactionFilters } from "@/components/transactions/TransactionFilters
 import { TransactionsHelpPanel } from "@/components/transactions/TransactionsHelpPanel";
 import { TransactionsTable } from "@/components/transactions/TransactionsTable";
 import { PageHeader } from "@/components/ui/PageHeader";
-import { accountIdsForContext, type ContextFilter } from "@/lib/analytics/filters";
+import type { ContextFilter } from "@/lib/analytics/filters";
 import { auth } from "@/lib/auth";
-import { ensureTransferCategory } from "@/lib/categories/ensure-transfer-category";
-import { prisma } from "@/lib/db";
-import { buildTransactionTableRows } from "@/lib/transactions/build-transaction-table-rows";
-import { loadPairedOwnAccountTransferKeys } from "@/lib/transactions/load-workspace-transfer-pairs";
+import { loadTransactionsPageData } from "@/lib/transactions/load-transactions-page";
 import {
   buildTransactionsReturnTo,
-  prismaCategoryFilter,
   transactionActiveFilter,
   type TransactionSearchParams,
 } from "@/lib/transactions/page-filters";
-import { buildSimilarCountsByTransactionId } from "@/lib/transactions/similar-transaction-count";
 import { updateTransactionCategory } from "@/server/actions/transactions";
 
 async function changeCategoryAction(formData: FormData): Promise<void> {
@@ -64,84 +59,30 @@ export default async function TransactionsPage({
   if (!session?.user) {
     redirect("/login");
   }
-  const workspaceId = session.user.workspaceId;
   const params = await searchParams;
   const context = (params.context ?? "razem") as ContextFilter;
-
-  const accounts = await prisma.account.findMany({ where: { workspaceId } });
-  const accountIds = accountIdsForContext(accounts, context);
-  const categoryFilter = prismaCategoryFilter(params, workspaceId);
-
-  const [transactions, categories, filterCategory, transferCategoryId] =
-    await Promise.all([
-      prisma.transaction.findMany({
-        where: {
-          workspaceId,
-          accountId: { in: accountIds },
-          ...(params.uncategorized === "1" ? { categoryId: null } : {}),
-          ...(params.counterparty
-            ? {
-                counterparty: {
-                  contains: params.counterparty,
-                  mode: "insensitive" as const,
-                },
-              }
-            : {}),
-          ...categoryFilter,
-        },
-        orderBy: { bookedAt: "desc" },
-        take: 200,
-        include: { category: true, account: true },
-      }),
-      prisma.category.findMany({ where: { workspaceId }, orderBy: { name: "asc" } }),
-      params.categoryId
-        ? prisma.category.findFirst({
-            where: { id: params.categoryId, workspaceId },
-            select: { name: true },
-          })
-        : null,
-      ensureTransferCategory(workspaceId),
-    ]);
-
+  const pageData = await loadTransactionsPageData(session.user.workspaceId, context, params);
   const returnTo = buildTransactionsReturnTo(params);
-  const categoryLabel = filterCategory?.name ?? params.categoryName;
-  const similarCounts = buildSimilarCountsByTransactionId(
-    transactions.map((tx) => ({
-      id: tx.id,
-      counterparty: tx.counterparty,
-      amount: tx.amount.toString(),
-      currency: tx.currency,
-    })),
-  );
-  const pairedTransferKeys = await loadPairedOwnAccountTransferKeys({
-    workspaceId,
-    accountIds,
-    anchorTransactions: transactions.map((tx) => ({
-      id: tx.id,
-      accountId: tx.accountId,
-      amount: tx.amount,
-      currency: tx.currency,
-      bookedAt: tx.bookedAt,
-    })),
-  });
-  const rows = buildTransactionTableRows({
-    transactions,
-    transferCategoryId,
-    similarCounts,
-    pairedTransferKeys,
-  });
 
   return (
     <div className="space-y-4">
       <PageHeader
         title="Transakcje"
-        lead="Kategoryzuj pojedynczo lub masowo po kontrahencie. Zmiana kategorii zapisuje się od razu."
+        lead="Kategoryzuj pojedynczo lub masowo po kontrahencie. Taguj operacje i oznaczaj subskrypcje."
         tip="Lista pokazuje do 200 ostatnich pozycji z wybranych kont."
         actions={<TransactionFilters active={transactionActiveFilter(params)} />}
       />
-      {categoryLabel ? (
+      {pageData.filterCategoryName ? (
         <p className="text-sm text-slate-600">
-          Filtr: kategoria <strong>{categoryLabel}</strong> —{" "}
+          Filtr: kategoria <strong>{pageData.filterCategoryName}</strong> —{" "}
+          <a href="/transactions" className="link-brand">
+            wyczyść filtr
+          </a>
+        </p>
+      ) : null}
+      {pageData.filterTagName ? (
+        <p className="text-sm text-slate-600">
+          Filtr: tag <strong>{pageData.filterTagName}</strong> —{" "}
           <a href="/transactions" className="link-brand">
             wyczyść filtr
           </a>
@@ -151,8 +92,9 @@ export default async function TransactionsPage({
       {params.msg ? <p className="alert-success">{params.msg}</p> : null}
       <TransactionsHelpPanel />
       <TransactionsTable
-        transactions={rows}
-        categories={categories}
+        transactions={pageData.rows}
+        categories={pageData.categories}
+        allTags={pageData.allTags}
         returnTo={returnTo}
         changeCategoryAction={changeCategoryAction}
       />

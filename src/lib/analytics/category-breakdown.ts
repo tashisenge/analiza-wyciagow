@@ -2,11 +2,13 @@ export interface TxForCategoryBreakdown {
   amount: string;
   categoryId: string | null;
   categoryName: string | null;
+  categoryColor?: string | null;
 }
 
 export interface CategorySlice {
   categoryId: string | null;
   categoryName: string;
+  categoryColor: string | null;
   total: number;
   percent: number;
 }
@@ -19,12 +21,12 @@ export function categoryBreakdown(
   transactions: TxForCategoryBreakdown[],
 ): CategorySlice[] {
   const expenses = transactions.filter((tx) => isExpense(tx.amount));
-  const byCategory = new Map<string, { name: string; total: number }>();
+  const byCategory = new Map<string, { name: string; color: string | null; total: number }>();
 
   for (const tx of expenses) {
     const name = tx.categoryName ?? "Bez kategorii";
     const key = tx.categoryId ?? `mbank:${name}`;
-    const prev = byCategory.get(key) ?? { name, total: 0 };
+    const prev = byCategory.get(key) ?? { name, color: tx.categoryColor ?? null, total: 0 };
     prev.total += Math.abs(Number(tx.amount));
     byCategory.set(key, prev);
   }
@@ -33,8 +35,9 @@ export function categoryBreakdown(
 
   return [...byCategory.entries()]
     .map(([categoryId, value]) => ({
-      categoryId: categoryId === "__none__" ? null : categoryId,
+      categoryId: categoryId.startsWith("mbank:") ? null : categoryId,
       categoryName: value.name,
+      categoryColor: value.color,
       total: Math.round(value.total * 100) / 100,
       percent: Math.round((value.total / sum) * 1000) / 10,
     }))

@@ -64,6 +64,8 @@ model Workspace {
   opportunityResearch         OpportunityResearch[]
   categoryBudgets             CategoryBudget[]
   aiInsights                  AiInsight[]
+  tags                        Tag[]
+  subscriptionMarkers         SubscriptionMarker[]
 }
 
 model AiInsight {
@@ -176,6 +178,7 @@ model Transaction {
   account       Account      @relation(fields: [accountId], references: [id], onDelete: Cascade)
   importBatch   ImportBatch? @relation(fields: [importBatchId], references: [id])
   category      Category?    @relation(fields: [categoryId], references: [id])
+  tags          TransactionTag[]
 
   @@unique([workspaceId, dedupeHash])
   @@index([workspaceId, bookedAt])
@@ -232,4 +235,36 @@ model CategoryBudget {
   category       Category       @relation(fields: [categoryId], references: [id], onDelete: Cascade)
 
   @@unique([workspaceId, categoryId, accountContext])
+}
+
+model Tag {
+  id           String           @id @default(cuid())
+  workspaceId  String
+  name         String
+  color        String           @default("#6366f1")
+  workspace    Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  transactions TransactionTag[]
+
+  @@unique([workspaceId, name])
+}
+
+model TransactionTag {
+  transactionId String
+  tagId         String
+  transaction   Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  tag           Tag         @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([transactionId, tagId])
+  @@index([tagId])
+}
+
+model SubscriptionMarker {
+  id           String    @id @default(cuid())
+  workspaceId  String
+  counterparty String
+  note         String?
+  createdAt    DateTime  @default(now())
+  workspace    Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, counterparty])
 }

@@ -1,5 +1,6 @@
 import { FilterChip } from "@/components/ui/FilterChip";
 import { InfoTip } from "@/components/ui/InfoTip";
+import { buildDashboardHref } from "@/lib/analytics/dashboard-params";
 import type { ContextFilter } from "@/lib/analytics/filters";
 
 const CONTEXTS: { value: ContextFilter; label: string; tip: string }[] = [
@@ -11,15 +12,18 @@ const CONTEXTS: { value: ContextFilter; label: string; tip: string }[] = [
 interface ContextToggleProps {
   active: ContextFilter;
   period?: string;
+  year?: number;
+  month?: number;
   basePath?: string;
 }
 
 export function ContextToggle({
   active,
   period = "month",
+  year,
+  month,
   basePath = "/dashboard",
 }: ContextToggleProps): React.JSX.Element {
-  const query = basePath === "/dashboard" ? `&period=${period}` : "";
   return (
     <div className="flex flex-wrap items-center gap-2">
       <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
@@ -31,7 +35,11 @@ export function ContextToggle({
       {CONTEXTS.map((ctx) => (
         <FilterChip
           key={ctx.value}
-          href={`${basePath}?context=${ctx.value}${query}`}
+          href={
+            basePath === "/dashboard"
+              ? buildDashboardHref({ context: ctx.value, period, year, month })
+              : `${basePath}?context=${ctx.value}`
+          }
           active={active === ctx.value}
           title={ctx.tip}
         >
