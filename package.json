@@ -4,10 +4,11 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:clean": "node scripts/ensure-single-dev.mjs && rm -rf .next && next dev",
     "dev:turbo": "next dev --turbopack",
     "build": "next build",
     "postinstall": "prisma generate",
-    "vercel-build": "prisma generate && prisma migrate deploy && next build",
+    "vercel-build": "prisma generate && DIRECT_URL=\"${DIRECT_URL:-${DATABASE_URL_UNPOOLED:-$POSTGRES_URL_NON_POOLING}}\" prisma migrate deploy && next build",
     "start": "next start",
     "lint": "eslint . --max-warnings 0",
     "lint:fix": "eslint . --fix",
