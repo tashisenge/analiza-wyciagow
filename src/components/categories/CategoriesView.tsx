@@ -1,11 +1,15 @@
+import Link from "next/link";
+
 import { CategoryRulesSection } from "@/components/categories/CategoryRulesSection";
 import { PageHeader } from "@/components/ui/PageHeader";
+import { formatCategoryTransactionCount } from "@/lib/categories/category-transaction-counts";
 
 interface CategoryRow {
   id: string;
   name: string;
   color: string;
   isDefault: boolean;
+  transactionCount: number;
 }
 
 interface RuleRow {
@@ -73,15 +77,24 @@ export function CategoriesView({
               key={category.id}
               className="flex items-center justify-between rounded border bg-white px-3 py-2 text-sm"
             >
-              <span>
-                <span
-                  className="mr-2 inline-block h-3 w-3 rounded-full"
-                  style={{ backgroundColor: category.color }}
-                />
-                {category.name}
-                {category.isDefault ? (
-                  <span className="ml-2 text-xs text-slate-500">(domyślna)</span>
-                ) : null}
+              <span className="flex items-center gap-3">
+                <span>
+                  <span
+                    className="mr-2 inline-block h-3 w-3 rounded-full"
+                    style={{ backgroundColor: category.color }}
+                  />
+                  {category.name}
+                  {category.isDefault ? (
+                    <span className="ml-2 text-xs text-slate-500">(domyślna)</span>
+                  ) : null}
+                </span>
+                <Link
+                  href={`/transactions?categoryId=${category.id}`}
+                  className="rounded-full bg-calm-100 px-2 py-0.5 text-xs font-medium text-slate-700 hover:bg-calm-200"
+                  title="Pokaż transakcje w tej kategorii"
+                >
+                  {formatCategoryTransactionCount(category.transactionCount)}
+                </Link>
               </span>
               {!category.isDefault ? (
                 <form action={deleteCategoryAction}>

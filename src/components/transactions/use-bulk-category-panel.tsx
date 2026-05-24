@@ -13,15 +13,30 @@ interface UseBulkCategoryPanelInput {
   selectedIds: string[];
 }
 
+interface UseBulkCategoryPanelReturn {
+  categoryId: string;
+  rememberMerchant: boolean;
+  counterpartyContains: string;
+  mbankCategory: string;
+  uncategorizedOnly: boolean;
+  setCategoryId: (value: string) => void;
+  setRememberMerchant: (value: boolean) => void;
+  setCounterpartyContains: (value: string) => void;
+  setMbankCategory: (value: string) => void;
+  setUncategorizedOnly: (value: boolean) => void;
+  pending: boolean;
+  previewCount: number | null;
+  previewCapped: boolean;
+  error: string | null;
+  success: string | null;
+  runPreview: () => void;
+  runBulkUpdate: () => void;
+}
+
 export function useBulkCategoryPanel({
   initialFilters,
   selectedIds,
-}: UseBulkCategoryPanelInput): ReturnType<typeof useBulkCategoryFormState> &
-  ReturnType<typeof useBulkPreviewAction> &
-  Pick<ReturnType<typeof useBulkUpdateAction>, "success" | "runBulkUpdate"> & {
-    pending: boolean;
-    error: string | null;
-  } {
+}: UseBulkCategoryPanelInput): UseBulkCategoryPanelReturn {
   const form = useBulkCategoryFormState(initialFilters);
   const getFilters = useCallback(
     () =>

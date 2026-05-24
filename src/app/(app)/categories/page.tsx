@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 
 import { CategoriesView } from "@/components/categories/CategoriesView";
 import { auth } from "@/lib/auth";
+import { loadCategoryTransactionCounts } from "@/lib/categories/category-transaction-counts";
 import { prisma } from "@/lib/db";
 import {
   createCategory,
@@ -66,18 +67,24 @@ export default async function CategoriesPage({
   const params = await searchParams;
   const workspaceId = session.user.workspaceId;
 
-  const [categories, rules] = await Promise.all([
+  const [categories, rules, transactionCounts] = await Promise.all([
     prisma.category.findMany({ where: { workspaceId }, orderBy: { name: "asc" } }),
     prisma.categoryRule.findMany({
       where: { workspaceId },
       include: { category: true },
       orderBy: { priority: "desc" },
     }),
+    loadCategoryTransactionCounts(workspaceId),
   ]);
+
+  const categoriesWithCounts = categories.map((category) => ({
+    ...category,
+    transactionCount: transactionCounts.get(category.id) ?? 0,
+  }));
 
   return (
     <CategoriesView
-      categories={categories}
+      categories={categoriesWithCounts}
       rules={rules}
       error={params.error}
       createCategoryAction={createCategoryAction}
