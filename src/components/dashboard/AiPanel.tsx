@@ -88,7 +88,7 @@ export function AiPanel({
         <p className="mt-2 text-xs text-slate-600">
           Z analiz wykluczono {String(excludedCategoryCount)} kategorii —{" "}
           <a href="/settings" className="link-brand">
-            zmień w ustawieniach
+            ustawienia AI
           </a>
         </p>
       ) : null}

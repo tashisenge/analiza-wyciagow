@@ -1,6 +1,8 @@
 import { redirect } from "next/navigation";
 
 import { SettingsView } from "@/components/settings/SettingsView";
+import { envAiProviderHint, listAiProviderInfo } from "@/lib/ai/provider-status";
+import { getWorkspaceAiStatus } from "@/lib/ai/status";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { updateAnalysisExcludedCategories } from "@/server/actions/ai-settings";
@@ -43,14 +45,17 @@ export default async function SettingsPage({
     redirect("/login");
   }
   const params = await searchParams;
-  const workspace = await prisma.workspace.findUniqueOrThrow({
-    where: { id: session.user.workspaceId },
-    include: {
-      accounts: true,
-      members: { include: { user: true } },
-      categories: { orderBy: { name: "asc" } },
-    },
-  });
+  const [workspace, aiStatus] = await Promise.all([
+    prisma.workspace.findUniqueOrThrow({
+      where: { id: session.user.workspaceId },
+      include: {
+        accounts: true,
+        members: { include: { user: true } },
+        categories: { orderBy: { name: "asc" } },
+      },
+    }),
+    getWorkspaceAiStatus(session.user.workspaceId),
+  ]);
 
   return (
     <SettingsView
@@ -60,6 +65,12 @@ export default async function SettingsPage({
       members={workspace.members}
       categories={workspace.categories}
       excludedCategoryIds={workspace.analysisExcludedCategoryIds}
+      aiAvailable={aiStatus.available}
+      aiPreference={aiStatus.preference}
+      activeProvider={aiStatus.activeProvider}
+      availableProviders={aiStatus.availableProviders}
+      aiProviders={listAiProviderInfo()}
+      envDefaultProvider={envAiProviderHint()}
       updateExclusionsAction={updateExclusionsAction}
       error={params.error}
       deleted={params.deleted === "1"}
