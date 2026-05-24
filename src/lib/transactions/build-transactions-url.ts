@@ -24,3 +24,25 @@ export function appendTransactionSearchParams(
   setIfPresent(params, "dateFrom", search.dateFrom);
   setIfPresent(params, "dateTo", search.dateTo);
 }
+
+export function buildTransactionsHref(
+  current: TransactionSearchParams,
+  patch: Partial<Record<keyof TransactionSearchParams, string | undefined>>,
+): string {
+  const merged: TransactionSearchParams = { ...current };
+  for (const [key, value] of Object.entries(patch) as [
+    keyof TransactionSearchParams,
+    string | undefined,
+  ][]) {
+    if (value === undefined || value === "") {
+      delete merged[key];
+    } else {
+      merged[key] = value;
+    }
+  }
+
+  const params = new URLSearchParams();
+  appendTransactionSearchParams(params, merged);
+  const query = params.toString();
+  return query ? `/transactions?${query}` : "/transactions";
+}

@@ -1,5 +1,5 @@
 import {
-  normalizeMbankCategoryName,
+  mapMbankCategoryToAppName,
   resolveCategoryIdByName,
 } from "@/lib/mbank-category-map";
 
@@ -10,9 +10,9 @@ export function resolveMbankCategoryId(
   if (!mbankCategory) {
     return null;
   }
-  const name = normalizeMbankCategoryName(mbankCategory);
-  if (!name) {
+  const appName = mapMbankCategoryToAppName(mbankCategory);
+  if (!appName) {
     return null;
   }
-  return resolveCategoryIdByName(name, categoriesByName);
+  return resolveCategoryIdByName(appName, categoriesByName);
 }

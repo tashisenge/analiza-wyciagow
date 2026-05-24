@@ -1,4 +1,5 @@
 import type { ContextFilter } from "@/lib/analytics/filters";
+import { shouldExcludeCategoryFromOptimization } from "@/lib/categories/canonical-categories";
 import { buildOpportunities } from "@/lib/optimization/build-opportunities";
 import { fetchBudgetsForContext } from "@/lib/optimization/fetch-optimization-inputs";
 import type { DetectedOpportunity, TxForOptimization } from "@/lib/optimization/types";
@@ -18,11 +19,13 @@ export async function runDetectionForMonth(
   return buildOpportunities({
     current: options.mapped.filter((tx) => tx.bookedAt >= monthStart),
     history: options.mapped.filter((tx) => tx.bookedAt < monthStart),
-    budgets: budgets.map((b) => ({
-      categoryId: b.categoryId,
-      monthlyLimit: b.monthlyLimit,
-      categoryName: b.category.name,
-    })),
+    budgets: budgets
+      .filter((b) => !shouldExcludeCategoryFromOptimization(b.category))
+      .map((b) => ({
+        categoryId: b.categoryId,
+        monthlyLimit: b.monthlyLimit,
+        categoryName: b.category.name,
+      })),
     anchor: options.anchor,
   });
 }

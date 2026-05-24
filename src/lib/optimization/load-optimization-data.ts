@@ -3,6 +3,11 @@ import type { Prisma } from "@prisma/client";
 import type { ContextFilter } from "@/lib/analytics/filters";
 import { prisma } from "@/lib/db";
 import {
+  dismissFixedCategoryOpportunities,
+  optimizableTransactionsWhere,
+  visibleOpenOpportunityWhere,
+} from "@/lib/optimization/filter-transactions";
+import {
   fetchAccountIds,
   fetchBudgetsForContext,
   sixMonthsAgo,
@@ -45,12 +50,9 @@ export async function refreshWorkspaceOpportunities(
 ): Promise<number> {
   const accountIds = await fetchAccountIds(workspaceId, context);
   const anchor = new Date();
+  await dismissFixedCategoryOpportunities(workspaceId);
   const allTxs = await prisma.transaction.findMany({
-    where: {
-      workspaceId,
-      accountId: { in: accountIds },
-      bookedAt: { gte: sixMonthsAgo(anchor) },
-    },
+    where: optimizableTransactionsWhere(workspaceId, accountIds, sixMonthsAgo(anchor)),
     include: { category: true },
   });
   const mapped = mapTransactionsForOptimization(allTxs);
@@ -70,7 +72,7 @@ async function loadOpenOpportunities(
   context: ContextFilter,
 ): Promise<OpportunityWithRelations[]> {
   return prisma.optimizationOpportunity.findMany({
-    where: { workspaceId, status: "OPEN", accountContext: context },
+    where: visibleOpenOpportunityWhere(workspaceId, context),
     include: opportunityInclude,
     orderBy: { estimatedMonthlySavings: "desc" },
   });
@@ -128,6 +130,7 @@ export async function loadOptimizePageData(
   workspaceId: string,
   context: ContextFilter,
 ): Promise<OptimizePageData> {
+  await dismissFixedCategoryOpportunities(workspaceId);
   const accountIds = await fetchAccountIds(workspaceId, context);
   const monthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
   const core = await fetchOptimizePageCore(workspaceId, context, monthStart);

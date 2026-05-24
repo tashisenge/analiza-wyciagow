@@ -97,6 +97,40 @@ export async function deleteCategory(categoryId: string): Promise<CategoryAction
   }
 }
 
+export async function setCategoryOptimizationExclusion(
+  categoryId: string,
+  excludeFromOptimization: boolean,
+): Promise<CategoryActionResult> {
+  const workspaceId = await getWorkspaceId();
+  if (!workspaceId) {
+    return { ok: false, error: "Brak sesji" };
+  }
+
+  const category = await prisma.category.findFirst({
+    where: { id: categoryId, workspaceId },
+  });
+  if (!category) {
+    return { ok: false, error: "Nie znaleziono kategorii" };
+  }
+
+  try {
+    await prisma.category.update({
+      where: { id: categoryId },
+      data: { excludeFromOptimization },
+    });
+    revalidatePath("/categories");
+    revalidatePath("/optimize");
+    return { ok: true };
+  } catch (error) {
+    return {
+      ok: false,
+      error: logActionError("categories.setOptimizationExclusion", error, {
+        context: { categoryId, workspaceId },
+      }),
+    };
+  }
+}
+
 const createRuleSchema = z.object({
   categoryId: z.string().min(1),
   matchField: z.enum(["description", "counterparty"]),

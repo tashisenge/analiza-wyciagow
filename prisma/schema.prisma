@@ -112,11 +112,12 @@ model Account {
 }
 
 model Category {
-  id               String                   @id @default(cuid())
-  workspaceId      String
-  name             String
-  color            String                   @default("#6366f1")
-  isDefault        Boolean                  @default(false)
+  id                       String                   @id @default(cuid())
+  workspaceId              String
+  name                     String
+  color                    String                   @default("#6366f1")
+  isDefault                Boolean                  @default(false)
+  excludeFromOptimization  Boolean                  @default(false)
   workspace        Workspace                @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   transactions     Transaction[]
   rules            CategoryRule[]

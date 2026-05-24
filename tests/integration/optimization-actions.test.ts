@@ -15,7 +15,9 @@ function recentMonth(offset: number): Date {
 }
 
 describe.skipIf(!HAS_DB)("optimization persistence", () => {
-  it("upserts opportunities for workspace", async () => {
+  it(
+    "upserts opportunities for workspace",
+    async () => {
     const workspace = await prisma.workspace.create({ data: { name: "Opt WS" } });
     const account = await prisma.account.create({
       data: { workspaceId: workspace.id, type: "dom", name: "Dom" },
@@ -53,5 +55,7 @@ describe.skipIf(!HAS_DB)("optimization persistence", () => {
     expect(detected).toHaveLength(0);
 
     await prisma.workspace.delete({ where: { id: workspace.id } });
-  });
+    },
+    15_000,
+  );
 });

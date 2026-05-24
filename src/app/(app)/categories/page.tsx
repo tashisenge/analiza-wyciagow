@@ -2,13 +2,17 @@ import { redirect } from "next/navigation";
 
 import { CategoriesView } from "@/components/categories/CategoriesView";
 import { auth } from "@/lib/auth";
+import { CANONICAL_CATEGORY_NAMES } from "@/lib/categories/default-categories";
 import { loadCategoryTransactionCounts } from "@/lib/categories/category-transaction-counts";
+import { ensureCanonicalCategories } from "@/lib/categories/ensure-canonical-categories";
 import { prisma } from "@/lib/db";
+import { assignMbankCategoriesForWorkspace } from "@/lib/mbank/sync-categories";
 import {
   createCategory,
   createRule,
   deleteCategory,
   deleteRule,
+  setCategoryOptimizationExclusion,
 } from "@/server/actions/categories";
 
 async function createCategoryAction(formData: FormData): Promise<void> {
@@ -55,6 +59,18 @@ async function deleteRuleAction(formData: FormData): Promise<void> {
   redirect("/categories");
 }
 
+async function toggleOptimizationExclusionAction(
+  categoryId: string,
+  excludeFromOptimization: boolean,
+): Promise<void> {
+  "use server";
+  const result = await setCategoryOptimizationExclusion(categoryId, excludeFromOptimization);
+  if (!result.ok) {
+    redirect(`/categories?error=${encodeURIComponent(result.error)}`);
+  }
+  redirect("/categories");
+}
+
 export default async function CategoriesPage({
   searchParams,
 }: {
@@ -66,6 +82,12 @@ export default async function CategoriesPage({
   }
   const params = await searchParams;
   const workspaceId = session.user.workspaceId;
+
+  await ensureCanonicalCategories(workspaceId);
+  let categoryCount = await prisma.category.count({ where: { workspaceId } });
+  if (categoryCount > CANONICAL_CATEGORY_NAMES.length + 2) {
+    await assignMbankCategoriesForWorkspace(workspaceId);
+  }
 
   const [categories, rules, transactionCounts] = await Promise.all([
     prisma.category.findMany({ where: { workspaceId }, orderBy: { name: "asc" } }),
@@ -91,6 +113,7 @@ export default async function CategoriesPage({
       deleteCategoryAction={deleteCategoryAction}
       createRuleAction={createRuleAction}
       deleteRuleAction={deleteRuleAction}
+      toggleOptimizationExclusionAction={toggleOptimizationExclusionAction}
     />
   );
 }

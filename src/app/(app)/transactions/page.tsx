@@ -7,6 +7,7 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import type { ContextFilter } from "@/lib/analytics/filters";
 import { auth } from "@/lib/auth";
 import type { BulkCategoryFilters } from "@/lib/transactions/bulk-category-types";
+import { buildTransactionsHref } from "@/lib/transactions/build-transactions-url";
 import { loadTransactionsPageData } from "@/lib/transactions/load-transactions-page";
 import {
   buildTransactionsReturnTo,
@@ -83,13 +84,31 @@ export default async function TransactionsPage({
         title="Transakcje"
         lead="Kategoryzuj pojedynczo lub masowo po kontrahencie. Taguj operacje i oznaczaj subskrypcje."
         tip="Lista pokazuje do 200 ostatnich pozycji z wybranych kont."
-        actions={<TransactionFilters active={transactionActiveFilter(params)} />}
+        actions={
+          <TransactionFilters
+            active={transactionActiveFilter(params)}
+            params={params}
+            categories={pageData.categories}
+          />
+        }
       />
       {pageData.filterCategoryName ? (
         <p className="text-sm text-slate-600">
           Filtr: kategoria <strong>{pageData.filterCategoryName}</strong> —{" "}
-          <a href="/transactions" className="link-brand">
-            wyczyść filtr
+          {pageData.rows.length > 0 ? (
+            <>
+              pokazano <strong>{String(pageData.rows.length)}</strong>
+              {pageData.rows.length >= 200 ? "+" : ""} transakcji (max 200) —{" "}
+            </>
+          ) : null}
+          <a
+            href={buildTransactionsHref(params, {
+              categoryId: undefined,
+              categoryName: undefined,
+            })}
+            className="link-brand"
+          >
+            wyczyść filtr kategorii
           </a>
         </p>
       ) : null}

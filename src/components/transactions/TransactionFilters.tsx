@@ -1,41 +1,129 @@
+"use client";
+
+import { useRouter } from "next/navigation";
+import { useTransition } from "react";
+
 import { FilterChip } from "@/components/ui/FilterChip";
 import { InfoTip } from "@/components/ui/InfoTip";
+import { buildTransactionsHref } from "@/lib/transactions/build-transactions-url";
+import type { TransactionSearchParams } from "@/lib/transactions/page-filters";
 
-const FILTERS = [
-  { key: "all", label: "Wszystkie", query: "", tip: "Pełna lista (max 200)." },
+interface CategoryOption {
+  id: string;
+  name: string;
+}
+
+interface TransactionFiltersProps {
+  active: string;
+  params: TransactionSearchParams;
+  categories: CategoryOption[];
+}
+
+const QUICK_FILTERS = [
+  { key: "all", label: "Wszystkie", tip: "Pełna lista (max 200)." },
   {
     key: "uncategorized",
     label: "Bez kategorii",
-    query: "uncategorized=1",
     tip: "Tylko transakcje bez przypisanej kategorii.",
   },
-  { key: "firma", label: "Firma", query: "context=firma", tip: "Konto firmowe." },
-  { key: "dom", label: "Dom", query: "context=dom", tip: "Konto domowe." },
+  { key: "firma", label: "Firma", tip: "Konto firmowe." },
+  { key: "dom", label: "Dom", tip: "Konto domowe." },
 ] as const;
 
-export function TransactionFilters({ active }: { active: string }): React.JSX.Element {
+function quickFilterHref(
+  key: (typeof QUICK_FILTERS)[number]["key"],
+  params: TransactionSearchParams,
+): string {
+  switch (key) {
+    case "all":
+      return "/transactions";
+    case "uncategorized":
+      return buildTransactionsHref(params, {
+        uncategorized: "1",
+        categoryId: undefined,
+        categoryName: undefined,
+      });
+    case "firma":
+      return buildTransactionsHref(params, {
+        context: "firma",
+        uncategorized: undefined,
+      });
+    case "dom":
+      return buildTransactionsHref(params, {
+        context: "dom",
+        uncategorized: undefined,
+      });
+  }
+}
+
+export function TransactionFilters({
+  active,
+  params,
+  categories,
+}: TransactionFiltersProps): React.JSX.Element {
+  const router = useRouter();
+  const [pending, startTransition] = useTransition();
+  const selectedCategoryId = params.categoryId ?? "";
+
+  function onCategoryChange(categoryId: string): void {
+    startTransition(() => {
+      if (!categoryId) {
+        router.push(
+          buildTransactionsHref(params, {
+            categoryId: undefined,
+            categoryName: undefined,
+          }),
+        );
+        return;
+      }
+      router.push(
+        buildTransactionsHref(params, {
+          categoryId,
+          categoryName: undefined,
+          uncategorized: undefined,
+        }),
+      );
+    });
+  }
+
   return (
     <div className="flex flex-wrap items-center gap-2">
       <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
         Filtr
         <InfoTip label="Filtry listy">
-          Zawęż listę przed masową kategoryzacją. Kliknij nagłówek kolumny „Podobne” w
-          pomocy poniżej.
+          Wybierz kategorię, żeby przejrzeć przypisania. Filtry dat i kontekstu zachowują się
+          w URL.
         </InfoTip>
       </span>
-      {FILTERS.map((filter) => {
-        const href = filter.query ? `/transactions?${filter.query}` : "/transactions";
-        return (
-          <FilterChip
-            key={filter.key}
-            href={href}
-            active={active === filter.key}
-            title={filter.tip}
-          >
-            {filter.label}
-          </FilterChip>
-        );
-      })}
+      {QUICK_FILTERS.map((filter) => (
+        <FilterChip
+          key={filter.key}
+          href={quickFilterHref(filter.key, params)}
+          active={active === filter.key}
+          title={filter.tip}
+        >
+          {filter.label}
+        </FilterChip>
+      ))}
+      <label className="flex items-center gap-1.5 text-xs text-slate-600">
+        Kategoria
+        <select
+          value={selectedCategoryId}
+          onChange={(event) => {
+            onCategoryChange(event.target.value);
+          }}
+          disabled={pending}
+          className="input-field max-w-[14rem] text-xs"
+          aria-label="Filtruj po kategorii"
+        >
+          <option value="">— wszystkie —</option>
+          {categories.map((category) => (
+            <option key={category.id} value={category.id}>
+              {category.name}
+            </option>
+          ))}
+        </select>
+      </label>
     </div>
   );
 }

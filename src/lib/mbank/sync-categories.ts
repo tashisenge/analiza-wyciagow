@@ -1,7 +1,9 @@
 import { resolveCategoryId } from "@/lib/categorization/resolve-category";
+import {
+  deleteEmptyOrphanCategories,
+  ensureCanonicalCategories,
+} from "@/lib/categories/ensure-canonical-categories";
 import { prisma } from "@/lib/db";
-import { colorForMbankCategory } from "@/lib/mbank/category-colors";
-import { uniqueMbankCategoryNames } from "@/lib/mbank/category-names";
 
 export async function buildCategoriesByName(
   workspaceId: string,
@@ -10,30 +12,13 @@ export async function buildCategoriesByName(
   return new Map(categories.map((category) => [category.name, category.id]));
 }
 
-/** Tworzy brakujące Category o nazwach jak w mBanku. */
+/** Upewnia się, że istnieją kanoniczne kategorie (bez tworzenia 1:1 z mBank). */
 export async function syncMbankCategories(
   workspaceId: string,
-  rawMbankNames: string[],
+  _rawMbankNames?: string[],
 ): Promise<Map<string, string>> {
-  const names = uniqueMbankCategoryNames(rawMbankNames);
-  const byName = await buildCategoriesByName(workspaceId);
-
-  for (const name of names) {
-    if (byName.has(name)) {
-      continue;
-    }
-    const created = await prisma.category.create({
-      data: {
-        workspaceId,
-        name,
-        color: colorForMbankCategory(name),
-        isDefault: true,
-      },
-    });
-    byName.set(name, created.id);
-  }
-
-  return byName;
+  await ensureCanonicalCategories(workspaceId);
+  return buildCategoriesByName(workspaceId);
 }
 
 interface ApplyCategoriesInput {
@@ -64,10 +49,9 @@ export async function assignMbankCategoriesForWorkspace(
     prisma.transaction.findMany({ where: { workspaceId } }),
   ]);
 
-  await syncMbankCategories(
-    workspaceId,
-    transactions.map((tx) => tx.mbankCategory),
-  );
+  await syncMbankCategories(workspaceId);
   const byName = await buildCategoriesByName(workspaceId);
-  return applyResolvedCategories({ transactions, rules, memories, byName });
+  const updated = await applyResolvedCategories({ transactions, rules, memories, byName });
+  await deleteEmptyOrphanCategories(workspaceId);
+  return updated;
 }

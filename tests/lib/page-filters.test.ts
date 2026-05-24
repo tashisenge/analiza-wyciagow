@@ -34,3 +34,26 @@ describe("page-filters", () => {
     expect(url).toContain("dateTo=2026-01-31");
   });
 });
+
+describe("buildTransactionsHref", () => {
+  it("sets category while preserving context", async () => {
+    const { buildTransactionsHref } = await import("@/lib/transactions/build-transactions-url");
+    const href = buildTransactionsHref(
+      { context: "dom", dateFrom: "2026-01-01" },
+      { categoryId: "cat-1" },
+    );
+    expect(href).toContain("context=dom");
+    expect(href).toContain("dateFrom=2026-01-01");
+    expect(href).toContain("categoryId=cat-1");
+  });
+
+  it("clears category when patch omits it", async () => {
+    const { buildTransactionsHref } = await import("@/lib/transactions/build-transactions-url");
+    const href = buildTransactionsHref(
+      { categoryId: "cat-1", context: "firma" },
+      { categoryId: undefined },
+    );
+    expect(href).not.toContain("categoryId=");
+    expect(href).toContain("context=firma");
+  });
+});

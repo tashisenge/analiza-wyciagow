@@ -18,7 +18,15 @@ describe("normalizeMbankCategoryName", () => {
 });
 
 describe("mapMbankCategoryToAppName", () => {
-  it("passes through mbank name (1:1)", () => {
-    expect(mapMbankCategoryToAppName("Wynagrodzenie")).toBe("Wynagrodzenie");
+  it("maps common mbank labels to canonical categories", () => {
+    expect(mapMbankCategoryToAppName("Żywność i chemia domowa")).toBe("Żywność");
+    expect(mapMbankCategoryToAppName("Przejazdy")).toBe("Transport");
+    expect(mapMbankCategoryToAppName("Wynagrodzenie")).toBe("Przychód");
+    expect(mapMbankCategoryToAppName("Podatki")).toBe("Podatki (firma)");
+    expect(mapMbankCategoryToAppName("Składki ZUS")).toBe("ZUS (firma)");
+  });
+
+  it("falls back to Inne for unknown labels", () => {
+    expect(mapMbankCategoryToAppName("Nietypowa kategoria XYZ")).toBe("Inne");
   });
 });
