@@ -32,19 +32,72 @@ const REVIEW_REASONS = new Set<ReviewReason>([
   "app_missing",
 ]);
 
+function trimOrUndefined(value: string | undefined): string | undefined {
+  const trimmed = value?.trim();
+  if (!trimmed) {
+    return undefined;
+  }
+  return trimmed;
+}
+
+function parseContextFilter(value: string | undefined): ContextFilter {
+  const context = (value ?? "razem") as ContextFilter;
+  return context === "razem" ? "razem" : context;
+}
+
+function setOptionalSearchParam(
+  params: URLSearchParams,
+  key: string,
+  value: string | undefined,
+): void {
+  if (value) {
+    params.set(key, value);
+  } else {
+    params.delete(key);
+  }
+}
+
+function setPageParam(params: URLSearchParams, page?: number): void {
+  if (page != null && page > 1) {
+    params.set("page", String(page));
+  } else {
+    params.delete("page");
+  }
+}
+
+function appendReviewFilterParams(params: URLSearchParams, filters: ReviewQueueFilters): void {
+  if (filters.context && filters.context !== "razem") {
+    params.set("context", filters.context);
+  } else {
+    params.delete("context");
+  }
+
+  setOptionalSearchParam(params, "counterparty", filters.counterpartyContains);
+  setOptionalSearchParam(params, "mbankCategory", filters.mbankCategory);
+
+  if (filters.uncategorizedOnly) {
+    params.set("uncategorized", "1");
+  } else {
+    params.delete("uncategorized");
+  }
+
+  setOptionalSearchParam(params, "dateFrom", filters.dateFrom);
+  setOptionalSearchParam(params, "dateTo", filters.dateTo);
+  setOptionalSearchParam(params, "reason", filters.reason);
+}
+
 export function isReviewReason(value: string | undefined): value is ReviewReason {
   return value != null && REVIEW_REASONS.has(value as ReviewReason);
 }
 
 export function parseReviewQueueFilters(params: ReviewSearchParams): ReviewQueueFilters {
-  const context = (params.context ?? "razem") as ContextFilter;
   return {
-    counterpartyContains: params.counterparty?.trim() || undefined,
-    mbankCategory: params.mbankCategory?.trim() || undefined,
+    counterpartyContains: trimOrUndefined(params.counterparty),
+    mbankCategory: trimOrUndefined(params.mbankCategory),
     uncategorizedOnly: params.uncategorized === "1",
-    dateFrom: params.dateFrom?.trim() || undefined,
-    dateTo: params.dateTo?.trim() || undefined,
-    context: context === "razem" ? "razem" : context,
+    dateFrom: trimOrUndefined(params.dateFrom),
+    dateTo: trimOrUndefined(params.dateTo),
+    context: parseContextFilter(params.context),
     reason: isReviewReason(params.reason) ? params.reason : undefined,
   };
 }
@@ -54,53 +107,8 @@ export function appendReviewSearchParams(
   filters: ReviewQueueFilters,
   page?: number,
 ): void {
-  if (page != null && page > 1) {
-    params.set("page", String(page));
-  } else {
-    params.delete("page");
-  }
-
-  if (filters.context && filters.context !== "razem") {
-    params.set("context", filters.context);
-  } else {
-    params.delete("context");
-  }
-
-  if (filters.counterpartyContains) {
-    params.set("counterparty", filters.counterpartyContains);
-  } else {
-    params.delete("counterparty");
-  }
-
-  if (filters.mbankCategory) {
-    params.set("mbankCategory", filters.mbankCategory);
-  } else {
-    params.delete("mbankCategory");
-  }
-
-  if (filters.uncategorizedOnly) {
-    params.set("uncategorized", "1");
-  } else {
-    params.delete("uncategorized");
-  }
-
-  if (filters.dateFrom) {
-    params.set("dateFrom", filters.dateFrom);
-  } else {
-    params.delete("dateFrom");
-  }
-
-  if (filters.dateTo) {
-    params.set("dateTo", filters.dateTo);
-  } else {
-    params.delete("dateTo");
-  }
-
-  if (filters.reason) {
-    params.set("reason", filters.reason);
-  } else {
-    params.delete("reason");
-  }
+  setPageParam(params, page);
+  appendReviewFilterParams(params, filters);
 }
 
 export function buildReviewHref(filters: ReviewQueueFilters, page = 1): string {
@@ -128,13 +136,13 @@ export function getReviewReason(row: {
 }
 
 export function hasActiveReviewFilters(filters: ReviewQueueFilters): boolean {
-  return Boolean(
-    filters.counterpartyContains ||
-      filters.mbankCategory ||
-      filters.uncategorizedOnly ||
-      filters.dateFrom ||
-      filters.dateTo ||
-      filters.reason ||
-      (filters.context && filters.context !== "razem"),
+  return (
+    trimOrUndefined(filters.counterpartyContains) != null ||
+    trimOrUndefined(filters.mbankCategory) != null ||
+    filters.uncategorizedOnly === true ||
+    trimOrUndefined(filters.dateFrom) != null ||
+    trimOrUndefined(filters.dateTo) != null ||
+    filters.reason != null ||
+    (filters.context != null && filters.context !== "razem")
   );
 }

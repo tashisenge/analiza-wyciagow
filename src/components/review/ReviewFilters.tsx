@@ -80,7 +80,7 @@ export function ReviewFilters({ filters }: ReviewFiltersProps): React.JSX.Elemen
   }
 
   const activeReason = filters.reason ?? "all";
-  const context = (filters.context ?? "razem") as ContextFilter;
+  const context = (filters.context ?? "razem");
 
   return (
     <div className="section-card space-y-4 p-4">

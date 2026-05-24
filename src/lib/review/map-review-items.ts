@@ -28,29 +28,31 @@ function toReviewItem(tx: ReviewCandidate): ReviewQueueItem {
   };
 }
 
+function reviewRowFromCandidate(tx: ReviewCandidate): {
+  mbankCategory: string;
+  categoryId: string | null;
+  categoryName: string | null;
+} {
+  return {
+    mbankCategory: tx.mbankCategory,
+    categoryId: tx.categoryId,
+    categoryName: tx.category?.name ?? null,
+  };
+}
+
+function matchesReviewReason(tx: ReviewCandidate, reason?: ReviewReason): boolean {
+  if (!reason) {
+    return true;
+  }
+  return getReviewReason(reviewRowFromCandidate(tx)) === reason;
+}
+
 export function mapReviewItems(
   candidates: ReviewCandidate[],
   reason?: ReviewReason,
 ): ReviewQueueItem[] {
   return candidates
-    .filter((tx) =>
-      isReviewRow({
-        mbankCategory: tx.mbankCategory,
-        categoryId: tx.categoryId,
-        categoryName: tx.category?.name ?? null,
-      }),
-    )
-    .filter((tx) => {
-      if (!reason) {
-        return true;
-      }
-      return (
-        getReviewReason({
-          mbankCategory: tx.mbankCategory,
-          categoryId: tx.categoryId,
-          categoryName: tx.category?.name ?? null,
-        }) === reason
-      );
-    })
+    .filter((tx) => isReviewRow(reviewRowFromCandidate(tx)))
+    .filter((tx) => matchesReviewReason(tx, reason))
     .map(toReviewItem);
 }

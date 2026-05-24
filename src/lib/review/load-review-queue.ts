@@ -6,6 +6,14 @@ import { resolveBulkAccountIds } from "@/lib/transactions/bulk-category-targets"
 
 const REVIEW_PAGE_SIZE = 50;
 
+type ReviewCandidateRow = Awaited<
+  ReturnType<
+    typeof prisma.transaction.findMany<{
+      include: { category: { select: { name: true } } };
+    }>
+  >
+>[number];
+
 export interface ReviewQueueItem {
   id: string;
   bookedAt: Date;
@@ -18,13 +26,12 @@ export interface ReviewQueueItem {
   categoryName: string | null;
 }
 
-export async function loadReviewQueue(
+async function fetchReviewCandidates(
   workspaceId: string,
-  page = 1,
-  filters: ReviewQueueFilters = {},
-): Promise<{ items: ReviewQueueItem[]; total: number; page: number }> {
-  const accountIds = await resolveBulkAccountIds(workspaceId, filters.context);
-  const candidates = await prisma.transaction.findMany({
+  accountIds: string[],
+  filters: ReviewQueueFilters,
+): Promise<ReviewCandidateRow[]> {
+  return prisma.transaction.findMany({
     where: buildReviewQueueWhere(workspaceId, accountIds, {
       counterpartyContains: filters.counterpartyContains,
       mbankCategory: filters.mbankCategory,
@@ -36,7 +43,15 @@ export async function loadReviewQueue(
     orderBy: { bookedAt: "desc" },
     take: 500,
   });
+}
 
+export async function loadReviewQueue(
+  workspaceId: string,
+  page = 1,
+  filters: ReviewQueueFilters = {},
+): Promise<{ items: ReviewQueueItem[]; total: number; page: number }> {
+  const accountIds = await resolveBulkAccountIds(workspaceId, filters.context);
+  const candidates = await fetchReviewCandidates(workspaceId, accountIds, filters);
   const filtered = mapReviewItems(candidates, filters.reason);
   const start = (page - 1) * REVIEW_PAGE_SIZE;
 
