@@ -9,6 +9,12 @@ export interface BulkCategoryFilters {
   mbankCategory?: string;
   /** Tylko transakcje bez categoryId */
   uncategorizedOnly?: boolean;
+  /** Ukryty filtr listy transakcji: tag */
+  tagId?: string;
+  /** Ukryty filtr listy transakcji: bieżąca kategoria */
+  categoryId?: string;
+  /** Ukryty filtr listy transakcji: nazwa bieżącej kategorii */
+  categoryName?: string;
   /** Zakres dat inclusive (ISO date YYYY-MM-DD) */
   dateFrom?: string;
   dateTo?: string;
