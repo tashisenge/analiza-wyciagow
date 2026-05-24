@@ -23,8 +23,9 @@ const LOCAL_CSV_PATH = join(
 const FIXTURE_CSV_PATH = join(process.cwd(), "tests/fixtures/mbank-sample.csv");
 
 function resolveDemoCsvPath(): string {
-  if (process.env.DEMO_CSV_PATH) {
-    return process.env.DEMO_CSV_PATH;
+  const fromEnv = process.env["DEMO_CSV_PATH"];
+  if (fromEnv) {
+    return fromEnv;
   }
   if (existsSync(LOCAL_CSV_PATH)) {
     return LOCAL_CSV_PATH;
