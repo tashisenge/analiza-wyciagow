@@ -13,15 +13,6 @@ export interface SpendingSummaryForAi {
   topCategories: { name: string; total: number; percent: number }[];
   topMerchants: { name: string; total: number; changePercent: number | null }[];
   uncategorizedCount: number;
-  discretionary?: {
-    totalPln: number;
-    shareOfExpensesPercent: number | null;
-    vsPreviousPeriodPercent: number | null;
-    monthlyLimit: number | null;
-    limitUsedPercent: number | null;
-    limitOverrun: boolean;
-    topMerchants: { counterparty: string; totalPln: number }[];
-  };
   dataNote?: string;
 }
 

@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { ContextToggle } from "@/components/dashboard/ContextToggle";
 import { DateRangeToggle } from "@/components/dashboard/DateRangeToggle";
 import { MonthPicker, YearPicker } from "@/components/dashboard/PeriodPicker";
+import { DiscretionaryAiPanel } from "@/components/discretionary/DiscretionaryAiPanel";
 import { DiscretionaryLimitAlert } from "@/components/discretionary/DiscretionaryLimitAlert";
 import { DiscretionaryLimitEditor } from "@/components/discretionary/DiscretionaryLimitEditor";
 import { DiscretionaryMerchantsTable } from "@/components/discretionary/DiscretionaryMerchantsTable";
@@ -12,7 +13,7 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { parseDashboardParams } from "@/lib/analytics/dashboard-params";
 import { resolveDateRange } from "@/lib/analytics/date-range";
 import { auth } from "@/lib/auth";
-import { loadDiscretionaryPageData } from "@/lib/discretionary/load-discretionary-page";
+import { loadOpcjonalnePage } from "@/lib/discretionary/load-opcjonalne-page";
 
 const BASE_PATH = "/opcjonalne";
 
@@ -36,7 +37,11 @@ export default async function OpcjonalnePage({
     month: period === "month" ? month : undefined,
   });
 
-  const data = await loadDiscretionaryPageData(session.user.workspaceId, context, range);
+  const { data, aiStatus, insightHistory, canGenerateAi } = await loadOpcjonalnePage(
+    session.user.workspaceId,
+    context,
+    range,
+  );
 
   return (
     <div className="space-y-8">
@@ -110,6 +115,23 @@ export default async function OpcjonalnePage({
       />
 
       <DiscretionaryLimitEditor context={context} currentLimit={data.monthlyLimit} />
+
+      <DiscretionaryAiPanel
+        aiAvailable={aiStatus.available}
+        context={context}
+        period={period}
+        year={year}
+        month={month}
+        canGenerate={canGenerateAi}
+        insightHistory={insightHistory.map((entry) => ({
+          id: entry.id,
+          context: entry.context,
+          provider: entry.provider,
+          contentMarkdown: entry.contentMarkdown,
+          periodLabel: entry.periodLabel,
+          createdAt: entry.createdAt.toISOString(),
+        }))}
+      />
 
       <DiscretionaryMerchantsTable merchants={data.merchants} context={context} />
     </div>

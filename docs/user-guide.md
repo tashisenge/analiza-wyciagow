@@ -68,6 +68,7 @@ Na stronie **Kategorie**:
 6. **Kto wydał:** na transakcjach przypisz tag **Adam** lub **Żona** (tworzone automatycznie) — filtry na liście transakcji.
 7. **Analiza AI** uwzględnia teraz sekcję o wydatkach opcjonalnych i limicie (jeśli ustawiony).
 8. Przy **przekroczeniu limitu** zobaczycie żółty alert na dashboardzie i na `/opcjonalne`.
+9. **Raport AI (głupoty)** na `/opcjonalne`: osobny przycisk „Raport AI za ten okres” — tylko wydatki opcjonalne, niezależny od analizy na dashboardzie. Historia raportów jest zapisywana per kontekst (firma/dom/razem).
 
 Kolejność przypisania kategorii przy imporcie:
 

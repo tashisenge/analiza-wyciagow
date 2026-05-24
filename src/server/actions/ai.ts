@@ -44,6 +44,7 @@ function revalidateFinancePages(): void {
   revalidatePath("/dashboard");
   revalidatePath("/transactions");
   revalidatePath("/settings");
+  revalidatePath("/opcjonalne");
 }
 
 export async function applyMbankMapping(): Promise<AiActionResult> {

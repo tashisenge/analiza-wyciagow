@@ -32,11 +32,8 @@ ${hygiene ? `- Higiena danych: ${hygiene}` : ""}
 ## Gdzie optymalizować
 3–5 punktów z kwotami z JSON (kategorie lub kontrahenci).
 
-## Wydatki opcjonalne
-Tylko jeśli w JSON jest pole discretionary: suma PLN, udział %, zmiana m/m; przy limitOverrun — przekroczenie limitu i jedna rada. Bez pola — pomiń całą sekcję.
-
 ## Jedna rzecz na ten miesiąc
-Jedna wykonalna rada (preferuj opcjonalne / limit, jeśli dane to uzasadniają).
+Jedna wykonalna rada.
 
 ## Uwaga o danych
 1 zdanie: co zostało odfiltrowane (transfery / wykluczone kategorie) — tylko jeśli dotyczy.
