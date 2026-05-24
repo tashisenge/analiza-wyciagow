@@ -25,7 +25,12 @@ describe("parseMbankVerifyResponse", () => {
   it("skips unknown categories", () => {
     const raw = JSON.stringify({
       suggestions: [
-        { id: "tx-1", recommendedCategory: "Nieistniejąca", reason: "x", prefer: "mbank" },
+        {
+          id: "tx-1",
+          recommendedCategory: "Nieistniejąca",
+          reason: "x",
+          prefer: "mbank",
+        },
       ],
     });
     const result = parseMbankVerifyResponse(raw, new Set(["Transport"]));

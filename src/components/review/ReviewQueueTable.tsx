@@ -27,7 +27,9 @@ export function ReviewQueueTable({
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
-  const [customCategoryByTx, setCustomCategoryByTx] = useState<Record<string, string>>({});
+  const [customCategoryByTx, setCustomCategoryByTx] = useState<Record<string, string>>(
+    {},
+  );
 
   function runDecision(
     transactionId: string,

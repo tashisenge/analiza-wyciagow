@@ -32,7 +32,12 @@ export function ReviewAiBatchButton({
 
   return (
     <div className="space-y-1">
-      <button type="button" onClick={run} disabled={pending} className="btn-primary text-sm">
+      <button
+        type="button"
+        onClick={run}
+        disabled={pending}
+        className="btn-primary text-sm"
+      >
         {pending ? "Weryfikuję…" : "Zweryfikuj 50 z AI"}
       </button>
       {error ? <p className="alert-error text-sm">{error}</p> : null}

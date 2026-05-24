@@ -88,7 +88,9 @@ export function YearlySummaryCards({
       </div>
       <div className="rounded-lg border border-calm-200 bg-white p-3">
         <p className="text-xs uppercase tracking-wide text-slate-500">Saldo {year}</p>
-        <p className="mt-1 text-lg font-semibold text-slate-900">{summary.net.toFixed(2)} PLN</p>
+        <p className="mt-1 text-lg font-semibold text-slate-900">
+          {summary.net.toFixed(2)} PLN
+        </p>
       </div>
     </div>
   );

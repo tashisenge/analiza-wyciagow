@@ -19,7 +19,10 @@ function revalidateTagPaths(): void {
   revalidatePath("/dashboard");
 }
 
-export async function createTag(name: string, color?: string): Promise<{ ok: boolean; error?: string; id?: string }> {
+export async function createTag(
+  name: string,
+  color?: string,
+): Promise<{ ok: boolean; error?: string; id?: string }> {
   const workspaceId = await getWorkspaceId();
   if (!workspaceId) {
     return { ok: false, error: "Brak sesji" };

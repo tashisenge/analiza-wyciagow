@@ -147,7 +147,10 @@ export function SettingsView({
         </ul>
       </section>
 
-      <SettingsDataSection workspaceName={workspaceName} deleteDataAction={deleteDataAction} />
+      <SettingsDataSection
+        workspaceName={workspaceName}
+        deleteDataAction={deleteDataAction}
+      />
     </div>
   );
 }

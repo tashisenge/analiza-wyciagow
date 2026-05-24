@@ -60,7 +60,11 @@ export function buildDashboardTrendData(
     (tx) => tx.bookedAt >= yearStart && tx.bookedAt <= yearEnd,
   );
   return {
-    monthlyTrend: monthlyExpenseTrend(transactions, range.currentEnd, range.isFullYear ? 12 : 6),
+    monthlyTrend: monthlyExpenseTrend(
+      transactions,
+      range.currentEnd,
+      range.isFullYear ? 12 : 6,
+    ),
     yearlyMonths: range.isFullYear
       ? buildYearlyMonthSummaries(yearTransactions, yearForTrend)
       : [],

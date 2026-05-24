@@ -6,10 +6,7 @@ import { Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 
 import { useAmountTooltipLabel } from "@/components/privacy/use-amount-tooltip-label";
 import type { CategorySlice } from "@/lib/analytics/category-breakdown";
-import {
-  categorySliceKey,
-  sliceChartColor,
-} from "@/lib/analytics/dashboard-extras";
+import { categorySliceKey, sliceChartColor } from "@/lib/analytics/dashboard-extras";
 
 interface CategoryChartProps {
   slices: CategorySlice[];
@@ -97,7 +94,9 @@ export function CategoryChart({
                     ? "border-slate-200 bg-slate-50 text-slate-400 line-through"
                     : "border-calm-200 bg-white text-slate-700"
                 }`}
-                title={isHidden ? "Pokaż kategorię na wykresie" : "Ukryj kategorię na wykresie"}
+                title={
+                  isHidden ? "Pokaż kategorię na wykresie" : "Ukryj kategorię na wykresie"
+                }
               >
                 <span
                   className="inline-block h-2.5 w-2.5 rounded-full"
@@ -198,7 +197,11 @@ export function DashboardCategorySection({
             Zarządzaj kategoriami
           </Link>
         </div>
-        <CategoryLegendControls slices={slices} hiddenKeys={hiddenKeys} onToggle={toggle} />
+        <CategoryLegendControls
+          slices={slices}
+          hiddenKeys={hiddenKeys}
+          onToggle={toggle}
+        />
         <CategoryChart slices={slices} hiddenKeys={hiddenKeys} onToggle={toggle} />
       </div>
       {children}

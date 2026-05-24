@@ -65,8 +65,7 @@ function resolveAnchoredMonth(
 ): Omit<DateRangeResult, "label" | "isFullYear"> {
   const anchor = new Date(year, month - 1, 1);
   const currentStart = startOfMonth(anchor);
-  const isCurrentMonth =
-    now.getFullYear() === year && now.getMonth() === month - 1;
+  const isCurrentMonth = now.getFullYear() === year && now.getMonth() === month - 1;
   const currentEnd = isCurrentMonth ? now : endOfMonth(anchor);
   const previousAnchor = new Date(year, month - 2, 1);
   return {
@@ -77,10 +76,7 @@ function resolveAnchoredMonth(
   };
 }
 
-function resolveAnchoredYear(
-  now: Date,
-  year: number,
-): Omit<DateRangeResult, "label"> {
+function resolveAnchoredYear(now: Date, year: number): Omit<DateRangeResult, "label"> {
   const currentStart = new Date(year, 0, 1);
   const isCurrentYear = now.getFullYear() === year;
   const currentEnd = isCurrentYear ? now : endOfYear(currentStart);

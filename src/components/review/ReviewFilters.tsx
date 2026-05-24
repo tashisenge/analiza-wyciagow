@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 
+import { ReviewDateFilterFields } from "@/components/review/ReviewDateFilterFields";
 import { BulkCategoryFilterFields } from "@/components/transactions/BulkCategoryFilterFields";
 import { FilterChip } from "@/components/ui/FilterChip";
 import { InfoTip } from "@/components/ui/InfoTip";
@@ -54,7 +55,9 @@ export function ReviewFilters({ filters }: ReviewFiltersProps): React.JSX.Elemen
     filters.counterpartyContains ?? "",
   );
   const [mbankCategory, setMbankCategory] = useState(filters.mbankCategory ?? "");
-  const [uncategorizedOnly, setUncategorizedOnly] = useState(filters.uncategorizedOnly ?? false);
+  const [uncategorizedOnly, setUncategorizedOnly] = useState(
+    filters.uncategorizedOnly ?? false,
+  );
   const [dateFrom, setDateFrom] = useState(filters.dateFrom ?? "");
   const [dateTo, setDateTo] = useState(filters.dateTo ?? "");
 
@@ -80,7 +83,7 @@ export function ReviewFilters({ filters }: ReviewFiltersProps): React.JSX.Elemen
   }
 
   const activeReason = filters.reason ?? "all";
-  const context = (filters.context ?? "razem");
+  const context = filters.context ?? "razem";
 
   return (
     <div className="section-card space-y-4 p-4">
@@ -88,8 +91,8 @@ export function ReviewFilters({ filters }: ReviewFiltersProps): React.JSX.Elemen
         <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
           Filtry
           <InfoTip label="Filtry weryfikacji">
-            Zawęż kolejkę przed decyzjami i weryfikacją AI. Filtry dat i kontrahenta wymagają
-            kliknięcia „Zastosuj”.
+            Zawęż kolejkę przed decyzjami i weryfikacją AI. Filtry dat i kontrahenta
+            wymagają kliknięcia „Zastosuj”.
           </InfoTip>
         </span>
         {hasActiveReviewFilters(filters) ? (
@@ -100,7 +103,9 @@ export function ReviewFilters({ filters }: ReviewFiltersProps): React.JSX.Elemen
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
-        <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Kontekst</span>
+        <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
+          Kontekst
+        </span>
         {CONTEXTS.map((ctx) => (
           <FilterChip
             key={ctx.value}
@@ -114,7 +119,9 @@ export function ReviewFilters({ filters }: ReviewFiltersProps): React.JSX.Elemen
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
-        <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Typ</span>
+        <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
+          Typ
+        </span>
         {REASON_FILTERS.map((reason) => (
           <FilterChip
             key={reason.value}
@@ -136,38 +143,14 @@ export function ReviewFilters({ filters }: ReviewFiltersProps): React.JSX.Elemen
         onUncategorizedChange={setUncategorizedOnly}
       />
 
-      <div className="flex flex-wrap items-end gap-2">
-        <label className="text-xs text-slate-600">
-          Od
-          <input
-            type="date"
-            value={dateFrom}
-            onChange={(event) => {
-              setDateFrom(event.target.value);
-            }}
-            className="input-field ml-1 text-xs"
-          />
-        </label>
-        <label className="text-xs text-slate-600">
-          Do
-          <input
-            type="date"
-            value={dateTo}
-            onChange={(event) => {
-              setDateTo(event.target.value);
-            }}
-            className="input-field ml-1 text-xs"
-          />
-        </label>
-        <button
-          type="button"
-          onClick={applyFieldFilters}
-          disabled={pending}
-          className="btn-secondary text-xs"
-        >
-          Zastosuj filtry
-        </button>
-      </div>
+      <ReviewDateFilterFields
+        dateFrom={dateFrom}
+        dateTo={dateTo}
+        pending={pending}
+        onDateFromChange={setDateFrom}
+        onDateToChange={setDateTo}
+        onApply={applyFieldFilters}
+      />
     </div>
   );
 }

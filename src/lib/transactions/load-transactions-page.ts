@@ -51,6 +51,30 @@ function mapTransactionRows(
   });
 }
 
+function buildTransactionsWhere(
+  workspaceId: string,
+  accountIds: string[],
+  params: TransactionSearchParams,
+): Prisma.TransactionWhereInput {
+  const categoryFilter = prismaCategoryFilter(params, workspaceId);
+  return {
+    workspaceId,
+    accountId: { in: accountIds },
+    ...(params.uncategorized === "1" ? { categoryId: null } : {}),
+    ...(params.counterparty
+      ? {
+          counterparty: {
+            contains: params.counterparty,
+            mode: "insensitive" as const,
+          },
+        }
+      : {}),
+    ...transactionListExtraWhere(params),
+    ...(params.tagId ? { tags: { some: { tagId: params.tagId } } } : {}),
+    ...categoryFilter,
+  };
+}
+
 async function fetchTransactionsBundle(
   workspaceId: string,
   accountIds: string[],
@@ -63,39 +87,34 @@ async function fetchTransactionsBundle(
   allTags: { id: string; name: string; color: string }[];
   subscriptionMarkers: { counterparty: string }[];
 }> {
-  const categoryFilter = prismaCategoryFilter(params, workspaceId);
-  const [transactions, categories, filterCategory, transferCategoryId, allTags, subscriptionMarkers] =
-    await Promise.all([
-      prisma.transaction.findMany({
-        where: {
-          workspaceId,
-          accountId: { in: accountIds },
-          ...(params.uncategorized === "1" ? { categoryId: null } : {}),
-          ...(params.counterparty
-            ? { counterparty: { contains: params.counterparty, mode: "insensitive" as const } }
-            : {}),
-          ...transactionListExtraWhere(params),
-          ...(params.tagId ? { tags: { some: { tagId: params.tagId } } } : {}),
-          ...categoryFilter,
-        },
-        orderBy: { bookedAt: "desc" },
-        take: 200,
-        include: transactionPageInclude,
-      }),
-      prisma.category.findMany({ where: { workspaceId }, orderBy: { name: "asc" } }),
-      params.categoryId
-        ? prisma.category.findFirst({
-            where: { id: params.categoryId, workspaceId },
-            select: { name: true },
-          })
-        : null,
-      ensureTransferCategory(workspaceId),
-      prisma.tag.findMany({ where: { workspaceId }, orderBy: { name: "asc" } }),
-      prisma.subscriptionMarker.findMany({
-        where: { workspaceId },
-        select: { counterparty: true },
-      }),
-    ]);
+  const [
+    transactions,
+    categories,
+    filterCategory,
+    transferCategoryId,
+    allTags,
+    subscriptionMarkers,
+  ] = await Promise.all([
+    prisma.transaction.findMany({
+      where: buildTransactionsWhere(workspaceId, accountIds, params),
+      orderBy: { bookedAt: "desc" },
+      take: 200,
+      include: transactionPageInclude,
+    }),
+    prisma.category.findMany({ where: { workspaceId }, orderBy: { name: "asc" } }),
+    params.categoryId
+      ? prisma.category.findFirst({
+          where: { id: params.categoryId, workspaceId },
+          select: { name: true },
+        })
+      : null,
+    ensureTransferCategory(workspaceId),
+    prisma.tag.findMany({ where: { workspaceId }, orderBy: { name: "asc" } }),
+    prisma.subscriptionMarker.findMany({
+      where: { workspaceId },
+      select: { counterparty: true },
+    }),
+  ]);
   return {
     transactions,
     categories,
@@ -104,6 +123,44 @@ async function fetchTransactionsBundle(
     allTags,
     subscriptionMarkers,
   };
+}
+
+async function buildTransactionRows(input: {
+  workspaceId: string;
+  accountIds: string[];
+  transactions: PageTransaction[];
+  transferCategoryId: string;
+  subscriptionMarkers: { counterparty: string }[];
+}): Promise<TransactionRow[]> {
+  const similarCounts = buildSimilarCountsByTransactionId(
+    input.transactions.map((tx) => ({
+      id: tx.id,
+      counterparty: tx.counterparty,
+      amount: tx.amount.toString(),
+      currency: tx.currency,
+    })),
+  );
+  const pairedTransferKeys = await loadPairedOwnAccountTransferKeys({
+    workspaceId: input.workspaceId,
+    accountIds: input.accountIds,
+    anchorTransactions: input.transactions.map((tx) => ({
+      id: tx.id,
+      accountId: tx.accountId,
+      amount: tx.amount,
+      currency: tx.currency,
+      bookedAt: tx.bookedAt,
+    })),
+  });
+  const tableRows = buildTransactionTableRows({
+    transactions: input.transactions,
+    transferCategoryId: input.transferCategoryId,
+    similarCounts,
+    pairedTransferKeys,
+  });
+  const subscriptionSet = new Set(
+    input.subscriptionMarkers.map((item) => item.counterparty),
+  );
+  return mapTransactionRows(input.transactions, tableRows, subscriptionSet);
 }
 
 export async function loadTransactionsPageData(
@@ -120,38 +177,25 @@ export async function loadTransactionsPageData(
   const accounts = await prisma.account.findMany({ where: { workspaceId } });
   const accountIds = accountIdsForContext(accounts, context);
   const bundle = await fetchTransactionsBundle(workspaceId, accountIds, params);
-  const { transactions, categories, filterCategory, transferCategoryId, allTags, subscriptionMarkers } =
-    bundle;
+  const {
+    transactions,
+    categories,
+    filterCategory,
+    transferCategoryId,
+    allTags,
+    subscriptionMarkers,
+  } = bundle;
 
-  const similarCounts = buildSimilarCountsByTransactionId(
-    transactions.map((tx) => ({
-      id: tx.id,
-      counterparty: tx.counterparty,
-      amount: tx.amount.toString(),
-      currency: tx.currency,
-    })),
-  );
-  const pairedTransferKeys = await loadPairedOwnAccountTransferKeys({
+  const rows = await buildTransactionRows({
     workspaceId,
     accountIds,
-    anchorTransactions: transactions.map((tx) => ({
-      id: tx.id,
-      accountId: tx.accountId,
-      amount: tx.amount,
-      currency: tx.currency,
-      bookedAt: tx.bookedAt,
-    })),
-  });
-  const tableRows = buildTransactionTableRows({
     transactions,
     transferCategoryId,
-    similarCounts,
-    pairedTransferKeys,
+    subscriptionMarkers,
   });
-  const subscriptionSet = new Set(subscriptionMarkers.map((item) => item.counterparty));
 
   return {
-    rows: mapTransactionRows(transactions, tableRows, subscriptionSet),
+    rows,
     categories,
     allTags,
     filterCategoryName: filterCategory?.name ?? params.categoryName,

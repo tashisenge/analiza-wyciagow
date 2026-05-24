@@ -1,6 +1,10 @@
 import type { TransactionSearchParams } from "@/lib/transactions/page-filters";
 
-function setIfPresent(params: URLSearchParams, key: string, value: string | undefined): void {
+function setIfPresent(
+  params: URLSearchParams,
+  key: string,
+  value: string | undefined,
+): void {
   if (value) {
     params.set(key, value);
   }

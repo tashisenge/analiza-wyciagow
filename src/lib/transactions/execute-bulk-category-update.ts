@@ -24,17 +24,26 @@ interface ExecuteBulkUpdateInput {
   transactionIds?: string[];
 }
 
-export async function executeBulkCategoryUpdate(input: ExecuteBulkUpdateInput): Promise<{
-  updatedCount: number;
-  rememberedMerchants: number;
-}> {
-  const accountIds = await resolveBulkAccountIds(input.workspaceId, input.filters.context);
-  const targetIds = await resolveBulkTargetIds({
+async function resolveBulkUpdateTargetIds(
+  input: ExecuteBulkUpdateInput,
+): Promise<string[]> {
+  const accountIds = await resolveBulkAccountIds(
+    input.workspaceId,
+    input.filters.context,
+  );
+  return resolveBulkTargetIds({
     workspaceId: input.workspaceId,
     accountIds,
     filters: input.filters,
     transactionIds: input.transactionIds,
   });
+}
+
+export async function executeBulkCategoryUpdate(input: ExecuteBulkUpdateInput): Promise<{
+  updatedCount: number;
+  rememberedMerchants: number;
+}> {
+  const targetIds = await resolveBulkUpdateTargetIds(input);
 
   if (targetIds.length === 0) {
     throw new Error("Brak transakcji spełniających kryteria");

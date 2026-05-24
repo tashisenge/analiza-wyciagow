@@ -21,7 +21,9 @@ interface ResolveTargetIdsInput {
   transactionIds?: string[];
 }
 
-export async function resolveBulkTargetIds(input: ResolveTargetIdsInput): Promise<string[]> {
+export async function resolveBulkTargetIds(
+  input: ResolveTargetIdsInput,
+): Promise<string[]> {
   const where = input.transactionIds?.length
     ? buildBulkCategoryWhere({
         workspaceId: input.workspaceId,

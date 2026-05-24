@@ -47,7 +47,9 @@ export async function requestBulkUpdate(
   });
 }
 
-export function formatBulkUpdateSuccess(result: Extract<BulkCategoryActionResult, { ok: true }>): string {
+export function formatBulkUpdateSuccess(
+  result: Extract<BulkCategoryActionResult, { ok: true }>,
+): string {
   const suffix =
     result.rememberedMerchants > 0
       ? ` (zapamiętano ${String(result.rememberedMerchants)} kontrahentów)`

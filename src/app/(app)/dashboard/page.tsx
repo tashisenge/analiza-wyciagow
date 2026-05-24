@@ -90,7 +90,12 @@ function DashboardChartsSection({
 export default async function DashboardPage({
   searchParams,
 }: {
-  searchParams: Promise<{ context?: string; period?: string; year?: string; month?: string }>;
+  searchParams: Promise<{
+    context?: string;
+    period?: string;
+    year?: string;
+    month?: string;
+  }>;
 }): Promise<React.JSX.Element> {
   const session = await auth();
   if (!session?.user) {
@@ -109,7 +114,12 @@ export default async function DashboardPage({
         lead="Przegląd finansów domu i firmy — wybierz okres, miesiąc i kontekst kont."
         actions={
           <div className="flex flex-col gap-2 sm:items-end">
-            <DateRangeToggle active={period} context={context} year={year} month={month} />
+            <DateRangeToggle
+              active={period}
+              context={context}
+              year={year}
+              month={month}
+            />
             {period === "month" ? (
               <MonthPicker context={context} period={period} year={year} month={month} />
             ) : null}

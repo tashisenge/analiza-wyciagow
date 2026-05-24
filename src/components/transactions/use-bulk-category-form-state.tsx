@@ -17,7 +17,9 @@ interface BulkCategoryFormState {
   setUncategorizedOnly: (value: boolean) => void;
 }
 
-export function useBulkCategoryFormState(initialFilters: BulkCategoryFilters): BulkCategoryFormState {
+export function useBulkCategoryFormState(
+  initialFilters: BulkCategoryFilters,
+): BulkCategoryFormState {
   const [categoryId, setCategoryId] = useState("");
   const [rememberMerchant, setRememberMerchant] = useState(true);
   const [counterpartyContains, setCounterpartyContains] = useState(

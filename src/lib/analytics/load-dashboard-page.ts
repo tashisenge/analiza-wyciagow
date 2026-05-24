@@ -19,8 +19,12 @@ export async function loadDashboardPageContext(
   insightHistory: Awaited<ReturnType<typeof loadAiInsightHistory>>;
   excludedCategoryCount: number;
 }> {
-  const { context, period, year: yearParam, month: monthParam } =
-    parseDashboardParams(searchParams);
+  const {
+    context,
+    period,
+    year: yearParam,
+    month: monthParam,
+  } = parseDashboardParams(searchParams);
   const now = new Date();
   const year = yearParam ?? now.getFullYear();
   const month = monthParam ?? now.getMonth() + 1;

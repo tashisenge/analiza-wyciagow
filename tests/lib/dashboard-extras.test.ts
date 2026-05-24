@@ -5,20 +5,28 @@ import {
   categorySliceKey,
   mapRecurringPayments,
 } from "@/lib/analytics/dashboard-extras";
-import { parseDashboardParams, buildDashboardHref } from "@/lib/analytics/dashboard-params";
+import {
+  parseDashboardParams,
+  buildDashboardHref,
+} from "@/lib/analytics/dashboard-params";
 
 describe("dashboard params", () => {
   it("parses year and month", () => {
-    const parsed = parseDashboardParams({ context: "dom", period: "month", year: "2025", month: "3" });
+    const parsed = parseDashboardParams({
+      context: "dom",
+      period: "month",
+      year: "2025",
+      month: "3",
+    });
     expect(parsed.context).toBe("dom");
     expect(parsed.year).toBe(2025);
     expect(parsed.month).toBe(3);
   });
 
   it("builds dashboard href with month", () => {
-    expect(buildDashboardHref({ context: "razem", period: "month", year: 2025, month: 3 })).toBe(
-      "/dashboard?context=razem&period=month&year=2025&month=3",
-    );
+    expect(
+      buildDashboardHref({ context: "razem", period: "month", year: 2025, month: 3 }),
+    ).toBe("/dashboard?context=razem&period=month&year=2025&month=3");
   });
 });
 

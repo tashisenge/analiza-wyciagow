@@ -62,7 +62,11 @@ export default async function TransactionsPage({
   }
   const params = await searchParams;
   const context = (params.context ?? "razem") as ContextFilter;
-  const pageData = await loadTransactionsPageData(session.user.workspaceId, context, params);
+  const pageData = await loadTransactionsPageData(
+    session.user.workspaceId,
+    context,
+    params,
+  );
   const returnTo = buildTransactionsReturnTo(params);
   const bulkFilters: BulkCategoryFilters = {
     counterpartyContains: params.counterparty,

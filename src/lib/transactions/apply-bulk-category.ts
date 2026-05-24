@@ -22,7 +22,8 @@ export async function applyBulkCategoryUpdate(input: {
   rememberMerchant: boolean;
 }): Promise<{ updatedCount: number; rememberedMerchants: number }> {
   const ids = input.transactionIds.slice(0, BULK_CATEGORY_MAX);
-  const rows = ids.length > 0 ? await loadValidRows(input.prisma, input.workspaceId, ids) : [];
+  const rows =
+    ids.length > 0 ? await loadValidRows(input.prisma, input.workspaceId, ids) : [];
   if (rows.length === 0) {
     return { updatedCount: 0, rememberedMerchants: 0 };
   }

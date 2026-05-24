@@ -17,20 +17,35 @@ function isExpense(amount: string): boolean {
   return Number(amount) < 0;
 }
 
-export function categoryBreakdown(
-  transactions: TxForCategoryBreakdown[],
-): CategorySlice[] {
-  const expenses = transactions.filter((tx) => isExpense(tx.amount));
-  const byCategory = new Map<string, { name: string; color: string | null; total: number }>();
+function accumulateExpenses(
+  expenses: TxForCategoryBreakdown[],
+): Map<string, { name: string; color: string | null; total: number }> {
+  const byCategory = new Map<
+    string,
+    { name: string; color: string | null; total: number }
+  >();
 
   for (const tx of expenses) {
     const name = tx.categoryName ?? "Bez kategorii";
     const key = tx.categoryId ?? `mbank:${name}`;
-    const prev = byCategory.get(key) ?? { name, color: tx.categoryColor ?? null, total: 0 };
+    const prev = byCategory.get(key) ?? {
+      name,
+      color: tx.categoryColor ?? null,
+      total: 0,
+    };
     prev.total += Math.abs(Number(tx.amount));
     byCategory.set(key, prev);
   }
 
+  return byCategory;
+}
+
+export function categoryBreakdown(
+  transactions: TxForCategoryBreakdown[],
+): CategorySlice[] {
+  const byCategory = accumulateExpenses(
+    transactions.filter((tx) => isExpense(tx.amount)),
+  );
   const sum = [...byCategory.values()].reduce((acc, item) => acc + item.total, 0) || 1;
 
   return [...byCategory.entries()]

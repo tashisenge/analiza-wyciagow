@@ -28,7 +28,10 @@ export async function applyCategoryToTransactionRows(input: {
   rememberMerchant: boolean;
 }): Promise<{ updatedCount: number; rememberedMerchants: number }> {
   const { count } = await input.prisma.transaction.updateMany({
-    where: { workspaceId: input.workspaceId, id: { in: input.rows.map((row) => row.id) } },
+    where: {
+      workspaceId: input.workspaceId,
+      id: { in: input.rows.map((row) => row.id) },
+    },
     data: { categoryId: input.categoryId },
   });
   const rememberedMerchants = await rememberIfRequested({

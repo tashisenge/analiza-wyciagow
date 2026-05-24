@@ -65,7 +65,10 @@ function setPageParam(params: URLSearchParams, page?: number): void {
   }
 }
 
-function appendReviewFilterParams(params: URLSearchParams, filters: ReviewQueueFilters): void {
+function appendReviewFilterParams(
+  params: URLSearchParams,
+  filters: ReviewQueueFilters,
+): void {
   if (filters.context && filters.context !== "razem") {
     params.set("context", filters.context);
   } else {

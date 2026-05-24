@@ -60,5 +60,8 @@ export async function loadDashboardData(
   };
 }
 
-export type { DashboardData, DashboardOpportunity } from "@/lib/analytics/dashboard-types";
+export type {
+  DashboardData,
+  DashboardOpportunity,
+} from "@/lib/analytics/dashboard-types";
 export type { RecurringPaymentRow, SubscriptionSummaryRow, YearlyMonthSummary };

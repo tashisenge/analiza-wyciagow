@@ -56,7 +56,8 @@ export function AiProviderSettings({
               </span>
             </div>
             <p className="mt-2 text-xs text-slate-600">
-              Zmienna: <code className="rounded bg-slate-100 px-1">{provider.envKey}</code>
+              Zmienna:{" "}
+              <code className="rounded bg-slate-100 px-1">{provider.envKey}</code>
             </p>
             {provider.configured && provider.model ? (
               <p className="mt-1 text-xs text-slate-600">
@@ -92,8 +93,8 @@ export function AiProviderSettings({
         </div>
         {!aiAvailable ? (
           <p className="mt-2 text-sm text-amber-800">
-            Żaden dostawca nie jest dostępny — dodaj co najmniej jeden klucz API w .env lub
-            Vercel i zrestartuj / zrób redeploy.
+            Żaden dostawca nie jest dostępny — dodaj co najmniej jeden klucz API w .env
+            lub Vercel i zrestartuj / zrób redeploy.
           </p>
         ) : null}
       </div>
@@ -108,10 +109,12 @@ export function AiProviderSettings({
             klucze.
           </li>
           <li>
-            Vercel: Settings → Environment Variables →{" "}
-            <code>ANTHROPIC_API_KEY</code> lub <code>OPENAI_API_KEY</code>.
+            Vercel: Settings → Environment Variables → <code>ANTHROPIC_API_KEY</code> lub{" "}
+            <code>OPENAI_API_KEY</code>.
           </li>
-          <li>Opcjonalnie: <code>AI_PROVIDER=anthropic|openai</code> dla trybu Auto.</li>
+          <li>
+            Opcjonalnie: <code>AI_PROVIDER=anthropic|openai</code> dla trybu Auto.
+          </li>
         </ul>
       </details>
     </section>

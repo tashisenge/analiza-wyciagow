@@ -6,7 +6,10 @@ import { ReviewAiBatchButton } from "@/components/review/ReviewAiBatchButton";
 import { ReviewQueueTable } from "@/components/review/ReviewQueueTable";
 import type { MbankVerifySuggestion } from "@/lib/ai/verify-mbank-assignments";
 import type { ReviewQueueItem } from "@/lib/review/load-review-queue";
-import { buildReviewHref, type ReviewQueueFilters } from "@/lib/review/review-queue-filters";
+import {
+  buildReviewHref,
+  type ReviewQueueFilters,
+} from "@/lib/review/review-queue-filters";
 
 interface CategoryOption {
   id: string;
@@ -28,7 +31,9 @@ export function ReviewPageClient({
   filters,
   categories,
 }: ReviewPageClientProps): React.JSX.Element {
-  const [suggestions, setSuggestions] = useState<Record<string, MbankVerifySuggestion>>({});
+  const [suggestions, setSuggestions] = useState<Record<string, MbankVerifySuggestion>>(
+    {},
+  );
   const pageSize = 50;
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
@@ -38,14 +43,18 @@ export function ReviewPageClient({
         <p className="text-sm text-slate-600">
           {total > 0 ? (
             <>
-              W kolejce: <strong>{String(total)}</strong> transakcji (strona {String(page)} z{" "}
-              {String(totalPages)})
+              W kolejce: <strong>{String(total)}</strong> transakcji (strona{" "}
+              {String(page)} z {String(totalPages)})
             </>
           ) : (
             "Kolejka pusta dla wybranych filtrów"
           )}
         </p>
-        <ReviewAiBatchButton page={page} filters={filters} onSuggestions={setSuggestions} />
+        <ReviewAiBatchButton
+          page={page}
+          filters={filters}
+          onSuggestions={setSuggestions}
+        />
       </div>
       {totalPages > 1 ? (
         <div className="flex flex-wrap items-center gap-2 text-sm">

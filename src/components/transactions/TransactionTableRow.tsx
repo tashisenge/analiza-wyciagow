@@ -42,7 +42,9 @@ function formatAmount(amount: string, currency: string): string {
   return `${formatted} ${currency}`;
 }
 
-function renderSimilarBadges(counts: TransactionTableRowData["similarCounts"]): React.JSX.Element {
+function renderSimilarBadges(
+  counts: TransactionTableRowData["similarCounts"],
+): React.JSX.Element {
   if (counts.byCounterparty === 0) {
     return <span className="text-xs text-slate-400">—</span>;
   }
@@ -87,7 +89,9 @@ export function TransactionTableRow({
           />
         </td>
       ) : null}
-      <td className="px-3 py-2 whitespace-nowrap">{tx.bookedAt.toISOString().slice(0, 10)}</td>
+      <td className="px-3 py-2 whitespace-nowrap">
+        {tx.bookedAt.toISOString().slice(0, 10)}
+      </td>
       <td className="max-w-xs px-3 py-2">
         {tx.isOwnAccountTransfer ? (
           <span className="mb-1 inline-block rounded-lg bg-brand-100 px-2 py-0.5 text-xs text-brand-900">

@@ -36,7 +36,9 @@ export interface ParsedDashboardParams {
   month?: number;
 }
 
-export function parseDashboardParams(params: DashboardSearchParams): ParsedDashboardParams {
+export function parseDashboardParams(
+  params: DashboardSearchParams,
+): ParsedDashboardParams {
   const context = (params.context ?? "razem") as ContextFilter;
   const period = params.period ?? "month";
   return {
@@ -53,7 +55,10 @@ export function buildDashboardHref(options: {
   year?: number;
   month?: number;
 }): string {
-  const search = new URLSearchParams({ context: options.context, period: options.period });
+  const search = new URLSearchParams({
+    context: options.context,
+    period: options.period,
+  });
   if (options.year !== undefined) {
     search.set("year", String(options.year));
   }

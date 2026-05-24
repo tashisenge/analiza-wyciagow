@@ -34,7 +34,9 @@ export function TransactionDateFilters(): React.JSX.Element {
         <input
           type="date"
           value={dateFrom}
-          onChange={(event) => { setDateFrom(event.target.value); }}
+          onChange={(event) => {
+            setDateFrom(event.target.value);
+          }}
           className="input-field ml-1 text-xs"
         />
       </label>
@@ -43,7 +45,9 @@ export function TransactionDateFilters(): React.JSX.Element {
         <input
           type="date"
           value={dateTo}
-          onChange={(event) => { setDateTo(event.target.value); }}
+          onChange={(event) => {
+            setDateTo(event.target.value);
+          }}
           className="input-field ml-1 text-xs"
         />
       </label>

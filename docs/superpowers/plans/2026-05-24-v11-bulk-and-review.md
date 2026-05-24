@@ -16,38 +16,39 @@
 
 ## Mapa plików (ten plan)
 
-| Plik | Odpowiedzialność |
-| ---- | ---------------- |
-| `src/lib/transactions/bulk-category-types.ts` | Typy filtrów i wyników masowej aktualizacji |
-| `src/lib/transactions/bulk-category-filter.ts` | Budowa `Prisma.TransactionWhereInput` z filtrów + workspace |
-| `src/lib/transactions/apply-bulk-category.ts` | Orkiestracja updateMany + pamięć kontrahenta (max 500) |
-| `src/lib/transactions/page-filters.ts` | Rozszerzenie o `dateFrom`, `dateTo`, `mbankCategory` |
-| `src/server/actions/bulk-category.ts` | `previewBulkCategoryUpdate`, `bulkUpdateCategory` |
-| `src/components/transactions/BulkCategoryPanel.tsx` | Formularz filtrów, podgląd N, submit (client) |
-| `src/components/transactions/TransactionDateFilters.tsx` | Pola dat od–do w URL |
-| `src/app/(app)/transactions/page.tsx` | Podpięcie panelu masowego |
-| `src/lib/review/needs-mbank-review.ts` | Czy transakcja kwalifikuje się do kolejki |
-| `src/lib/review/build-review-queue-where.ts` | Filtr Prisma dla kolejki review |
-| `src/lib/review/load-review-queue.ts` | Ładowanie strony review (paginacja) |
-| `src/lib/ai/prompts/mbank-verify.ts` | System prompt weryfikacji mBank |
-| `src/lib/ai/verify-mbank-assignments.ts` | Parsowanie JSON sugestii AI |
-| `src/lib/ai/run-mbank-verify-batch.ts` | Batch do 50 tx → sugestie |
-| `src/server/actions/review.ts` | `loadReviewCount`, `aiVerifyReviewBatch`, `applyReviewDecision` |
-| `src/components/review/ReviewQueueTable.tsx` | Tabela z akcjami Zaakceptuj mBank / app / inna / Pomiń |
-| `src/components/review/ReviewAiBatchButton.tsx` | Przycisk „Zweryfikuj 50 z AI” (client) |
-| `src/app/(app)/review/page.tsx` | Strona kolejki weryfikacji |
-| `src/components/AppNavLinks.tsx` | Link „Weryfikacja” |
-| `src/app/(app)/dashboard/page.tsx` | Baner link do `/review` gdy count > 0 |
-| `tests/lib/bulk-category-filter.test.ts` | Unit filtrów |
-| `tests/lib/needs-mbank-review.test.ts` | Unit logiki kolejki |
-| `tests/lib/verify-mbank-assignments.test.ts` | Unit parse JSON AI |
-| `tests/e2e/review-smoke.spec.ts` | Smoke: strona review 200 |
+| Plik                                                     | Odpowiedzialność                                                |
+| -------------------------------------------------------- | --------------------------------------------------------------- |
+| `src/lib/transactions/bulk-category-types.ts`            | Typy filtrów i wyników masowej aktualizacji                     |
+| `src/lib/transactions/bulk-category-filter.ts`           | Budowa `Prisma.TransactionWhereInput` z filtrów + workspace     |
+| `src/lib/transactions/apply-bulk-category.ts`            | Orkiestracja updateMany + pamięć kontrahenta (max 500)          |
+| `src/lib/transactions/page-filters.ts`                   | Rozszerzenie o `dateFrom`, `dateTo`, `mbankCategory`            |
+| `src/server/actions/bulk-category.ts`                    | `previewBulkCategoryUpdate`, `bulkUpdateCategory`               |
+| `src/components/transactions/BulkCategoryPanel.tsx`      | Formularz filtrów, podgląd N, submit (client)                   |
+| `src/components/transactions/TransactionDateFilters.tsx` | Pola dat od–do w URL                                            |
+| `src/app/(app)/transactions/page.tsx`                    | Podpięcie panelu masowego                                       |
+| `src/lib/review/needs-mbank-review.ts`                   | Czy transakcja kwalifikuje się do kolejki                       |
+| `src/lib/review/build-review-queue-where.ts`             | Filtr Prisma dla kolejki review                                 |
+| `src/lib/review/load-review-queue.ts`                    | Ładowanie strony review (paginacja)                             |
+| `src/lib/ai/prompts/mbank-verify.ts`                     | System prompt weryfikacji mBank                                 |
+| `src/lib/ai/verify-mbank-assignments.ts`                 | Parsowanie JSON sugestii AI                                     |
+| `src/lib/ai/run-mbank-verify-batch.ts`                   | Batch do 50 tx → sugestie                                       |
+| `src/server/actions/review.ts`                           | `loadReviewCount`, `aiVerifyReviewBatch`, `applyReviewDecision` |
+| `src/components/review/ReviewQueueTable.tsx`             | Tabela z akcjami Zaakceptuj mBank / app / inna / Pomiń          |
+| `src/components/review/ReviewAiBatchButton.tsx`          | Przycisk „Zweryfikuj 50 z AI” (client)                          |
+| `src/app/(app)/review/page.tsx`                          | Strona kolejki weryfikacji                                      |
+| `src/components/AppNavLinks.tsx`                         | Link „Weryfikacja”                                              |
+| `src/app/(app)/dashboard/page.tsx`                       | Baner link do `/review` gdy count > 0                           |
+| `tests/lib/bulk-category-filter.test.ts`                 | Unit filtrów                                                    |
+| `tests/lib/needs-mbank-review.test.ts`                   | Unit logiki kolejki                                             |
+| `tests/lib/verify-mbank-assignments.test.ts`             | Unit parse JSON AI                                              |
+| `tests/e2e/review-smoke.spec.ts`                         | Smoke: strona review 200                                        |
 
 ---
 
 ### Task 1: Typy i stałe masowej kategoryzacji
 
 **Files:**
+
 - Create: `src/lib/transactions/bulk-category-types.ts`
 
 - [ ] **Step 1: Utwórz plik typów**
@@ -95,6 +96,7 @@ git commit -m "feat: typy filtrów masowej kategoryzacji"
 ### Task 2: Filtr Prisma dla masowej kategoryzacji
 
 **Files:**
+
 - Create: `src/lib/transactions/bulk-category-filter.ts`
 - Test: `tests/lib/bulk-category-filter.test.ts`
 
@@ -255,6 +257,7 @@ git commit -m "feat: filtr Prisma dla masowej kategoryzacji"
 ### Task 3: Orkiestracja masowej aktualizacji (lib)
 
 **Files:**
+
 - Create: `src/lib/transactions/apply-bulk-category.ts`
 - Test: `tests/lib/apply-bulk-category.test.ts`
 
@@ -335,7 +338,10 @@ Expected: FAIL
 ```typescript
 import type { PrismaClient } from "@prisma/client";
 
-import { BULK_CATEGORY_MAX, type BulkCategoryApplyResult } from "@/lib/transactions/bulk-category-types";
+import {
+  BULK_CATEGORY_MAX,
+  type BulkCategoryApplyResult,
+} from "@/lib/transactions/bulk-category-types";
 
 export interface ApplyBulkCategoryInput {
   prisma: PrismaClient;
@@ -417,6 +423,7 @@ git commit -m "feat: orkiestracja masowej aktualizacji kategorii"
 ### Task 4: Server actions — preview i bulk update
 
 **Files:**
+
 - Create: `src/server/actions/bulk-category.ts`
 
 - [ ] **Step 1: Implementacja actions**
@@ -456,8 +463,14 @@ const filtersSchema = z.object({
   counterpartyContains: z.string().optional(),
   mbankCategory: z.string().optional(),
   uncategorizedOnly: z.boolean().optional(),
-  dateFrom: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
-  dateTo: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+  dateFrom: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .optional(),
+  dateTo: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .optional(),
   context: z.enum(["firma", "dom", "razem"]).optional(),
 });
 
@@ -628,6 +641,7 @@ git commit -m "feat: server actions podglądu i masowej kategoryzacji"
 ### Task 5: Rozszerzenie filtrów strony transakcji (daty + mBank)
 
 **Files:**
+
 - Modify: `src/lib/transactions/page-filters.ts`
 - Modify: `src/lib/transactions/load-transactions-page.ts`
 - Test: `tests/lib/page-filters.test.ts`
@@ -637,14 +651,14 @@ git commit -m "feat: server actions podglądu i masowej kategoryzacji"
 W `tests/lib/page-filters.test.ts` dopisz:
 
 ```typescript
-  it("builds return URL with date range", () => {
-    const url = buildTransactionsReturnTo({
-      dateFrom: "2026-01-01",
-      dateTo: "2026-01-31",
-    });
-    expect(url).toContain("dateFrom=2026-01-01");
-    expect(url).toContain("dateTo=2026-01-31");
+it("builds return URL with date range", () => {
+  const url = buildTransactionsReturnTo({
+    dateFrom: "2026-01-01",
+    dateTo: "2026-01-31",
   });
+  expect(url).toContain("dateFrom=2026-01-01");
+  expect(url).toContain("dateTo=2026-01-31");
+});
 ```
 
 - [ ] **Step 2: Uruchom test — FAIL**
@@ -669,15 +683,15 @@ export interface TransactionSearchParams {
 }
 
 // w buildTransactionsReturnTo dodaj:
-  if (params.mbankCategory) {
-    search.set("mbankCategory", params.mbankCategory);
-  }
-  if (params.dateFrom) {
-    search.set("dateFrom", params.dateFrom);
-  }
-  if (params.dateTo) {
-    search.set("dateTo", params.dateTo);
-  }
+if (params.mbankCategory) {
+  search.set("mbankCategory", params.mbankCategory);
+}
+if (params.dateFrom) {
+  search.set("dateFrom", params.dateFrom);
+}
+if (params.dateTo) {
+  search.set("dateTo", params.dateTo);
+}
 ```
 
 - [ ] **Step 4: W `load-transactions-page.ts` w `fetchTransactionsBundle` dodaj do where:**
@@ -722,6 +736,7 @@ git commit -m "feat: filtry dat i kategorii mBank na liście transakcji"
 ### Task 6: UI — panel masowej kategoryzacji
 
 **Files:**
+
 - Create: `src/components/transactions/BulkCategoryPanel.tsx`
 - Create: `src/components/transactions/TransactionDateFilters.tsx`
 - Modify: `src/app/(app)/transactions/page.tsx`
@@ -891,8 +906,8 @@ export function BulkCategoryPanel({
       <div className="flex items-center gap-2">
         <h2 className="text-sm font-semibold text-slate-800">Masowa kategoryzacja</h2>
         <InfoTip label="Masowa kategoryzacja">
-          Ustaw filtry, sprawdź liczbę transakcji, wybierz kategorię i zastosuj. Max 500 na
-          operację. Możesz też zaznaczyć wiersze w tabeli poniżej.
+          Ustaw filtry, sprawdź liczbę transakcji, wybierz kategorię i zastosuj. Max 500
+          na operację. Możesz też zaznaczyć wiersze w tabeli poniżej.
         </InfoTip>
       </div>
       <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
@@ -929,7 +944,12 @@ export function BulkCategoryPanel({
         </p>
       ) : null}
       <div className="flex flex-wrap items-center gap-2">
-        <button type="button" onClick={runPreview} disabled={pending} className="btn-secondary text-xs">
+        <button
+          type="button"
+          onClick={runPreview}
+          disabled={pending}
+          className="btn-secondary text-xs"
+        >
           Podgląd liczby
         </button>
         {previewCount !== null ? (
@@ -961,7 +981,12 @@ export function BulkCategoryPanel({
           />
           Zapamiętaj dla kontrahentów
         </label>
-        <button type="button" onClick={runBulkUpdate} disabled={pending} className="btn-primary text-xs">
+        <button
+          type="button"
+          onClick={runBulkUpdate}
+          disabled={pending}
+          className="btn-primary text-xs"
+        >
           Zastosuj kategorię
         </button>
       </div>
@@ -1029,14 +1054,14 @@ W `TransactionsTable.tsx` dodaj opcjonalną kolumnę checkbox (pierwsza kolumna)
 W `transactions/page.tsx` zbuduj `bulkFilters` z searchParams:
 
 ```typescript
-  const bulkFilters: BulkCategoryFilters = {
-    counterpartyContains: params.counterparty,
-    mbankCategory: params.mbankCategory,
-    uncategorizedOnly: params.uncategorized === "1",
-    dateFrom: params.dateFrom,
-    dateTo: params.dateTo,
-    context: context === "razem" ? "razem" : context,
-  };
+const bulkFilters: BulkCategoryFilters = {
+  counterpartyContains: params.counterparty,
+  mbankCategory: params.mbankCategory,
+  uncategorizedOnly: params.uncategorized === "1",
+  dateFrom: params.dateFrom,
+  dateTo: params.dateTo,
+  context: context === "razem" ? "razem" : context,
+};
 ```
 
 Zastąp bezpośrednie `<TransactionsTable />` komponentem `<TransactionsPageClient />`.
@@ -1058,6 +1083,7 @@ git commit -m "feat: panel masowej kategoryzacji na stronie transakcji"
 ### Task 7: Logika kolejki review — needsMbankReview
 
 **Files:**
+
 - Create: `src/lib/review/needs-mbank-review.ts`
 - Test: `tests/lib/needs-mbank-review.test.ts`
 
@@ -1173,6 +1199,7 @@ git commit -m "feat: reguła kwalifikacji transakcji do kolejki review mBank"
 ### Task 8: Ładowanie kolejki review
 
 **Files:**
+
 - Create: `src/lib/review/build-review-queue-where.ts`
 - Create: `src/lib/review/load-review-queue.ts`
 
@@ -1205,9 +1232,11 @@ export function buildReviewQueueWhere(workspaceId: string): Prisma.TransactionWh
   };
 }
 
-export function isReviewRow(
-  row: { mbankCategory: string; categoryId: string | null; categoryName: string | null },
-): boolean {
+export function isReviewRow(row: {
+  mbankCategory: string;
+  categoryId: string | null;
+  categoryName: string | null;
+}): boolean {
   const normalized = normalizeMbankCategoryName(row.mbankCategory);
   if (row.mbankCategory.toLowerCase().includes("bez kategorii")) {
     return true;
@@ -1226,7 +1255,10 @@ export function isReviewRow(
 
 ```typescript
 import { prisma } from "@/lib/db";
-import { buildReviewQueueWhere, isReviewRow } from "@/lib/review/build-review-queue-where";
+import {
+  buildReviewQueueWhere,
+  isReviewRow,
+} from "@/lib/review/build-review-queue-where";
 
 const REVIEW_PAGE_SIZE = 50;
 
@@ -1298,6 +1330,7 @@ git commit -m "feat: ładowanie kolejki weryfikacji mBank"
 ### Task 9: AI — weryfikacja przypisań mBank
 
 **Files:**
+
 - Create: `src/lib/ai/prompts/mbank-verify.ts`
 - Create: `src/lib/ai/verify-mbank-assignments.ts`
 - Create: `src/lib/ai/run-mbank-verify-batch.ts`
@@ -1332,7 +1365,14 @@ describe("parseMbankVerifyResponse", () => {
 
   it("skips unknown categories", () => {
     const raw = JSON.stringify({
-      suggestions: [{ id: "tx-1", recommendedCategory: "Nieistniejąca", reason: "x", prefer: "mbank" }],
+      suggestions: [
+        {
+          id: "tx-1",
+          recommendedCategory: "Nieistniejąca",
+          reason: "x",
+          prefer: "mbank",
+        },
+      ],
     });
     const result = parseMbankVerifyResponse(raw, new Set(["Transport"]));
     expect(result.size).toBe(0);
@@ -1469,7 +1509,9 @@ export async function runMbankVerifyBatch(options: {
   config: AiConfig;
   items: ReviewQueueItem[];
   categoryNames: string[];
-}): Promise<Map<string, import("@/lib/ai/verify-mbank-assignments").MbankVerifySuggestion>> {
+}): Promise<
+  Map<string, import("@/lib/ai/verify-mbank-assignments").MbankVerifySuggestion>
+> {
   const batch = options.items.slice(0, MBANK_VERIFY_BATCH_SIZE);
   return verifyMbankAssignmentsWithAi({
     config: options.config,
@@ -1503,6 +1545,7 @@ git commit -m "feat: AI weryfikacja rozbieżności kategorii mBank"
 ### Task 10: Server actions review
 
 **Files:**
+
 - Create: `src/server/actions/review.ts`
 
 - [ ] **Step 1: Implementacja**
@@ -1691,6 +1734,7 @@ git commit -m "feat: server actions kolejki weryfikacji mBank"
 ### Task 11: UI strony `/review`
 
 **Files:**
+
 - Create: `src/components/review/ReviewQueueTable.tsx`
 - Create: `src/components/review/ReviewAiBatchButton.tsx`
 - Create: `src/app/(app)/review/page.tsx`
@@ -1730,7 +1774,12 @@ export function ReviewAiBatchButton({
 
   return (
     <div className="space-y-1">
-      <button type="button" onClick={run} disabled={pending} className="btn-primary text-sm">
+      <button
+        type="button"
+        onClick={run}
+        disabled={pending}
+        className="btn-primary text-sm"
+      >
         {pending ? "Weryfikuję…" : "Zweryfikuj 50 z AI"}
       </button>
       {error ? <p className="alert-error text-sm">{error}</p> : null}
@@ -1742,6 +1791,7 @@ export function ReviewAiBatchButton({
 - [ ] **Step 2: Tabela review (client) z akcjami**
 
 `ReviewQueueTable.tsx` — kolumny: data, kontrahent, mBank, app, sugestia AI (reason), przyciski:
+
 - „Zaakceptuj mBank” → `applyReviewDecision({ decision: "mbank" })`
 - „Zaakceptuj app” → `applyReviewDecision({ decision: "app" })`
 - `<select>` + „Inna” → `applyReviewDecision({ decision: "custom", categoryId })`
@@ -1823,6 +1873,7 @@ git commit -m "feat: strona weryfikacji mBank z akcjami i AI batch"
 ### Task 12: Baner review na dashboardzie
 
 **Files:**
+
 - Modify: `src/app/(app)/dashboard/page.tsx`
 
 - [ ] **Step 1: Pobierz count i pokaż baner**
@@ -1839,14 +1890,16 @@ const reviewCount = await countReviewQueue(session.user.workspaceId);
 Pod banerem uncategorized dodaj:
 
 ```tsx
-      {reviewCount > 0 ? (
-        <p className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-900">
-          {reviewCount} transakcji do weryfikacji mBank —{" "}
-          <a href="/review" className="link-brand font-medium">
-            przejdź do kolejki
-          </a>
-        </p>
-      ) : null}
+{
+  reviewCount > 0 ? (
+    <p className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-900">
+      {reviewCount} transakcji do weryfikacji mBank —{" "}
+      <a href="/review" className="link-brand font-medium">
+        przejdź do kolejki
+      </a>
+    </p>
+  ) : null;
+}
 ```
 
 - [ ] **Step 2: Commit**
@@ -1861,6 +1914,7 @@ git commit -m "feat: baner kolejki weryfikacji mBank na dashboardzie"
 ### Task 13: Smoke E2E i pełna weryfikacja
 
 **Files:**
+
 - Create: `tests/e2e/review-smoke.spec.ts`
 
 - [ ] **Step 1: Smoke test**
@@ -1899,22 +1953,22 @@ git commit -m "test: smoke E2E strony weryfikacji mBank"
 
 **1. Spec coverage**
 
-| Wymaganie roadmap §1.2 (bulk) | Task |
-| ----------------------------- | ---- |
-| Filtr kontrahent / mBank / brak kategorii / daty / kontekst | Task 2, 5, 6 |
-| Podgląd N transakcji | Task 4 (`previewBulkCategoryUpdate`) |
-| Wybór kategorii + zapamiętaj kontrahenta | Task 3, 4, 6 |
-| Zaznaczone ID (checkboxy) | Task 6 |
-| `bulkUpdateCategory`, max 500, workspaceId | Task 2–4 |
-| Akceptacja: LIDL 40 tx w 2 kliknięcia | Task 6 (filtr kontrahent + podgląd + apply) |
+| Wymaganie roadmap §1.2 (bulk)                               | Task                                        |
+| ----------------------------------------------------------- | ------------------------------------------- |
+| Filtr kontrahent / mBank / brak kategorii / daty / kontekst | Task 2, 5, 6                                |
+| Podgląd N transakcji                                        | Task 4 (`previewBulkCategoryUpdate`)        |
+| Wybór kategorii + zapamiętaj kontrahenta                    | Task 3, 4, 6                                |
+| Zaznaczone ID (checkboxy)                                   | Task 6                                      |
+| `bulkUpdateCategory`, max 500, workspaceId                  | Task 2–4                                    |
+| Akceptacja: LIDL 40 tx w 2 kliknięcia                       | Task 6 (filtr kontrahent + podgląd + apply) |
 
-| Wymaganie roadmap §1.4 (review) | Task |
-| ------------------------------- | ---- |
-| Kolejka: bez kategorii mBank / mismatch / brak app | Task 7, 8 |
-| AI sugeruje, nie zmienia od razu | Task 9, 10, 11 |
-| Akcje: mBank / app / inna / pomiń | Task 10, 11 |
-| Batch 50 z AI | Task 9, 11 |
-| Pliki verify-mbank-assignments + review actions | Task 9, 10 |
+| Wymaganie roadmap §1.4 (review)                    | Task           |
+| -------------------------------------------------- | -------------- |
+| Kolejka: bez kategorii mBank / mismatch / brak app | Task 7, 8      |
+| AI sugeruje, nie zmienia od razu                   | Task 9, 10, 11 |
+| Akcje: mBank / app / inna / pomiń                  | Task 10, 11    |
+| Batch 50 z AI                                      | Task 9, 11     |
+| Pliki verify-mbank-assignments + review actions    | Task 9, 10     |
 
 **2. Placeholder scan:** Brak TBD / „implement later” / pustych kroków testowych.
 

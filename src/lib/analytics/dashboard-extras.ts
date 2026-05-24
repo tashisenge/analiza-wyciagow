@@ -33,11 +33,19 @@ const FALLBACK_COLORS = [
   "#99f6e4",
 ];
 
-export function sliceChartColor(slice: { categoryColor: string | null }, index: number): string {
-  return slice.categoryColor ?? FALLBACK_COLORS[index % FALLBACK_COLORS.length] ?? "#64748b";
+export function sliceChartColor(
+  slice: { categoryColor: string | null },
+  index: number,
+): string {
+  return (
+    slice.categoryColor ?? FALLBACK_COLORS[index % FALLBACK_COLORS.length] ?? "#64748b"
+  );
 }
 
-export function categorySliceKey(categoryId: string | null, categoryName: string): string {
+export function categorySliceKey(
+  categoryId: string | null,
+  categoryName: string,
+): string {
   return categoryId ?? `name:${categoryName}`;
 }
 

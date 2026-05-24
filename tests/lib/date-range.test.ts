@@ -22,7 +22,10 @@ describe("resolveDateRange", () => {
   });
 
   it("supports anchored month", () => {
-    const range = resolveDateRange("month", new Date("2026-05-15"), { year: 2026, month: 3 });
+    const range = resolveDateRange("month", new Date("2026-05-15"), {
+      year: 2026,
+      month: 3,
+    });
     expect(range.currentStart.getMonth()).toBe(2);
     expect(range.currentEnd.getMonth()).toBe(2);
     expect(range.label.toLowerCase()).toContain("marz");

@@ -1,7 +1,10 @@
 import { countAiCategorizationTargets } from "@/lib/ai/ai-target-transactions";
 import { categoryBreakdown } from "@/lib/analytics/category-breakdown";
 import { groupExpensesByCategory } from "@/lib/analytics/category-transactions";
-import type { DashboardData, DashboardOpportunity } from "@/lib/analytics/dashboard-types";
+import type {
+  DashboardData,
+  DashboardOpportunity,
+} from "@/lib/analytics/dashboard-types";
 import type { DateRangeResult } from "@/lib/analytics/date-range";
 import { fetchDashboardOpportunities } from "@/lib/analytics/fetch-dashboard-opportunities";
 import type { ContextFilter } from "@/lib/analytics/filters";

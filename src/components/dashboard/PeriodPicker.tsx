@@ -22,7 +22,10 @@ export function MonthPicker({
 
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <label htmlFor="dashboard-month" className="text-xs font-medium uppercase tracking-wide text-slate-500">
+      <label
+        htmlFor="dashboard-month"
+        className="text-xs font-medium uppercase tracking-wide text-slate-500"
+      >
         Miesiąc
       </label>
       <input
@@ -55,14 +58,21 @@ interface YearPickerProps {
   year: number;
 }
 
-export function YearPicker({ context, period, year }: YearPickerProps): React.JSX.Element {
+export function YearPicker({
+  context,
+  period,
+  year,
+}: YearPickerProps): React.JSX.Element {
   const router = useRouter();
   const nowYear = new Date().getFullYear();
   const years = Array.from({ length: 6 }, (_, index) => nowYear - index);
 
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <label htmlFor="dashboard-year" className="text-xs font-medium uppercase tracking-wide text-slate-500">
+      <label
+        htmlFor="dashboard-year"
+        className="text-xs font-medium uppercase tracking-wide text-slate-500"
+      >
         Rok
       </label>
       <select

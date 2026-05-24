@@ -28,8 +28,8 @@ export function BulkCategoryPanel({
       <div className="flex items-center gap-2">
         <h2 className="text-sm font-semibold text-slate-800">Masowa kategoryzacja</h2>
         <InfoTip label="Masowa kategoryzacja">
-          Ustaw filtry, sprawdź liczbę transakcji, wybierz kategorię i zastosuj. Max 500 na
-          operację. Możesz też zaznaczyć wiersze w tabeli poniżej.
+          Ustaw filtry, sprawdź liczbę transakcji, wybierz kategorię i zastosuj. Max 500
+          na operację. Możesz też zaznaczyć wiersze w tabeli poniżej.
         </InfoTip>
       </div>
       <BulkCategoryFilterFields
