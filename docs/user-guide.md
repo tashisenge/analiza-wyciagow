@@ -64,7 +64,10 @@ Na stronie **Kategorie**:
 2. Na **Opcjonalne** (`/opcjonalne`) ustaw **limit miesięczny** dla kontekstu firma/dom/razem.
 3. Co miesiąc: dashboard → widget „Wydatki opcjonalne” → szczegóły → jedna wspólna decyzja, co ograniczyć.
 4. Aplikacja **nie rozdziela** wydatków na osoby — to jeden wspólny widok. Jeśli chcecie oznaczać „kto”, użyjcie **tagów** (np. `Adam`, `Żona`) na transakcjach.
-5. Filtr **Tylko opcjonalne** na liście transakcji: `/transactions?discretionary=1`.
+5. Filtr **Tylko opcjonalne** na liście transakcji: przycisk „Opcjonalne” lub `/transactions?discretionary=1`.
+6. **Kto wydał:** na transakcjach przypisz tag **Adam** lub **Żona** (tworzone automatycznie) — filtry na liście transakcji.
+7. **Analiza AI** uwzględnia teraz sekcję o wydatkach opcjonalnych i limicie (jeśli ustawiony).
+8. Przy **przekroczeniu limitu** zobaczycie żółty alert na dashboardzie i na `/opcjonalne`.
 
 Kolejność przypisania kategorii przy imporcie:
 

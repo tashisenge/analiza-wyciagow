@@ -1,3 +1,4 @@
+import { buildDiscretionaryInsightAddon } from "@/lib/ai/build-discretionary-insight-addon";
 import { filterTransactionsForInsight } from "@/lib/ai/filter-insight-transactions";
 import { buildMonthlySummary } from "@/lib/ai/monthly-summary";
 import type { InsightPromptContext } from "@/lib/ai/prompts/insights";
@@ -50,9 +51,10 @@ export async function buildInsightPayload(
   const periodLabel = `${monthStart.toLocaleDateString("pl-PL", { month: "long", year: "numeric" })}${contextLabel}`;
 
   const summary = buildMonthlySummary(filtered.included, periodLabel);
+  const discretionary = await buildDiscretionaryInsightAddon(workspaceId, context);
 
   return {
-    summary,
+    summary: { ...summary, discretionary: discretionary ?? undefined },
     periodLabel,
     transfersFiltered: filtered.transfersFiltered,
     excludedTxCount: filtered.excludedByCategory,

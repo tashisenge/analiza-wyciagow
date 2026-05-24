@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { DiscretionaryLimitAlert } from "@/components/discretionary/DiscretionaryLimitAlert";
 import { AmountValue } from "@/components/privacy/AmountValue";
 import { buildPeriodHref } from "@/lib/analytics/dashboard-params";
 import type { DiscretionaryPeriodSummary } from "@/lib/discretionary/types";
@@ -39,6 +40,11 @@ export function DiscretionaryWidget({
           Szczegóły →
         </Link>
       </div>
+      <DiscretionaryLimitAlert
+        totalPln={summary.totalPln}
+        monthlyLimit={monthlyLimit}
+        limitUsedPercent={limitUsedPercent}
+      />
       <p className="mt-2 text-sm text-orange-900">
         <AmountValue className="font-semibold">{summary.totalPln.toFixed(2)} PLN</AmountValue>
         {summary.shareOfExpensesPercent !== null ? (
