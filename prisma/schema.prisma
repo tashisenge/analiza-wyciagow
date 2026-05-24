@@ -63,6 +63,7 @@ model Workspace {
   opportunities               OptimizationOpportunity[]
   opportunityResearch         OpportunityResearch[]
   categoryBudgets             CategoryBudget[]
+  discretionaryBudgets        DiscretionaryBudget[]
   aiInsights                  AiInsight[]
   tags                        Tag[]
   subscriptionMarkers         SubscriptionMarker[]
@@ -118,6 +119,7 @@ model Category {
   color                    String                   @default("#6366f1")
   isDefault                Boolean                  @default(false)
   excludeFromOptimization  Boolean                  @default(false)
+  isDiscretionary          Boolean                  @default(false)
   workspace        Workspace                @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   transactions     Transaction[]
   rules            CategoryRule[]
@@ -236,6 +238,16 @@ model CategoryBudget {
   category       Category       @relation(fields: [categoryId], references: [id], onDelete: Cascade)
 
   @@unique([workspaceId, categoryId, accountContext])
+}
+
+model DiscretionaryBudget {
+  id             String         @id @default(cuid())
+  workspaceId    String
+  accountContext AccountContext @default(dom)
+  monthlyLimit   Decimal        @db.Decimal(12, 2)
+  workspace      Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, accountContext])
 }
 
 model Tag {
