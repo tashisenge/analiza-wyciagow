@@ -14,6 +14,44 @@ export interface TransactionSearchParams {
   msg?: string;
 }
 
+export type TransactionRawSearchParams = {
+  [K in keyof TransactionSearchParams]?: string | string[];
+} & {
+  error?: string | string[];
+};
+
+function singleSearchParam(value: string | string[] | undefined): string | undefined {
+  if (value == null) {
+    return undefined;
+  }
+  return Array.isArray(value) ? value[0] : value;
+}
+
+function trimOrUndefined(value: string | undefined): string | undefined {
+  const trimmed = value?.trim();
+  return trimmed ? trimmed : undefined;
+}
+
+/** Normalizuje Next.js searchParams do TransactionSearchParams. */
+export function parseTransactionSearchParams(
+  raw: TransactionRawSearchParams,
+): TransactionSearchParams & { error?: string } {
+  return {
+    uncategorized: singleSearchParam(raw.uncategorized),
+    discretionary: singleSearchParam(raw.discretionary),
+    context: trimOrUndefined(singleSearchParam(raw.context)),
+    categoryId: trimOrUndefined(singleSearchParam(raw.categoryId)),
+    categoryName: trimOrUndefined(singleSearchParam(raw.categoryName)),
+    counterparty: trimOrUndefined(singleSearchParam(raw.counterparty)),
+    tagId: trimOrUndefined(singleSearchParam(raw.tagId)),
+    mbankCategory: trimOrUndefined(singleSearchParam(raw.mbankCategory)),
+    dateFrom: trimOrUndefined(singleSearchParam(raw.dateFrom)),
+    dateTo: trimOrUndefined(singleSearchParam(raw.dateTo)),
+    msg: trimOrUndefined(singleSearchParam(raw.msg)),
+    error: trimOrUndefined(singleSearchParam(raw.error)),
+  };
+}
+
 export function transactionActiveFilter(params: TransactionSearchParams): string {
   if (params.tagId) {
     return "tag";
@@ -50,11 +88,16 @@ export function prismaCategoryFilter(
   | { categoryId: string }
   | { category: { name: string; workspaceId: string } }
   | Record<string, never> {
-  if (params.categoryId != null) {
-    return { categoryId: params.categoryId };
+  if (params.uncategorized === "1") {
+    return {};
   }
-  if (params.categoryName != null) {
-    return { category: { name: params.categoryName, workspaceId } };
+  const categoryId = params.categoryId?.trim();
+  if (categoryId) {
+    return { categoryId };
+  }
+  const categoryName = params.categoryName?.trim();
+  if (categoryName) {
+    return { category: { name: categoryName, workspaceId } };
   }
   return {};
 }

@@ -9,12 +9,9 @@ import {
   type TransactionTableRow,
 } from "@/lib/transactions/build-transaction-table-rows";
 import { loadPairedOwnAccountTransferKeys } from "@/lib/transactions/load-workspace-transfer-pairs";
-import {
-  prismaCategoryFilter,
-  type TransactionSearchParams,
-} from "@/lib/transactions/page-filters";
+import { buildTransactionsWhere } from "@/lib/transactions/build-transactions-where";
+import type { TransactionSearchParams } from "@/lib/transactions/page-filters";
 import { buildSimilarCountsByTransactionId } from "@/lib/transactions/similar-transaction-count";
-import { transactionListExtraWhere } from "@/lib/transactions/transaction-list-extra-where";
 
 const transactionPageInclude = {
   category: true,
@@ -49,31 +46,6 @@ function mapTransactionRows(
       isSubscription: subscriptionSet.has(row.counterparty),
     };
   });
-}
-
-function buildTransactionsWhere(
-  workspaceId: string,
-  accountIds: string[],
-  params: TransactionSearchParams,
-): Prisma.TransactionWhereInput {
-  const categoryFilter = prismaCategoryFilter(params, workspaceId);
-  return {
-    workspaceId,
-    accountId: { in: accountIds },
-    ...(params.uncategorized === "1" ? { categoryId: null } : {}),
-    ...(params.discretionary === "1" ? { category: { isDiscretionary: true } } : {}),
-    ...(params.counterparty
-      ? {
-          counterparty: {
-            contains: params.counterparty,
-            mode: "insensitive" as const,
-          },
-        }
-      : {}),
-    ...transactionListExtraWhere(params),
-    ...(params.tagId ? { tags: { some: { tagId: params.tagId } } } : {}),
-    ...categoryFilter,
-  };
 }
 
 async function fetchTransactionsBundle(

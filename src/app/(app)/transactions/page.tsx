@@ -12,8 +12,9 @@ import type { BulkCategoryFilters } from "@/lib/transactions/bulk-category-types
 import { loadTransactionsPageData } from "@/lib/transactions/load-transactions-page";
 import {
   buildTransactionsReturnTo,
+  parseTransactionSearchParams,
   transactionActiveFilter,
-  type TransactionSearchParams,
+  type TransactionRawSearchParams,
 } from "@/lib/transactions/page-filters";
 import { updateTransactionCategory } from "@/server/actions/transactions";
 
@@ -56,13 +57,13 @@ async function changeCategoryAction(formData: FormData): Promise<void> {
 export default async function TransactionsPage({
   searchParams,
 }: {
-  searchParams: Promise<TransactionSearchParams & { error?: string }>;
+  searchParams: Promise<TransactionRawSearchParams>;
 }): Promise<React.JSX.Element> {
   const session = await auth();
   if (!session?.user) {
     redirect("/login");
   }
-  const params = await searchParams;
+  const params = parseTransactionSearchParams(await searchParams);
   const context = (params.context ?? "razem") as ContextFilter;
   await ensurePersonTags(session.user.workspaceId);
   const pageData = await loadTransactionsPageData(

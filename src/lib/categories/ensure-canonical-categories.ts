@@ -60,7 +60,7 @@ export async function deleteEmptyOrphanCategories(workspaceId: string): Promise<
   let deleted = 0;
 
   for (const category of categories) {
-    if (isCanonicalCategoryName(category.name)) {
+    if (isCanonicalCategoryName(category.name) || !category.isDefault) {
       continue;
     }
     const count = await prisma.transaction.count({ where: { categoryId: category.id } });

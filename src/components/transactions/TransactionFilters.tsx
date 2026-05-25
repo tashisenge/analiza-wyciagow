@@ -6,8 +6,12 @@ import { useTransition } from "react";
 import { FilterChip } from "@/components/ui/FilterChip";
 import { InfoTip } from "@/components/ui/InfoTip";
 import { PERSON_TAG_NAMES } from "@/lib/tags/ensure-person-tags";
-import { buildTransactionsHref } from "@/lib/transactions/build-transactions-url";
 import type { TransactionSearchParams } from "@/lib/transactions/page-filters";
+import {
+  buildTransactionCategoryFilterHref,
+  buildTransactionQuickFilterHref,
+  buildTransactionTagFilterHref,
+} from "@/lib/transactions/transaction-filter-hrefs";
 
 interface CategoryOption {
   id: string;
@@ -42,53 +46,6 @@ const QUICK_FILTERS = [
   { key: "dom", label: "Dom", tip: "Konto domowe." },
 ] as const;
 
-function quickFilterHref(
-  key: (typeof QUICK_FILTERS)[number]["key"],
-  params: TransactionSearchParams,
-): string {
-  switch (key) {
-    case "all":
-      return "/transactions";
-    case "uncategorized":
-      return buildTransactionsHref(params, {
-        uncategorized: "1",
-        categoryId: undefined,
-        categoryName: undefined,
-        discretionary: undefined,
-        tagId: undefined,
-      });
-    case "discretionary":
-      return buildTransactionsHref(params, {
-        discretionary: "1",
-        uncategorized: undefined,
-        categoryId: undefined,
-        categoryName: undefined,
-        tagId: undefined,
-      });
-    case "firma":
-      return buildTransactionsHref(params, {
-        context: "firma",
-        uncategorized: undefined,
-        discretionary: undefined,
-      });
-    case "dom":
-      return buildTransactionsHref(params, {
-        context: "dom",
-        uncategorized: undefined,
-        discretionary: undefined,
-      });
-  }
-}
-
-function tagFilterHref(params: TransactionSearchParams, tagId: string): string {
-  return buildTransactionsHref(params, {
-    tagId,
-    uncategorized: undefined,
-    categoryId: undefined,
-    categoryName: undefined,
-  });
-}
-
 export function TransactionFilters({
   active,
   params,
@@ -104,22 +61,7 @@ export function TransactionFilters({
 
   function onCategoryChange(categoryId: string): void {
     startTransition(() => {
-      if (!categoryId) {
-        router.push(
-          buildTransactionsHref(params, {
-            categoryId: undefined,
-            categoryName: undefined,
-          }),
-        );
-        return;
-      }
-      router.push(
-        buildTransactionsHref(params, {
-          categoryId,
-          categoryName: undefined,
-          uncategorized: undefined,
-        }),
-      );
+      router.push(buildTransactionCategoryFilterHref(params, categoryId));
     });
   }
 
@@ -135,7 +77,7 @@ export function TransactionFilters({
       {QUICK_FILTERS.map((filter) => (
         <FilterChip
           key={filter.key}
-          href={quickFilterHref(filter.key, params)}
+          href={buildTransactionQuickFilterHref(filter.key, params)}
           active={active === filter.key}
           title={filter.tip}
         >
@@ -145,7 +87,7 @@ export function TransactionFilters({
       {personTags.map((tag) => (
         <FilterChip
           key={tag.id}
-          href={tagFilterHref(params, tag.id)}
+          href={buildTransactionTagFilterHref(params, tag.id)}
           active={params.tagId === tag.id}
           title={`Transakcje oznaczone tagiem ${tag.name}`}
         >

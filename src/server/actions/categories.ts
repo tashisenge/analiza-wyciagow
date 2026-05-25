@@ -48,6 +48,7 @@ export async function createCategory(formData: FormData): Promise<CategoryAction
       },
     });
     revalidatePath("/categories");
+    revalidatePath("/transactions");
     return { ok: true };
   } catch (error) {
     return {
