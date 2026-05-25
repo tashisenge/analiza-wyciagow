@@ -8,8 +8,8 @@ import {
   buildTransactionTableRows,
   type TransactionTableRow,
 } from "@/lib/transactions/build-transaction-table-rows";
-import { loadPairedOwnAccountTransferKeys } from "@/lib/transactions/load-workspace-transfer-pairs";
 import { buildTransactionsWhere } from "@/lib/transactions/build-transactions-where";
+import { loadPairedOwnAccountTransferKeys } from "@/lib/transactions/load-workspace-transfer-pairs";
 import type { TransactionSearchParams } from "@/lib/transactions/page-filters";
 import { buildSimilarCountsByTransactionId } from "@/lib/transactions/similar-transaction-count";
 

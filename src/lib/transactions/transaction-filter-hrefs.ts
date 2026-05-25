@@ -8,48 +8,34 @@ export type TransactionQuickFilterKey =
   | "firma"
   | "dom";
 
+type FilterPatch = Partial<Record<keyof TransactionSearchParams, string | undefined>>;
+
+const CLEAR_LIST_FILTERS: FilterPatch = {
+  categoryId: undefined,
+  categoryName: undefined,
+  discretionary: undefined,
+  tagId: undefined,
+  uncategorized: undefined,
+};
+
+const QUICK_FILTER_PATCHES: Record<
+  Exclude<TransactionQuickFilterKey, "all">,
+  FilterPatch
+> = {
+  uncategorized: { ...CLEAR_LIST_FILTERS, uncategorized: "1" },
+  discretionary: { ...CLEAR_LIST_FILTERS, discretionary: "1" },
+  firma: { ...CLEAR_LIST_FILTERS, context: "firma" },
+  dom: { ...CLEAR_LIST_FILTERS, context: "dom" },
+};
+
 export function buildTransactionQuickFilterHref(
   key: TransactionQuickFilterKey,
   params: TransactionSearchParams,
 ): string {
-  switch (key) {
-    case "all":
-      return "/transactions";
-    case "uncategorized":
-      return buildTransactionsHref(params, {
-        uncategorized: "1",
-        categoryId: undefined,
-        categoryName: undefined,
-        discretionary: undefined,
-        tagId: undefined,
-      });
-    case "discretionary":
-      return buildTransactionsHref(params, {
-        discretionary: "1",
-        uncategorized: undefined,
-        categoryId: undefined,
-        categoryName: undefined,
-        tagId: undefined,
-      });
-    case "firma":
-      return buildTransactionsHref(params, {
-        context: "firma",
-        uncategorized: undefined,
-        discretionary: undefined,
-        categoryId: undefined,
-        categoryName: undefined,
-        tagId: undefined,
-      });
-    case "dom":
-      return buildTransactionsHref(params, {
-        context: "dom",
-        uncategorized: undefined,
-        discretionary: undefined,
-        categoryId: undefined,
-        categoryName: undefined,
-        tagId: undefined,
-      });
+  if (key === "all") {
+    return "/transactions";
   }
+  return buildTransactionsHref(params, QUICK_FILTER_PATCHES[key]);
 }
 
 export function buildTransactionTagFilterHref(

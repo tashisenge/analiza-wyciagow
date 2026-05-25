@@ -29,7 +29,10 @@ function singleSearchParam(value: string | string[] | undefined): string | undef
 
 function trimOrUndefined(value: string | undefined): string | undefined {
   const trimmed = value?.trim();
-  return trimmed ? trimmed : undefined;
+  if (!trimmed) {
+    return undefined;
+  }
+  return trimmed;
 }
 
 /** Normalizuje Next.js searchParams do TransactionSearchParams. */
