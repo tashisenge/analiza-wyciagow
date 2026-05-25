@@ -24,6 +24,8 @@ export function appendTransactionSearchParams(
   setIfPresent(params, "mbankCategory", search.mbankCategory);
   setIfPresent(params, "dateFrom", search.dateFrom);
   setIfPresent(params, "dateTo", search.dateTo);
+  setIfPresent(params, "sort", search.sort);
+  setIfPresent(params, "sortDir", search.sortDir);
 }
 
 export function buildTransactionsHref(

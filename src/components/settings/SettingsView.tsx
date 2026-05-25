@@ -3,6 +3,7 @@ import { AiAnalysisSettings } from "@/components/settings/AiAnalysisSettings";
 import { AiProviderSettings } from "@/components/settings/AiProviderSettings";
 import { CopyInviteButton } from "@/components/settings/CopyInviteButton";
 import { SettingsDataSection } from "@/components/settings/SettingsDataSection";
+import { ErrorPopupToggle } from "@/components/ui/ErrorPopupToggle";
 import { InfoTip } from "@/components/ui/InfoTip";
 import { PageHeader } from "@/components/ui/PageHeader";
 import type { AiProviderInfo } from "@/lib/ai/provider-status";
@@ -94,6 +95,11 @@ export function SettingsView({
       <section className="section-card">
         <h2 className="section-title mb-3">Prywatność przy pokazywaniu ekranu</h2>
         <PrivacyAmountsToggle />
+      </section>
+
+      <section className="section-card">
+        <h2 className="section-title mb-3">Komunikaty na stronie transakcji</h2>
+        <ErrorPopupToggle />
       </section>
 
       <section className="section-card">

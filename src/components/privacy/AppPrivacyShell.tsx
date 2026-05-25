@@ -2,6 +2,7 @@
 
 import { PrivacyAmountsProvider } from "@/components/privacy/PrivacyAmountsProvider";
 import { PrivacyPresentationBanner } from "@/components/privacy/PrivacyPresentationBanner";
+import { ErrorPopupProvider } from "@/components/ui/ErrorPopupProvider";
 
 export function AppPrivacyShell({
   children,
@@ -10,8 +11,10 @@ export function AppPrivacyShell({
 }): React.JSX.Element {
   return (
     <PrivacyAmountsProvider>
-      <PrivacyPresentationBanner />
-      {children}
+      <ErrorPopupProvider>
+        <PrivacyPresentationBanner />
+        {children}
+      </ErrorPopupProvider>
     </PrivacyAmountsProvider>
   );
 }

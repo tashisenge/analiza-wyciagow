@@ -42,4 +42,12 @@ describe("buildTransactionsWhere", () => {
     const where = buildTransactionsWhere("ws-1", ["acc-a"], { tagId: "tag-1" });
     expect(where.tags).toEqual({ some: { tagId: "tag-1" } });
   });
+
+  it("filters counterparty case-insensitively", () => {
+    const where = buildTransactionsWhere("ws-1", ["acc-a"], { counterparty: "lidl" });
+    expect(where.counterparty).toEqual({
+      contains: "lidl",
+      mode: "insensitive",
+    });
+  });
 });

@@ -1,7 +1,9 @@
+import { TransactionsTableHead } from "@/components/transactions/TransactionsTableHead";
 import {
   TransactionTableRow,
   type TransactionTableRowData,
 } from "@/components/transactions/TransactionTableRow";
+import type { TransactionSearchParams } from "@/lib/transactions/page-filters";
 
 interface TagOption {
   id: string;
@@ -14,6 +16,7 @@ interface TransactionsTableProps {
   categories: { id: string; name: string }[];
   allTags: TagOption[];
   returnTo: string;
+  listParams: TransactionSearchParams;
   changeCategoryAction: (formData: FormData) => Promise<void>;
   selectedIds?: string[];
   onToggleSelect?: (id: string) => void;
@@ -24,6 +27,7 @@ export function TransactionsTable({
   categories,
   allTags,
   returnTo,
+  listParams,
   changeCategoryAction,
   selectedIds = [],
   onToggleSelect,
@@ -34,22 +38,7 @@ export function TransactionsTable({
   return (
     <div className="section-card overflow-x-auto p-0">
       <table className="min-w-full text-left text-sm">
-        <thead className="border-b border-calm-200 bg-calm-50">
-          <tr>
-            {showSelection ? (
-              <th className="px-3 py-2" aria-label="Zaznacz">
-                ✓
-              </th>
-            ) : null}
-            <th className="px-3 py-2">Data</th>
-            <th className="px-3 py-2">Operacja</th>
-            <th className="px-3 py-2">Kwota</th>
-            <th className="px-3 py-2">Konto</th>
-            <th className="px-3 py-2">Podobne</th>
-            <th className="px-3 py-2">Kategoria</th>
-            <th className="px-3 py-2">Tagi</th>
-          </tr>
-        </thead>
+        <TransactionsTableHead showSelection={showSelection} params={listParams} />
         <tbody>
           {transactions.length === 0 ? (
             <tr>

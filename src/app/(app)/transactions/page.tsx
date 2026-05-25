@@ -1,12 +1,14 @@
 import { redirect } from "next/navigation";
 
 import { TransactionFilters } from "@/components/transactions/TransactionFilters";
+import { TransactionFlashMessage } from "@/components/transactions/TransactionFlashMessage";
 import { TransactionsHelpPanel } from "@/components/transactions/TransactionsHelpPanel";
 import { TransactionsPageClient } from "@/components/transactions/TransactionsPageClient";
 import { PageHeader } from "@/components/ui/PageHeader";
 import type { ContextFilter } from "@/lib/analytics/filters";
 import { auth } from "@/lib/auth";
 import { ensurePersonTags } from "@/lib/tags/ensure-person-tags";
+import { buildCategoryChangeRedirectUrl } from "@/lib/transactions/build-category-change-redirect";
 import { buildTransactionsHref } from "@/lib/transactions/build-transactions-url";
 import type { BulkCategoryFilters } from "@/lib/transactions/bulk-category-types";
 import { loadTransactionsPageData } from "@/lib/transactions/load-transactions-page";
@@ -37,21 +39,7 @@ async function changeCategoryAction(formData: FormData): Promise<void> {
     matchSameAmount,
     createRule,
   });
-  if (!result.ok) {
-    const separator = returnTo.includes("?") ? "&" : "?";
-    redirect(
-      `${returnTo}${separator}error=${encodeURIComponent(result.error ?? "Błąd")}`,
-    );
-  }
-  if (result.updatedCount && result.updatedCount > 1) {
-    const separator = returnTo.includes("?") ? "&" : "?";
-    const cleared = !categoryId.trim();
-    const message = cleared
-      ? `Usunięto kategorię z ${String(result.updatedCount)} transakcji.`
-      : `Zaktualizowano ${String(result.updatedCount)} transakcji (w tym podobne).`;
-    redirect(`${returnTo}${separator}msg=${encodeURIComponent(message)}`);
-  }
-  redirect(returnTo);
+  redirect(buildCategoryChangeRedirectUrl(returnTo, result, categoryId));
 }
 
 export default async function TransactionsPage({
@@ -138,14 +126,25 @@ export default async function TransactionsPage({
           </a>
         </p>
       ) : null}
-      {params.error ? <p className="alert-error">{params.error}</p> : null}
-      {params.msg ? <p className="alert-success">{params.msg}</p> : null}
+      {params.counterparty ? (
+        <p className="text-sm text-slate-600">
+          Filtr: kontrahent zawiera <strong>{params.counterparty}</strong> —{" "}
+          <a
+            href={buildTransactionsHref(params, { counterparty: undefined })}
+            className="link-brand"
+          >
+            wyczyść filtr nazwy
+          </a>
+        </p>
+      ) : null}
+      <TransactionFlashMessage error={params.error} msg={params.msg} />
       <TransactionsHelpPanel />
       <TransactionsPageClient
         rows={pageData.rows}
         categories={pageData.categories}
         allTags={pageData.allTags}
         returnTo={returnTo}
+        listParams={params}
         bulkFilters={bulkFilters}
         changeCategoryAction={changeCategoryAction}
       />

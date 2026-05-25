@@ -12,6 +12,11 @@ import { buildTransactionsWhere } from "@/lib/transactions/build-transactions-wh
 import { loadPairedOwnAccountTransferKeys } from "@/lib/transactions/load-workspace-transfer-pairs";
 import type { TransactionSearchParams } from "@/lib/transactions/page-filters";
 import { buildSimilarCountsByTransactionId } from "@/lib/transactions/similar-transaction-count";
+import {
+  buildTransactionOrderBy,
+  parseTransactionSort,
+  sortTransactionRows,
+} from "@/lib/transactions/transaction-sort";
 
 const transactionPageInclude = {
   category: true,
@@ -60,6 +65,7 @@ async function fetchTransactionsBundle(
   allTags: { id: string; name: string; color: string }[];
   subscriptionMarkers: { counterparty: string }[];
 }> {
+  const sort = parseTransactionSort(params);
   const [
     transactions,
     categories,
@@ -70,7 +76,7 @@ async function fetchTransactionsBundle(
   ] = await Promise.all([
     prisma.transaction.findMany({
       where: buildTransactionsWhere(workspaceId, accountIds, params),
-      orderBy: { bookedAt: "desc" },
+      orderBy: buildTransactionOrderBy(sort),
       take: 200,
       include: transactionPageInclude,
     }),
@@ -159,13 +165,17 @@ export async function loadTransactionsPageData(
     subscriptionMarkers,
   } = bundle;
 
-  const rows = await buildTransactionRows({
-    workspaceId,
-    accountIds,
-    transactions,
-    transferCategoryId,
-    subscriptionMarkers,
-  });
+  const sort = parseTransactionSort(params);
+  const rows = sortTransactionRows(
+    await buildTransactionRows({
+      workspaceId,
+      accountIds,
+      transactions,
+      transferCategoryId,
+      subscriptionMarkers,
+    }),
+    sort,
+  );
 
   return {
     rows,

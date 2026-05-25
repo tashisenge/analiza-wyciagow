@@ -11,6 +11,8 @@ export interface TransactionSearchParams {
   mbankCategory?: string;
   dateFrom?: string;
   dateTo?: string;
+  sort?: string;
+  sortDir?: string;
   msg?: string;
 }
 
@@ -50,6 +52,8 @@ export function parseTransactionSearchParams(
     mbankCategory: trimOrUndefined(singleSearchParam(raw.mbankCategory)),
     dateFrom: trimOrUndefined(singleSearchParam(raw.dateFrom)),
     dateTo: trimOrUndefined(singleSearchParam(raw.dateTo)),
+    sort: trimOrUndefined(singleSearchParam(raw.sort)),
+    sortDir: trimOrUndefined(singleSearchParam(raw.sortDir)),
     msg: trimOrUndefined(singleSearchParam(raw.msg)),
     error: trimOrUndefined(singleSearchParam(raw.error)),
   };

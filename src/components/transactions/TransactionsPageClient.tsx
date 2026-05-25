@@ -3,9 +3,11 @@
 import { useState } from "react";
 
 import { BulkCategoryPanel } from "@/components/transactions/BulkCategoryPanel";
+import { TransactionCounterpartyFilter } from "@/components/transactions/TransactionCounterpartyFilter";
 import { TransactionDateFilters } from "@/components/transactions/TransactionDateFilters";
 import { TransactionsTable } from "@/components/transactions/TransactionsTable";
 import type { BulkCategoryFilters } from "@/lib/transactions/bulk-category-types";
+import type { TransactionSearchParams } from "@/lib/transactions/page-filters";
 
 interface CategoryOption {
   id: string;
@@ -47,6 +49,7 @@ interface TransactionsPageClientProps {
   categories: CategoryOption[];
   allTags: TagOption[];
   returnTo: string;
+  listParams: TransactionSearchParams;
   bulkFilters: BulkCategoryFilters;
   changeCategoryAction: (formData: FormData) => Promise<void>;
 }
@@ -56,6 +59,7 @@ export function TransactionsPageClient({
   categories,
   allTags,
   returnTo,
+  listParams,
   bulkFilters,
   changeCategoryAction,
 }: TransactionsPageClientProps): React.JSX.Element {
@@ -71,7 +75,10 @@ export function TransactionsPageClient({
 
   return (
     <div className="space-y-4">
-      <TransactionDateFilters />
+      <div className="flex flex-col gap-3">
+        <TransactionCounterpartyFilter />
+        <TransactionDateFilters />
+      </div>
       <BulkCategoryPanel
         categories={categories}
         initialFilters={bulkFilters}
@@ -82,6 +89,7 @@ export function TransactionsPageClient({
         categories={categories}
         allTags={allTags}
         returnTo={returnTo}
+        listParams={listParams}
         changeCategoryAction={changeCategoryAction}
         selectedIds={selectedIds}
         onToggleSelect={toggleId}

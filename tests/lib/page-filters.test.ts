@@ -70,8 +70,17 @@ describe("page-filters", () => {
       mbankCategory: undefined,
       dateFrom: undefined,
       dateTo: undefined,
+      sort: undefined,
+      sortDir: undefined,
       msg: undefined,
       error: undefined,
+    });
+  });
+
+  it("parses sort params", () => {
+    expect(parseTransactionSearchParams({ sort: "name", sortDir: "asc" })).toMatchObject({
+      sort: "name",
+      sortDir: "asc",
     });
   });
 });
@@ -96,5 +105,16 @@ describe("buildTransactionsHref", () => {
     );
     expect(href).not.toContain("categoryId=");
     expect(href).toContain("context=firma");
+  });
+
+  it("preserves sort params", async () => {
+    const { buildTransactionsHref } = await import("@/lib/transactions/build-transactions-url");
+    const href = buildTransactionsHref(
+      { sort: "similar", sortDir: "desc", context: "dom" },
+      { counterparty: "lidl" },
+    );
+    expect(href).toContain("sort=similar");
+    expect(href).toContain("sortDir=desc");
+    expect(href).toContain("counterparty=lidl");
   });
 });
