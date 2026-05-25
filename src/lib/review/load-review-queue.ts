@@ -41,7 +41,6 @@ async function fetchReviewCandidates(
     }),
     include: { category: { select: { name: true } } },
     orderBy: { bookedAt: "desc" },
-    take: 500,
   });
 }
 

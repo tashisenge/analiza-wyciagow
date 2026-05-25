@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 
-import { buildReviewQueueWhere } from "@/lib/review/build-review-queue-where";
+import {
+  buildReviewQueueWhere,
+  isReviewRow,
+} from "@/lib/review/build-review-queue-where";
 import {
   getReviewReason,
   parseReviewQueueFilters,
@@ -25,6 +28,18 @@ describe("buildReviewQueueWhere", () => {
     expect(clauses[1]).toMatchObject({
       counterparty: { contains: "lidl", mode: "insensitive" },
     });
+  });
+});
+
+describe("isReviewRow", () => {
+  it("does not flag rows whose mbank category maps to the canonical app category", () => {
+    expect(
+      isReviewRow({
+        mbankCategory: "Restauracje",
+        categoryId: "cat-entertainment",
+        categoryName: "Rozrywka",
+      }),
+    ).toBe(false);
   });
 });
 

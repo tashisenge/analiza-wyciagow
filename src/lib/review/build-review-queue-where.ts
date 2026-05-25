@@ -1,6 +1,7 @@
 import type { Prisma } from "@prisma/client";
 
 import { normalizeMbankCategoryName } from "@/lib/mbank/category-names";
+import { mapMbankCategoryToAppName } from "@/lib/mbank-category-map";
 import { buildBulkCategoryWhere } from "@/lib/transactions/bulk-category-filter";
 import type { BulkCategoryFilters } from "@/lib/transactions/bulk-category-types";
 
@@ -53,7 +54,10 @@ export function isReviewRow(row: {
     return true;
   }
   if (normalized && row.categoryName) {
-    return row.categoryName.trim().toLowerCase() !== normalized.trim().toLowerCase();
+    const expectedAppName = mapMbankCategoryToAppName(normalized);
+    return (
+      row.categoryName.trim().toLowerCase() !== expectedAppName?.trim().toLowerCase()
+    );
   }
   return false;
 }
