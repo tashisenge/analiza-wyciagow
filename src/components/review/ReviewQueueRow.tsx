@@ -8,18 +8,39 @@ interface CategoryOption {
   name: string;
 }
 
+interface RowMessage {
+  type: "success" | "error";
+  text: string;
+}
+
 interface ReviewQueueRowProps {
   item: ReviewQueueItem;
   suggestion: MbankVerifySuggestion | undefined;
   categories: CategoryOption[];
   customCategoryId: string;
   pending: boolean;
+  rowMessage?: RowMessage;
   onCustomCategoryChange: (categoryId: string) => void;
   onDecision: (
     transactionId: string,
     decision: "mbank" | "app" | "custom" | "skip",
     categoryId?: string,
   ) => void;
+  onError: (message: string) => void;
+}
+
+function rowClassName(pending: boolean, rowMessage?: RowMessage): string {
+  const base = "border-b align-top transition-colors duration-200 last:border-0";
+  if (pending) {
+    return `${base} bg-brand-50/60`;
+  }
+  if (rowMessage?.type === "success") {
+    return `${base} bg-emerald-50/70`;
+  }
+  if (rowMessage?.type === "error") {
+    return `${base} bg-red-50/70`;
+  }
+  return base;
 }
 
 export function ReviewQueueRow({
@@ -28,13 +49,15 @@ export function ReviewQueueRow({
   categories,
   customCategoryId,
   pending,
+  rowMessage,
   onCustomCategoryChange,
   onDecision,
+  onError,
 }: ReviewQueueRowProps): React.JSX.Element {
   const amountLabel = `${item.amount} ${item.currency}`;
 
   return (
-    <tr className="border-b align-top last:border-0">
+    <tr className={rowClassName(pending, rowMessage)}>
       <td className="px-3 py-2 whitespace-nowrap">
         {item.bookedAt.toISOString().slice(0, 10)}
       </td>
@@ -69,8 +92,10 @@ export function ReviewQueueRow({
           categories={categories}
           customCategoryId={customCategoryId}
           pending={pending}
+          rowMessage={rowMessage}
           onCustomCategoryChange={onCustomCategoryChange}
           onDecision={onDecision}
+          onError={onError}
         />
       </td>
     </tr>

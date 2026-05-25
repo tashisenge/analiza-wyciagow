@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 
 import { ReviewQueueRow } from "@/components/review/ReviewQueueRow";
 import type { MbankVerifySuggestion } from "@/lib/ai/verify-mbank-assignments";
@@ -11,6 +11,11 @@ import { applyReviewDecision } from "@/server/actions/review";
 interface CategoryOption {
   id: string;
   name: string;
+}
+
+interface RowMessage {
+  type: "success" | "error";
+  text: string;
 }
 
 interface ReviewQueueTableProps {
@@ -25,11 +30,28 @@ export function ReviewQueueTable({
   suggestions,
 }: ReviewQueueTableProps): React.JSX.Element {
   const router = useRouter();
-  const [pending, startTransition] = useTransition();
+  const [pendingId, setPendingId] = useState<string | null>(null);
+  const [hiddenIds, setHiddenIds] = useState<Set<string>>(() => new Set());
+  const [rowMessages, setRowMessages] = useState<Record<string, RowMessage>>({});
   const [error, setError] = useState<string | null>(null);
   const [customCategoryByTx, setCustomCategoryByTx] = useState<Record<string, string>>(
     {},
   );
+  const [, startTransition] = useTransition();
+
+  useEffect(() => {
+    setHiddenIds(new Set());
+  }, [items]);
+
+  function clearRowMessage(transactionId: string): void {
+    setRowMessages((prev) => {
+      if (!(transactionId in prev)) {
+        return prev;
+      }
+      const { [transactionId]: _removed, ...rest } = prev;
+      return rest;
+    });
+  }
 
   function runDecision(
     transactionId: string,
@@ -37,17 +59,45 @@ export function ReviewQueueTable({
     categoryId?: string,
   ): void {
     setError(null);
+    clearRowMessage(transactionId);
+    setPendingId(transactionId);
+
     startTransition(async () => {
       const result = await applyReviewDecision({ transactionId, decision, categoryId });
+      setPendingId(null);
+
       if (!result.ok) {
         setError(result.error);
+        setRowMessages((prev) => ({
+          ...prev,
+          [transactionId]: { type: "error", text: result.error },
+        }));
         return;
       }
+
+      if (decision === "skip") {
+        setRowMessages((prev) => ({
+          ...prev,
+          [transactionId]: { type: "success", text: result.message },
+        }));
+        window.setTimeout(() => {
+          clearRowMessage(transactionId);
+        }, 3000);
+        return;
+      }
+
+      setHiddenIds((prev) => new Set(prev).add(transactionId));
       router.refresh();
     });
   }
 
-  if (items.length === 0) {
+  function reportError(message: string): void {
+    setError(message);
+  }
+
+  const visibleItems = items.filter((item) => !hiddenIds.has(item.id));
+
+  if (visibleItems.length === 0) {
     return (
       <p className="section-card p-6 text-center text-slate-600">
         Brak transakcji do weryfikacji — kategorie mBank i app są spójne.
@@ -71,18 +121,20 @@ export function ReviewQueueTable({
             </tr>
           </thead>
           <tbody>
-            {items.map((item) => (
+            {visibleItems.map((item) => (
               <ReviewQueueRow
                 key={item.id}
                 item={item}
                 suggestion={suggestions[item.id]}
                 categories={categories}
                 customCategoryId={customCategoryByTx[item.id] ?? ""}
-                pending={pending}
+                pending={pendingId === item.id}
+                rowMessage={rowMessages[item.id]}
                 onCustomCategoryChange={(categoryId) => {
                   setCustomCategoryByTx((prev) => ({ ...prev, [item.id]: categoryId }));
                 }}
                 onDecision={runDecision}
+                onError={reportError}
               />
             ))}
           </tbody>
