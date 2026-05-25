@@ -11,6 +11,7 @@ interface ReviewCandidate {
   currency: string;
   mbankCategory: string;
   categoryId: string | null;
+  mbankReviewResolvedAt: Date | null;
   category: { name: string } | null;
 }
 
@@ -32,11 +33,13 @@ function reviewRowFromCandidate(tx: ReviewCandidate): {
   mbankCategory: string;
   categoryId: string | null;
   categoryName: string | null;
+  mbankReviewResolvedAt: Date | null;
 } {
   return {
     mbankCategory: tx.mbankCategory,
     categoryId: tx.categoryId,
     categoryName: tx.category?.name ?? null,
+    mbankReviewResolvedAt: tx.mbankReviewResolvedAt,
   };
 }
 

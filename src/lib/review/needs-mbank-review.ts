@@ -4,9 +4,13 @@ export interface MbankReviewInput {
   mbankCategory: string;
   categoryId: string | null;
   categoryName: string | null;
+  mbankReviewResolvedAt?: Date | null;
 }
 
 export function needsMbankReview(input: MbankReviewInput): boolean {
+  if (input.mbankReviewResolvedAt) {
+    return false;
+  }
   const normalizedMbank = normalizeMbankCategoryName(input.mbankCategory);
 
   if (!normalizedMbank) {

@@ -10,8 +10,9 @@ describe("buildReviewQueueWhere", () => {
   it("combines review criteria with account scope", () => {
     const where = buildReviewQueueWhere("ws-1", ["acc-a"]);
     const clauses = Array.isArray(where.AND) ? where.AND : [where.AND];
-    expect(clauses).toHaveLength(2);
-    expect(clauses[1]).toEqual({
+    expect(clauses).toHaveLength(3);
+    expect(clauses[0]).toEqual({ mbankReviewResolvedAt: null });
+    expect(clauses[2]).toEqual({
       workspaceId: "ws-1",
       accountId: { in: ["acc-a"] },
     });
@@ -22,7 +23,7 @@ describe("buildReviewQueueWhere", () => {
       counterpartyContains: "lidl",
     });
     const clauses = Array.isArray(where.AND) ? where.AND : [where.AND];
-    expect(clauses[1]).toMatchObject({
+    expect(clauses[2]).toMatchObject({
       counterparty: { contains: "lidl", mode: "insensitive" },
     });
   });

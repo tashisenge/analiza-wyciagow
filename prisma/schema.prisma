@@ -177,6 +177,7 @@ model Transaction {
   counterparty  String       @default("")
   mbankCategory String       @default("")
   categoryId    String?
+  mbankReviewResolvedAt DateTime?
   workspace     Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   account       Account      @relation(fields: [accountId], references: [id], onDelete: Cascade)
   importBatch   ImportBatch? @relation(fields: [importBatchId], references: [id])

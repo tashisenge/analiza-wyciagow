@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 
 import { ReviewQueueRow } from "@/components/review/ReviewQueueRow";
 import type { MbankVerifySuggestion } from "@/lib/ai/verify-mbank-assignments";
@@ -22,35 +22,46 @@ interface ReviewQueueTableProps {
   items: ReviewQueueItem[];
   categories: CategoryOption[];
   suggestions: Record<string, MbankVerifySuggestion>;
+  onResolved?: () => void;
+}
+
+function clearRowMessage(
+  transactionId: string,
+  setRowMessages: React.Dispatch<React.SetStateAction<Record<string, RowMessage>>>,
+): void {
+  setRowMessages((prev) => {
+    if (!(transactionId in prev)) {
+      return prev;
+    }
+    const { [transactionId]: _removed, ...rest } = prev;
+    return rest;
+  });
 }
 
 export function ReviewQueueTable({
   items,
   categories,
   suggestions,
+  onResolved,
 }: ReviewQueueTableProps): React.JSX.Element {
   const router = useRouter();
   const [pendingId, setPendingId] = useState<string | null>(null);
   const [hiddenIds, setHiddenIds] = useState<Set<string>>(() => new Set());
   const [rowMessages, setRowMessages] = useState<Record<string, RowMessage>>({});
+  const [banner, setBanner] = useState<{ type: "success" | "error"; text: string } | null>(
+    null,
+  );
   const [error, setError] = useState<string | null>(null);
   const [customCategoryByTx, setCustomCategoryByTx] = useState<Record<string, string>>(
     {},
   );
   const [, startTransition] = useTransition();
 
-  useEffect(() => {
-    setHiddenIds(new Set());
-  }, [items]);
-
-  function clearRowMessage(transactionId: string): void {
-    setRowMessages((prev) => {
-      if (!(transactionId in prev)) {
-        return prev;
-      }
-      const { [transactionId]: _removed, ...rest } = prev;
-      return rest;
-    });
+  function showBanner(type: "success" | "error", text: string): void {
+    setBanner({ type, text });
+    window.setTimeout(() => {
+      setBanner(null);
+    }, 3000);
   }
 
   function runDecision(
@@ -59,7 +70,8 @@ export function ReviewQueueTable({
     categoryId?: string,
   ): void {
     setError(null);
-    clearRowMessage(transactionId);
+    setBanner(null);
+    clearRowMessage(transactionId, setRowMessages);
     setPendingId(transactionId);
 
     startTransition(async () => {
@@ -68,6 +80,7 @@ export function ReviewQueueTable({
 
       if (!result.ok) {
         setError(result.error);
+        showBanner("error", result.error);
         setRowMessages((prev) => ({
           ...prev,
           [transactionId]: { type: "error", text: result.error },
@@ -80,19 +93,23 @@ export function ReviewQueueTable({
           ...prev,
           [transactionId]: { type: "success", text: result.message },
         }));
+        showBanner("success", result.message);
         window.setTimeout(() => {
-          clearRowMessage(transactionId);
+          clearRowMessage(transactionId, setRowMessages);
         }, 3000);
         return;
       }
 
       setHiddenIds((prev) => new Set(prev).add(transactionId));
+      onResolved?.();
+      showBanner("success", "Zapisano — usunięto z kolejki weryfikacji");
       router.refresh();
     });
   }
 
   function reportError(message: string): void {
     setError(message);
+    showBanner("error", message);
   }
 
   const visibleItems = items.filter((item) => !hiddenIds.has(item.id));
@@ -107,7 +124,15 @@ export function ReviewQueueTable({
 
   return (
     <div className="space-y-3">
-      {error ? <p className="alert-error text-sm">{error}</p> : null}
+      {banner ? (
+        <p
+          className={banner.type === "success" ? "alert-success text-sm" : "alert-error text-sm"}
+          role="status"
+        >
+          {banner.text}
+        </p>
+      ) : null}
+      {error && !banner ? <p className="alert-error text-sm">{error}</p> : null}
       <div className="section-card overflow-x-auto p-0">
         <table className="min-w-full text-left text-sm">
           <thead className="border-b border-calm-200 bg-calm-50">

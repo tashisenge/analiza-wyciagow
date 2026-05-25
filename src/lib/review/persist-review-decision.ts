@@ -8,7 +8,10 @@ async function updateReviewCategory(
 ): Promise<void> {
   await prisma.transaction.updateMany({
     where: { id: transactionId, workspaceId },
-    data: { categoryId },
+    data: {
+      categoryId,
+      mbankReviewResolvedAt: new Date(),
+    },
   });
 }
 

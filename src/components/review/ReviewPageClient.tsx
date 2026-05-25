@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { ReviewAiBatchButton } from "@/components/review/ReviewAiBatchButton";
 import { ReviewQueueTable } from "@/components/review/ReviewQueueTable";
@@ -34,16 +34,22 @@ export function ReviewPageClient({
   const [suggestions, setSuggestions] = useState<Record<string, MbankVerifySuggestion>>(
     {},
   );
+  const [resolvedLocally, setResolvedLocally] = useState(0);
   const pageSize = 50;
-  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const totalPages = Math.max(1, Math.ceil(Math.max(0, total - resolvedLocally) / pageSize));
+  const displayTotal = Math.max(0, total - resolvedLocally);
+
+  useEffect(() => {
+    setResolvedLocally(0);
+  }, [total]);
 
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm text-slate-600">
-          {total > 0 ? (
+          {displayTotal > 0 ? (
             <>
-              W kolejce: <strong>{String(total)}</strong> transakcji (strona{" "}
+              W kolejce: <strong>{String(displayTotal)}</strong> transakcji (strona{" "}
               {String(page)} z {String(totalPages)})
             </>
           ) : (
@@ -70,7 +76,14 @@ export function ReviewPageClient({
           ) : null}
         </div>
       ) : null}
-      <ReviewQueueTable items={items} categories={categories} suggestions={suggestions} />
+      <ReviewQueueTable
+        items={items}
+        categories={categories}
+        suggestions={suggestions}
+        onResolved={() => {
+          setResolvedLocally((count) => count + 1);
+        }}
+      />
     </div>
   );
 }

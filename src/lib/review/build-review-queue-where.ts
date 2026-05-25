@@ -36,7 +36,11 @@ export function buildReviewQueueWhere(
   });
 
   return {
-    AND: [reviewQueueOrClause(), scoped],
+    AND: [
+      { mbankReviewResolvedAt: null },
+      reviewQueueOrClause(),
+      scoped,
+    ],
   };
 }
 
@@ -44,7 +48,11 @@ export function isReviewRow(row: {
   mbankCategory: string;
   categoryId: string | null;
   categoryName: string | null;
+  mbankReviewResolvedAt?: Date | null;
 }): boolean {
+  if (row.mbankReviewResolvedAt) {
+    return false;
+  }
   const normalized = normalizeMbankCategoryName(row.mbankCategory);
   if (row.mbankCategory.toLowerCase().includes("bez kategorii")) {
     return true;

@@ -43,6 +43,17 @@ describe("needsMbankReview", () => {
     ).toBe(false);
   });
 
+  it("false when review was already resolved", () => {
+    expect(
+      needsMbankReview({
+        mbankCategory: "Transport",
+        categoryId: "c1",
+        categoryName: "Paliwo",
+        mbankReviewResolvedAt: new Date(),
+      }),
+    ).toBe(false);
+  });
+
   it("false when both empty mbank and no app category", () => {
     expect(
       needsMbankReview({
