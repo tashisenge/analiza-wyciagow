@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db";
 import { normalizeMbankCategoryName } from "@/lib/mbank/category-names";
+import { mapMbankCategoryToAppName } from "@/lib/mbank-category-map";
 
 export type ReviewDecision = "mbank" | "app" | "custom" | "skip";
 
@@ -23,11 +24,15 @@ async function resolveMbankCategoryId(
   if (!mbankName) {
     return { ok: false, error: "mBank nie ma sensownej kategorii" };
   }
+  const appName = mapMbankCategoryToAppName(mbankName);
+  if (!appName) {
+    return { ok: false, error: "mBank nie ma sensownej kategorii" };
+  }
   const category = await prisma.category.findFirst({
-    where: { workspaceId, name: mbankName },
+    where: { workspaceId, name: appName },
   });
   if (!category) {
-    return { ok: false, error: `Brak kategorii «${mbankName}» w app` };
+    return { ok: false, error: `Brak kategorii «${appName}» w app` };
   }
   return { ok: true, categoryId: category.id };
 }

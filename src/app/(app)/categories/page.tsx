@@ -3,10 +3,8 @@ import { redirect } from "next/navigation";
 import { CategoriesView } from "@/components/categories/CategoriesView";
 import { auth } from "@/lib/auth";
 import { loadCategoryTransactionCounts } from "@/lib/categories/category-transaction-counts";
-import { CANONICAL_CATEGORY_NAMES } from "@/lib/categories/default-categories";
 import { ensureCanonicalCategories } from "@/lib/categories/ensure-canonical-categories";
 import { prisma } from "@/lib/db";
-import { assignMbankCategoriesForWorkspace } from "@/lib/mbank/sync-categories";
 import {
   createCategory,
   createRule,
@@ -65,7 +63,10 @@ async function toggleOptimizationExclusionAction(
   excludeFromOptimization: boolean,
 ): Promise<void> {
   "use server";
-  const result = await setCategoryOptimizationExclusion(categoryId, excludeFromOptimization);
+  const result = await setCategoryOptimizationExclusion(
+    categoryId,
+    excludeFromOptimization,
+  );
   if (!result.ok) {
     redirect(`/categories?error=${encodeURIComponent(result.error)}`);
   }
@@ -97,10 +98,6 @@ export default async function CategoriesPage({
   const workspaceId = session.user.workspaceId;
 
   await ensureCanonicalCategories(workspaceId);
-  const categoryCount = await prisma.category.count({ where: { workspaceId } });
-  if (categoryCount > CANONICAL_CATEGORY_NAMES.length + 2) {
-    await assignMbankCategoriesForWorkspace(workspaceId);
-  }
 
   const [categories, rules, transactionCounts] = await Promise.all([
     prisma.category.findMany({ where: { workspaceId }, orderBy: { name: "asc" } }),

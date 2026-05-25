@@ -5,8 +5,6 @@ import {
 } from "@/lib/categories/default-categories";
 import { prisma } from "@/lib/db";
 
-type ExistingCategory = Awaited<ReturnType<typeof prisma.category.findMany>>[number];
-
 async function createCanonicalCategory(
   workspaceId: string,
   def: DefaultCategoryDef,
@@ -23,24 +21,7 @@ async function createCanonicalCategory(
   });
 }
 
-async function syncCanonicalFlags(found: ExistingCategory, def: DefaultCategoryDef): Promise<void> {
-  if (
-    found.excludeFromOptimization === def.excludeFromOptimization &&
-    found.isDiscretionary === def.isDiscretionary
-  ) {
-    return;
-  }
-
-  await prisma.category.update({
-    where: { id: found.id },
-    data: {
-      excludeFromOptimization: def.excludeFromOptimization,
-      isDiscretionary: def.isDiscretionary,
-    },
-  });
-}
-
-/** Tworzy brakujące kanoniczne kategorie i ustawia flagi stałych wydatków. */
+/** Tworzy brakujące kanoniczne kategorie bez nadpisywania ustawień użytkownika. */
 export async function ensureCanonicalCategories(workspaceId: string): Promise<void> {
   const existing = await prisma.category.findMany({ where: { workspaceId } });
   const byName = new Map(existing.map((c) => [c.name, c]));
@@ -51,7 +32,6 @@ export async function ensureCanonicalCategories(workspaceId: string): Promise<vo
       await createCanonicalCategory(workspaceId, def);
       continue;
     }
-    await syncCanonicalFlags(found, def);
   }
 }
 

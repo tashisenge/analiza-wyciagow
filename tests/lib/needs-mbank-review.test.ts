@@ -43,6 +43,16 @@ describe("needsMbankReview", () => {
     ).toBe(false);
   });
 
+  it("false when mbank category maps to the canonical app category", () => {
+    expect(
+      needsMbankReview({
+        mbankCategory: "Restauracje",
+        categoryId: "c1",
+        categoryName: "Rozrywka",
+      }),
+    ).toBe(false);
+  });
+
   it("false when both empty mbank and no app category", () => {
     expect(
       needsMbankReview({

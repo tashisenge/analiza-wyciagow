@@ -1,4 +1,5 @@
 import { normalizeMbankCategoryName } from "@/lib/mbank/category-names";
+import { mapMbankCategoryToAppName } from "@/lib/mbank-category-map";
 
 export interface MbankReviewInput {
   mbankCategory: string;
@@ -21,5 +22,8 @@ export function needsMbankReview(input: MbankReviewInput): boolean {
     return true;
   }
 
-  return input.categoryName.trim().toLowerCase() !== normalizedMbank.trim().toLowerCase();
+  const expectedAppName = mapMbankCategoryToAppName(normalizedMbank);
+  return (
+    input.categoryName.trim().toLowerCase() !== expectedAppName?.trim().toLowerCase()
+  );
 }
