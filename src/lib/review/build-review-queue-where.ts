@@ -4,6 +4,11 @@ import { normalizeMbankCategoryName } from "@/lib/mbank/category-names";
 import { buildBulkCategoryWhere } from "@/lib/transactions/bulk-category-filter";
 import type { BulkCategoryFilters } from "@/lib/transactions/bulk-category-types";
 
+export interface ReviewQueueDbFilters extends BulkCategoryFilters {
+  categoryId?: string;
+  descriptionContains?: string;
+}
+
 function reviewQueueOrClause(): Prisma.TransactionWhereInput {
   return {
     OR: [
@@ -21,25 +26,31 @@ function reviewQueueOrClause(): Prisma.TransactionWhereInput {
   };
 }
 
+function reviewExtraFilters(filters: ReviewQueueDbFilters): Prisma.TransactionWhereInput[] {
+  const extra: Prisma.TransactionWhereInput[] = [];
+  if (filters.categoryId) {
+    extra.push({ categoryId: filters.categoryId });
+  }
+  if (filters.descriptionContains) {
+    extra.push({
+      description: { contains: filters.descriptionContains, mode: "insensitive" },
+    });
+  }
+  return extra;
+}
+
 export function buildReviewQueueWhere(
   workspaceId: string,
   accountIds: string[],
-  filters: Pick<
-    BulkCategoryFilters,
-    "counterpartyContains" | "mbankCategory" | "dateFrom" | "dateTo" | "uncategorizedOnly"
-  > = {},
+  filters: ReviewQueueDbFilters = {},
 ): Prisma.TransactionWhereInput {
-  const scoped = buildBulkCategoryWhere({
-    workspaceId,
-    accountIds,
-    filters,
-  });
-
+  const scoped = buildBulkCategoryWhere({ workspaceId, accountIds, filters });
   return {
     AND: [
       { mbankReviewResolvedAt: null },
       reviewQueueOrClause(),
       scoped,
+      ...reviewExtraFilters(filters),
     ],
   };
 }

@@ -38,11 +38,12 @@ export default async function ReviewPage({
         lead="Porównaj kategorie banku z aplikacją. AI podpowiada — Ty decydujesz."
         tip="Pozycje z «Bez kategorii» mBank, rozbieżności nazw lub brak kategorii app mimo danych banku."
       />
-      <ReviewFilters filters={filters} />
+      <ReviewFilters filters={filters} categories={categories} />
       <ReviewPageClient
         items={queue.items}
         total={queue.total}
         page={queue.page}
+        pageSize={queue.pageSize}
         filters={filters}
         categories={categories}
       />

@@ -2,6 +2,7 @@ import { AmountValue } from "@/components/privacy/AmountValue";
 import { ReviewQueueActions } from "@/components/review/ReviewQueueActions";
 import type { MbankVerifySuggestion } from "@/lib/ai/verify-mbank-assignments";
 import type { ReviewQueueItem } from "@/lib/review/load-review-queue";
+import { getReviewReason, REVIEW_REASON_LABELS } from "@/lib/review/review-queue-filters";
 
 interface CategoryOption {
   id: string;
@@ -19,7 +20,10 @@ interface ReviewQueueRowProps {
   categories: CategoryOption[];
   customCategoryId: string;
   pending: boolean;
+  selected: boolean;
+  showSelection: boolean;
   rowMessage?: RowMessage;
+  onToggleSelect?: (id: string) => void;
   onCustomCategoryChange: (categoryId: string) => void;
   onDecision: (
     transactionId: string,
@@ -49,24 +53,40 @@ export function ReviewQueueRow({
   categories,
   customCategoryId,
   pending,
+  selected,
+  showSelection,
   rowMessage,
+  onToggleSelect,
   onCustomCategoryChange,
   onDecision,
   onError,
 }: ReviewQueueRowProps): React.JSX.Element {
   const amountLabel = `${item.amount} ${item.currency}`;
+  const reason = getReviewReason(item);
 
   return (
     <tr className={rowClassName(pending, rowMessage)}>
-      <td className="px-3 py-2 whitespace-nowrap">
+      {showSelection ? (
+        <td className="px-3 py-2">
+          <input
+            type="checkbox"
+            checked={selected}
+            aria-label={`Zaznacz ${item.counterparty || item.id}`}
+            onChange={() => {
+              onToggleSelect?.(item.id);
+            }}
+          />
+        </td>
+      ) : null}
+      <td className="whitespace-nowrap px-3 py-2">
         {item.bookedAt.toISOString().slice(0, 10)}
       </td>
       <td className="max-w-xs px-3 py-2">
         <p className="font-medium">{item.counterparty || "—"}</p>
         <p className="truncate text-xs text-slate-500">{item.description}</p>
-        <p className="text-xs text-slate-600">
-          <AmountValue>{amountLabel}</AmountValue>
-        </p>
+      </td>
+      <td className="whitespace-nowrap px-3 py-2 text-xs">
+        <AmountValue>{amountLabel}</AmountValue>
       </td>
       <td className="px-3 py-2">{item.mbankCategory || "—"}</td>
       <td className="px-3 py-2">{item.categoryName ?? "—"}</td>
@@ -77,13 +97,15 @@ export function ReviewQueueRow({
               → {suggestion.recommendedCategory}
             </p>
             <p>{suggestion.reason}</p>
-            <p className="text-slate-500">
-              Preferuje: {suggestion.prefer === "mbank" ? "mBank" : "app"}
-            </p>
           </>
         ) : (
           "—"
         )}
+      </td>
+      <td className="px-3 py-2">
+        <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-700">
+          {REVIEW_REASON_LABELS[reason]}
+        </span>
       </td>
       <td className="min-w-[14rem] px-3 py-2">
         <ReviewQueueActions

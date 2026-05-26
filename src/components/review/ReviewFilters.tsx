@@ -3,8 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 
-import { ReviewDateFilterFields } from "@/components/review/ReviewDateFilterFields";
-import { BulkCategoryFilterFields } from "@/components/transactions/BulkCategoryFilterFields";
+import { ReviewFieldFilters } from "@/components/review/ReviewFieldFilters";
 import { FilterChip } from "@/components/ui/FilterChip";
 import { InfoTip } from "@/components/ui/InfoTip";
 import type { ContextFilter } from "@/lib/analytics/filters";
@@ -22,38 +21,30 @@ const CONTEXTS: { value: ContextFilter; label: string; tip: string }[] = [
 ];
 
 const REASON_FILTERS: { value: ReviewReason | "all"; label: string; tip: string }[] = [
-  {
-    value: "all",
-    label: "Wszystkie rozbieżności",
-    tip: "Pełna kolejka weryfikacji.",
-  },
-  {
-    value: "mbank_uncategorized",
-    label: "mBank bez kategorii",
-    tip: "Bank nie przypisał kategorii.",
-  },
-  {
-    value: "name_mismatch",
-    label: "Różne nazwy",
-    tip: "mBank i app mają różne kategorie.",
-  },
-  {
-    value: "app_missing",
-    label: "Brak w app",
-    tip: "mBank ma kategorię, app nie.",
-  },
+  { value: "all", label: "Wszystkie rozbieżności", tip: "Pełna kolejka weryfikacji." },
+  { value: "mbank_uncategorized", label: "mBank bez kategorii", tip: "Bank nie przypisał kategorii." },
+  { value: "name_mismatch", label: "Różne nazwy", tip: "mBank i app mają różne kategorie." },
+  { value: "app_missing", label: "Brak w app", tip: "mBank ma kategorię, app nie." },
 ];
 
 interface ReviewFiltersProps {
   filters: ReviewQueueFilters;
+  categories: { id: string; name: string }[];
 }
 
-export function ReviewFilters({ filters }: ReviewFiltersProps): React.JSX.Element {
+export function ReviewFilters({
+  filters,
+  categories,
+}: ReviewFiltersProps): React.JSX.Element {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [counterpartyContains, setCounterpartyContains] = useState(
     filters.counterpartyContains ?? "",
   );
+  const [descriptionContains, setDescriptionContains] = useState(
+    filters.descriptionContains ?? "",
+  );
+  const [categoryId, setCategoryId] = useState(filters.categoryId ?? "");
   const [mbankCategory, setMbankCategory] = useState(filters.mbankCategory ?? "");
   const [uncategorizedOnly, setUncategorizedOnly] = useState(
     filters.uncategorizedOnly ?? false,
@@ -66,19 +57,14 @@ export function ReviewFilters({ filters }: ReviewFiltersProps): React.JSX.Elemen
       ...filters,
       counterpartyContains: counterpartyContains.trim() || undefined,
       mbankCategory: mbankCategory.trim() || undefined,
+      descriptionContains: descriptionContains.trim() || undefined,
+      categoryId: categoryId.trim() || undefined,
       uncategorizedOnly,
       dateFrom: dateFrom.trim() || undefined,
       dateTo: dateTo.trim() || undefined,
     };
     startTransition(() => {
       router.push(buildReviewHref(nextFilters));
-    });
-  }
-
-  function reasonHref(reason: ReviewReason | "all"): string {
-    return buildReviewHref({
-      ...filters,
-      reason: reason === "all" ? undefined : reason,
     });
   }
 
@@ -91,8 +77,7 @@ export function ReviewFilters({ filters }: ReviewFiltersProps): React.JSX.Elemen
         <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
           Filtry
           <InfoTip label="Filtry weryfikacji">
-            Zawęż kolejkę przed decyzjami i weryfikacją AI. Filtry dat i kontrahenta
-            wymagają kliknięcia „Zastosuj”.
+            Zawęż kolejkę przed decyzjami i weryfikacją AI.
           </InfoTip>
         </span>
         {hasActiveReviewFilters(filters) ? (
@@ -125,7 +110,10 @@ export function ReviewFilters({ filters }: ReviewFiltersProps): React.JSX.Elemen
         {REASON_FILTERS.map((reason) => (
           <FilterChip
             key={reason.value}
-            href={reasonHref(reason.value)}
+            href={buildReviewHref({
+              ...filters,
+              reason: reason.value === "all" ? undefined : reason.value,
+            })}
             active={activeReason === reason.value}
             title={reason.tip}
           >
@@ -134,19 +122,21 @@ export function ReviewFilters({ filters }: ReviewFiltersProps): React.JSX.Elemen
         ))}
       </div>
 
-      <BulkCategoryFilterFields
+      <ReviewFieldFilters
+        categories={categories}
         counterpartyContains={counterpartyContains}
         mbankCategory={mbankCategory}
+        descriptionContains={descriptionContains}
+        categoryId={categoryId}
         uncategorizedOnly={uncategorizedOnly}
-        onCounterpartyChange={setCounterpartyContains}
-        onMbankCategoryChange={setMbankCategory}
-        onUncategorizedChange={setUncategorizedOnly}
-      />
-
-      <ReviewDateFilterFields
         dateFrom={dateFrom}
         dateTo={dateTo}
         pending={pending}
+        onCounterpartyChange={setCounterpartyContains}
+        onMbankCategoryChange={setMbankCategory}
+        onDescriptionChange={setDescriptionContains}
+        onCategoryIdChange={setCategoryId}
+        onUncategorizedChange={setUncategorizedOnly}
         onDateFromChange={setDateFrom}
         onDateToChange={setDateTo}
         onApply={applyFieldFilters}

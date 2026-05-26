@@ -10,8 +10,10 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { logActionError } from "@/lib/logger";
 import { countReviewQueue, loadReviewQueue } from "@/lib/review/load-review-queue";
+import type { BulkReviewDecision } from "@/lib/review/persist-bulk-review-decisions";
 import { persistReviewDecision } from "@/lib/review/persist-review-decision";
 import type { ReviewQueueFilters } from "@/lib/review/review-queue-filters";
+import { runBulkReviewDecisions } from "@/server/actions/apply-bulk-review";
 
 export type ReviewActionResult =
   | { ok: true; message: string }
@@ -86,6 +88,32 @@ export async function aiVerifyReviewBatch(
     return {
       ok: false,
       error: logActionError("review.aiVerifyBatch", error, { context: { workspaceId } }),
+    };
+  }
+}
+
+export async function applyBulkReviewDecisions(input: {
+  transactionIds: string[];
+  decision: BulkReviewDecision;
+  categoryId?: string;
+  suggestions?: Record<string, MbankVerifySuggestion>;
+}): Promise<ReviewActionResult & { updatedCount?: number; failedCount?: number }> {
+  const workspaceId = await getWorkspaceId();
+  if (!workspaceId) {
+    return { ok: false, error: "Brak sesji" };
+  }
+
+  try {
+    const result = await runBulkReviewDecisions(workspaceId, input);
+    if (!result.ok) {
+      return result;
+    }
+    revalidateReviewPaths();
+    return result;
+  } catch (error) {
+    return {
+      ok: false,
+      error: logActionError("review.applyBulkDecisions", error, { context: { workspaceId } }),
     };
   }
 }

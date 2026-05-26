@@ -27,6 +27,20 @@ describe("buildReviewQueueWhere", () => {
       counterparty: { contains: "lidl", mode: "insensitive" },
     });
   });
+
+  it("adds description and category filters", () => {
+    const where = buildReviewQueueWhere("ws-1", ["acc-a"], {
+      descriptionContains: "przelew",
+      categoryId: "cat-1",
+    });
+    const clauses = Array.isArray(where.AND) ? where.AND : [where.AND];
+    expect(clauses).toEqual(
+      expect.arrayContaining([
+        { categoryId: "cat-1" },
+        { description: { contains: "przelew", mode: "insensitive" } },
+      ]),
+    );
+  });
 });
 
 describe("parseReviewQueueFilters", () => {
@@ -42,9 +56,15 @@ describe("parseReviewQueueFilters", () => {
     ).toEqual({
       context: "firma",
       counterpartyContains: "Biedronka",
+      mbankCategory: undefined,
+      descriptionContains: undefined,
+      categoryId: undefined,
       reason: "app_missing",
       uncategorizedOnly: true,
       dateFrom: "2026-01-01",
+      dateTo: undefined,
+      sort: undefined,
+      sortDir: undefined,
     });
   });
 });

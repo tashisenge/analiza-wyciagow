@@ -1,12 +1,15 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
 
+import { ReviewQueueBanner } from "@/components/review/ReviewQueueBanner";
 import { ReviewQueueRow } from "@/components/review/ReviewQueueRow";
+import { ReviewQueueTableHead } from "@/components/review/ReviewQueueTableHead";
+import { startReviewDecision } from "@/components/review/start-review-decision";
 import type { MbankVerifySuggestion } from "@/lib/ai/verify-mbank-assignments";
 import type { ReviewQueueItem } from "@/lib/review/load-review-queue";
-import { applyReviewDecision } from "@/server/actions/review";
+import type { ReviewQueueFilters } from "@/lib/review/review-queue-filters";
 
 interface CategoryOption {
   id: string;
@@ -22,26 +25,23 @@ interface ReviewQueueTableProps {
   items: ReviewQueueItem[];
   categories: CategoryOption[];
   suggestions: Record<string, MbankVerifySuggestion>;
+  filters: ReviewQueueFilters;
+  page: number;
+  selectedIds: string[];
+  onToggleSelect: (id: string) => void;
+  onToggleSelectAll: (ids: string[]) => void;
   onResolved?: () => void;
-}
-
-function clearRowMessage(
-  transactionId: string,
-  setRowMessages: React.Dispatch<React.SetStateAction<Record<string, RowMessage>>>,
-): void {
-  setRowMessages((prev) => {
-    if (!(transactionId in prev)) {
-      return prev;
-    }
-    const { [transactionId]: _removed, ...rest } = prev;
-    return rest;
-  });
 }
 
 export function ReviewQueueTable({
   items,
   categories,
   suggestions,
+  filters,
+  page,
+  selectedIds,
+  onToggleSelect,
+  onToggleSelectAll,
   onResolved,
 }: ReviewQueueTableProps): React.JSX.Element {
   const router = useRouter();
@@ -57,6 +57,14 @@ export function ReviewQueueTable({
   );
   const [, startTransition] = useTransition();
 
+  const visibleItems = useMemo(
+    () => items.filter((item) => !hiddenIds.has(item.id)),
+    [items, hiddenIds],
+  );
+  const visibleIds = useMemo(() => visibleItems.map((item) => item.id), [visibleItems]);
+  const allVisibleSelected =
+    visibleIds.length > 0 && visibleIds.every((id) => selectedIds.includes(id));
+
   function showBanner(type: "success" | "error", text: string): void {
     setBanner({ type, text });
     window.setTimeout(() => {
@@ -64,46 +72,36 @@ export function ReviewQueueTable({
     }, 3000);
   }
 
+  function clearRowMessage(transactionId: string): void {
+    setRowMessages((prev) => {
+      if (!(transactionId in prev)) {
+        return prev;
+      }
+      const { [transactionId]: _removed, ...rest } = prev;
+      return rest;
+    });
+  }
+
   function runDecision(
     transactionId: string,
     decision: "mbank" | "app" | "custom" | "skip",
     categoryId?: string,
   ): void {
-    setError(null);
-    setBanner(null);
-    clearRowMessage(transactionId, setRowMessages);
-    setPendingId(transactionId);
-
-    startTransition(async () => {
-      const result = await applyReviewDecision({ transactionId, decision, categoryId });
-      setPendingId(null);
-
-      if (!result.ok) {
-        setError(result.error);
-        showBanner("error", result.error);
-        setRowMessages((prev) => ({
-          ...prev,
-          [transactionId]: { type: "error", text: result.error },
-        }));
-        return;
-      }
-
-      if (decision === "skip") {
-        setRowMessages((prev) => ({
-          ...prev,
-          [transactionId]: { type: "success", text: result.message },
-        }));
-        showBanner("success", result.message);
-        window.setTimeout(() => {
-          clearRowMessage(transactionId, setRowMessages);
-        }, 3000);
-        return;
-      }
-
-      setHiddenIds((prev) => new Set(prev).add(transactionId));
-      onResolved?.();
-      showBanner("success", "Zapisano — usunięto z kolejki weryfikacji");
-      router.refresh();
+    startTransition(() => {
+      startReviewDecision({
+        transactionId,
+        decision,
+        categoryId,
+        router,
+        onResolved,
+        setPendingId,
+        setError,
+        setBanner,
+        setRowMessages,
+        setHiddenIds,
+        clearRowMessage,
+        showBanner,
+      });
     });
   }
 
@@ -111,8 +109,6 @@ export function ReviewQueueTable({
     setError(message);
     showBanner("error", message);
   }
-
-  const visibleItems = items.filter((item) => !hiddenIds.has(item.id));
 
   if (visibleItems.length === 0) {
     return (
@@ -124,27 +120,18 @@ export function ReviewQueueTable({
 
   return (
     <div className="space-y-3">
-      {banner ? (
-        <p
-          className={banner.type === "success" ? "alert-success text-sm" : "alert-error text-sm"}
-          role="status"
-        >
-          {banner.text}
-        </p>
-      ) : null}
-      {error && !banner ? <p className="alert-error text-sm">{error}</p> : null}
+      <ReviewQueueBanner banner={banner} error={error} />
       <div className="section-card overflow-x-auto p-0">
         <table className="min-w-full text-left text-sm">
-          <thead className="border-b border-calm-200 bg-calm-50">
-            <tr>
-              <th className="px-3 py-2">Data</th>
-              <th className="px-3 py-2">Operacja</th>
-              <th className="px-3 py-2">mBank</th>
-              <th className="px-3 py-2">App</th>
-              <th className="px-3 py-2">Sugestia AI</th>
-              <th className="px-3 py-2">Akcje</th>
-            </tr>
-          </thead>
+          <ReviewQueueTableHead
+            showSelection
+            filters={filters}
+            page={page}
+            allSelected={allVisibleSelected}
+            onToggleSelectAll={() => {
+              onToggleSelectAll(visibleIds);
+            }}
+          />
           <tbody>
             {visibleItems.map((item) => (
               <ReviewQueueRow
@@ -154,7 +141,10 @@ export function ReviewQueueTable({
                 categories={categories}
                 customCategoryId={customCategoryByTx[item.id] ?? ""}
                 pending={pendingId === item.id}
+                selected={selectedIds.includes(item.id)}
+                showSelection
                 rowMessage={rowMessages[item.id]}
+                onToggleSelect={onToggleSelect}
                 onCustomCategoryChange={(categoryId) => {
                   setCustomCategoryByTx((prev) => ({ ...prev, [item.id]: categoryId }));
                 }}
