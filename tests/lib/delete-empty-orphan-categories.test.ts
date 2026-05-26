@@ -1,6 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const categoryFindMany = vi.fn();
+const categoryCreate = vi.fn();
+const categoryUpdate = vi.fn();
 const transactionCount = vi.fn();
 const categoryDelete = vi.fn();
 
@@ -8,6 +10,8 @@ vi.mock("@/lib/db", () => ({
   prisma: {
     category: {
       findMany: (...args: unknown[]) => categoryFindMany(...args),
+      create: (...args: unknown[]) => categoryCreate(...args),
+      update: (...args: unknown[]) => categoryUpdate(...args),
       delete: (...args: unknown[]) => categoryDelete(...args),
     },
     transaction: {
@@ -16,7 +20,46 @@ vi.mock("@/lib/db", () => ({
   },
 }));
 
-import { deleteEmptyOrphanCategories } from "@/lib/categories/ensure-canonical-categories";
+import { DEFAULT_CATEGORIES } from "@/lib/categories/default-categories";
+import {
+  deleteEmptyOrphanCategories,
+  ensureCanonicalCategories,
+} from "@/lib/categories/ensure-canonical-categories";
+
+function canonicalCategoryRows() {
+  return DEFAULT_CATEGORIES.map((category) => ({
+    id: `cat-${category.name}`,
+    workspaceId: "ws-1",
+    name: category.name,
+    color: category.color,
+    isDefault: true,
+    excludeFromOptimization: category.excludeFromOptimization,
+    isDiscretionary: category.isDiscretionary,
+  }));
+}
+
+describe("ensureCanonicalCategories", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    categoryCreate.mockResolvedValue({});
+    categoryUpdate.mockResolvedValue({});
+  });
+
+  it("does not overwrite user-edited canonical category flags", async () => {
+    categoryFindMany.mockResolvedValue(
+      canonicalCategoryRows().map((category) =>
+        category.name === "Rozrywka"
+          ? { ...category, excludeFromOptimization: true, isDiscretionary: false }
+          : category,
+      ),
+    );
+
+    await ensureCanonicalCategories("ws-1");
+
+    expect(categoryCreate).not.toHaveBeenCalled();
+    expect(categoryUpdate).not.toHaveBeenCalled();
+  });
+});
 
 describe("deleteEmptyOrphanCategories", () => {
   beforeEach(() => {

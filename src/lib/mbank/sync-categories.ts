@@ -31,6 +31,9 @@ interface ApplyCategoriesInput {
 async function applyResolvedCategories(input: ApplyCategoriesInput): Promise<number> {
   let updated = 0;
   for (const tx of input.transactions) {
+    if (tx.mbankReviewResolvedAt) {
+      continue;
+    }
     const categoryId = resolveCategoryId(tx, input.rules, input.memories, input.byName);
     if (categoryId && categoryId !== tx.categoryId) {
       await prisma.transaction.update({ where: { id: tx.id }, data: { categoryId } });
@@ -51,7 +54,12 @@ export async function assignMbankCategoriesForWorkspace(
 
   await syncMbankCategories(workspaceId);
   const byName = await buildCategoriesByName(workspaceId);
-  const updated = await applyResolvedCategories({ transactions, rules, memories, byName });
+  const updated = await applyResolvedCategories({
+    transactions,
+    rules,
+    memories,
+    byName,
+  });
   await deleteEmptyOrphanCategories(workspaceId);
   return updated;
 }
