@@ -75,4 +75,15 @@ describe("buildBulkCategoryWhere", () => {
     expect(where.tags).toEqual({ some: { tagId: "tag-kids" } });
     expect(where.category).toEqual({ isDiscretionary: true });
   });
+
+  it("keeps discretionary scope even when uncategorized is also active", () => {
+    const where = buildBulkCategoryWhere({
+      workspaceId: "ws-1",
+      accountIds: ["acc-a"],
+      filters: { uncategorizedOnly: true, discretionary: true },
+    });
+
+    expect(where.categoryId).toBeNull();
+    expect(where.category).toEqual({ isDiscretionary: true });
+  });
 });

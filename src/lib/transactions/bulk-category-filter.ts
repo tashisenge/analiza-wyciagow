@@ -77,8 +77,10 @@ function buildCategoryRelationFilter(
   workspaceId: string,
   filters: BulkCategoryFilters,
 ): Prisma.TransactionWhereInput["category"] | undefined {
-  const categoryName = relationCategoryName(filters);
-  if (filters.uncategorizedOnly || (!categoryName && !filters.discretionary)) {
+  const categoryName = filters.uncategorizedOnly
+    ? undefined
+    : relationCategoryName(filters);
+  if (!categoryName && !filters.discretionary) {
     return undefined;
   }
 
