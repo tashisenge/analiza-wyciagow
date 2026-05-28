@@ -60,6 +60,63 @@ function applyDateRangeFilter(
   }
 }
 
+function currentCategoryFilter(
+  where: Prisma.TransactionWhereInput,
+): Exclude<Prisma.TransactionWhereInput["category"], undefined> {
+  return typeof where.category === "object" && where.category !== null
+    ? where.category
+    : {};
+}
+
+function applyCategoryFilter(
+  where: Prisma.TransactionWhereInput,
+  workspaceId: string,
+  filters: BulkCategoryFilters,
+): void {
+  if (filters.uncategorizedOnly) {
+    return;
+  }
+  const categoryId = filters.categoryId?.trim();
+  const categoryName = filters.categoryName?.trim();
+  if (categoryId) {
+    where.categoryId = categoryId;
+  } else if (categoryName) {
+    where.category = { ...currentCategoryFilter(where), name: categoryName, workspaceId };
+  }
+}
+
+function applyDiscretionaryFilter(
+  where: Prisma.TransactionWhereInput,
+  filters: BulkCategoryFilters,
+): void {
+  if (filters.discretionary) {
+    where.category = {
+      ...currentCategoryFilter(where),
+      isDiscretionary: true,
+    };
+  }
+}
+
+function applyTagFilter(
+  where: Prisma.TransactionWhereInput,
+  tagId: string | undefined,
+): void {
+  const trimmedTagId = tagId?.trim();
+  if (trimmedTagId) {
+    where.tags = { some: { tagId: trimmedTagId } };
+  }
+}
+
+function applyVisibleListFilters(
+  where: Prisma.TransactionWhereInput,
+  workspaceId: string,
+  filters: BulkCategoryFilters,
+): void {
+  applyCategoryFilter(where, workspaceId, filters);
+  applyDiscretionaryFilter(where, filters);
+  applyTagFilter(where, filters.tagId);
+}
+
 export function buildBulkCategoryWhere(
   input: BuildBulkCategoryWhereInput,
 ): Prisma.TransactionWhereInput {
@@ -81,6 +138,7 @@ export function buildBulkCategoryWhere(
     where.categoryId = null;
   }
 
+  applyVisibleListFilters(where, workspaceId, filters);
   applyDateRangeFilter(where, filters.dateFrom, filters.dateTo);
 
   return where;

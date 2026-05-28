@@ -64,6 +64,10 @@ export default async function TransactionsPage({
     counterpartyContains: params.counterparty,
     mbankCategory: params.mbankCategory,
     uncategorizedOnly: params.uncategorized === "1",
+    categoryId: params.categoryId,
+    categoryName: params.categoryName,
+    tagId: params.tagId,
+    discretionary: params.discretionary === "1",
     dateFrom: params.dateFrom,
     dateTo: params.dateTo,
     context: context === "razem" ? "razem" : context,
@@ -140,6 +144,7 @@ export default async function TransactionsPage({
       <TransactionFlashMessage error={params.error} msg={params.msg} />
       <TransactionsHelpPanel />
       <TransactionsPageClient
+        key={returnTo}
         rows={pageData.rows}
         categories={pageData.categories}
         allTags={pageData.allTags}

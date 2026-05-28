@@ -59,4 +59,20 @@ describe("buildBulkCategoryWhere", () => {
       mode: "insensitive",
     });
   });
+
+  it("mirrors visible list filters that can otherwise broaden bulk writes", () => {
+    const where = buildBulkCategoryWhere({
+      workspaceId: "ws-1",
+      accountIds: ["acc-a"],
+      filters: {
+        categoryId: "cat-food",
+        tagId: "tag-kids",
+        discretionary: true,
+      },
+    });
+
+    expect(where.categoryId).toBe("cat-food");
+    expect(where.tags).toEqual({ some: { tagId: "tag-kids" } });
+    expect(where.category).toEqual({ isDiscretionary: true });
+  });
 });
