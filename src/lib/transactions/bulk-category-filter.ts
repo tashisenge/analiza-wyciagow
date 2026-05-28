@@ -60,6 +60,74 @@ function applyDateRangeFilter(
   }
 }
 
+function applyCategoryFilter(
+  where: Prisma.TransactionWhereInput,
+  filters: BulkCategoryFilters,
+): void {
+  if (filters.uncategorizedOnly) {
+    return;
+  }
+  const categoryId = filters.categoryId?.trim();
+  if (categoryId) {
+    where.categoryId = categoryId;
+  }
+}
+
+function buildCategoryRelationFilter(
+  workspaceId: string,
+  filters: BulkCategoryFilters,
+): Prisma.TransactionWhereInput["category"] | undefined {
+  const categoryName = filters.uncategorizedOnly
+    ? undefined
+    : relationCategoryName(filters);
+  if (!categoryName && !filters.discretionary) {
+    return undefined;
+  }
+
+  if (categoryName && filters.discretionary) {
+    return { name: categoryName, workspaceId, isDiscretionary: true };
+  }
+  if (categoryName) {
+    return { name: categoryName, workspaceId };
+  }
+  return { isDiscretionary: true };
+}
+
+function relationCategoryName(filters: BulkCategoryFilters): string | undefined {
+  return filters.categoryId?.trim() ? undefined : filters.categoryName?.trim();
+}
+
+function applyCategoryRelationFilter(
+  where: Prisma.TransactionWhereInput,
+  workspaceId: string,
+  filters: BulkCategoryFilters,
+): void {
+  const category = buildCategoryRelationFilter(workspaceId, filters);
+  if (category) {
+    where.category = category;
+  }
+}
+
+function applyTagFilter(
+  where: Prisma.TransactionWhereInput,
+  tagId: string | undefined,
+): void {
+  const trimmedTagId = tagId?.trim();
+  if (trimmedTagId) {
+    where.tags = { some: { tagId: trimmedTagId } };
+  }
+}
+
+function applyVisibleListFilters(
+  where: Prisma.TransactionWhereInput,
+  workspaceId: string,
+  filters: BulkCategoryFilters,
+): void {
+  applyCategoryFilter(where, filters);
+  applyCategoryRelationFilter(where, workspaceId, filters);
+  applyTagFilter(where, filters.tagId);
+}
+
 export function buildBulkCategoryWhere(
   input: BuildBulkCategoryWhereInput,
 ): Prisma.TransactionWhereInput {
@@ -81,6 +149,7 @@ export function buildBulkCategoryWhere(
     where.categoryId = null;
   }
 
+  applyVisibleListFilters(where, workspaceId, filters);
   applyDateRangeFilter(where, filters.dateFrom, filters.dateTo);
 
   return where;
