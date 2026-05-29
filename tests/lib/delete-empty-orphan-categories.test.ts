@@ -1,6 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const categoryFindMany = vi.fn();
+const categoryCreate = vi.fn();
+const categoryUpdate = vi.fn();
 const transactionCount = vi.fn();
 const categoryDelete = vi.fn();
 
@@ -8,6 +10,8 @@ vi.mock("@/lib/db", () => ({
   prisma: {
     category: {
       findMany: (...args: unknown[]) => categoryFindMany(...args),
+      create: (...args: unknown[]) => categoryCreate(...args),
+      update: (...args: unknown[]) => categoryUpdate(...args),
       delete: (...args: unknown[]) => categoryDelete(...args),
     },
     transaction: {
@@ -16,7 +20,37 @@ vi.mock("@/lib/db", () => ({
   },
 }));
 
-import { deleteEmptyOrphanCategories } from "@/lib/categories/ensure-canonical-categories";
+import {
+  deleteEmptyOrphanCategories,
+  ensureCanonicalCategories,
+} from "@/lib/categories/ensure-canonical-categories";
+
+describe("ensureCanonicalCategories", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    categoryCreate.mockResolvedValue({});
+    categoryUpdate.mockResolvedValue({});
+  });
+
+  it("keeps existing canonical category preference flags", async () => {
+    categoryFindMany.mockResolvedValue([
+      {
+        id: "food",
+        name: "Żywność",
+        color: "#22c55e",
+        isDefault: true,
+        excludeFromOptimization: true,
+        isDiscretionary: true,
+      },
+    ]);
+
+    await ensureCanonicalCategories("ws-1");
+
+    expect(categoryUpdate).not.toHaveBeenCalledWith(
+      expect.objectContaining({ where: { id: "food" } }),
+    );
+  });
+});
 
 describe("deleteEmptyOrphanCategories", () => {
   beforeEach(() => {
