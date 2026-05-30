@@ -42,7 +42,7 @@ describe("loadReviewQueue", () => {
       if (skip < 10_000) {
         return Promise.resolve(
           Array.from({ length: take }, (_, index) =>
-            reviewCandidate({ id: `exact-${skip + index}` }),
+            reviewCandidate({ id: `exact-${String(skip + index)}` }),
           ),
         );
       }
