@@ -76,14 +76,21 @@ export async function deleteCategory(categoryId: string): Promise<CategoryAction
 
   try {
     const scope = scopedCategoryId(workspaceId, categoryId);
-    await prisma.transaction.updateMany({
-      where: scope,
-      data: { categoryId: null },
-    });
-    await prisma.categoryRule.deleteMany({ where: scope });
-    await prisma.merchantCategoryMemory.deleteMany({ where: scope });
-    await prisma.category.deleteMany({
-      where: scopedCategoryPrimaryKey(workspaceId, categoryId),
+    await prisma.$transaction(async (tx) => {
+      await tx.transaction.updateMany({
+        where: scope,
+        data: { categoryId: null },
+      });
+      await tx.optimizationOpportunity.updateMany({
+        where: scope,
+        data: { categoryId: null },
+      });
+      await tx.categoryBudget.deleteMany({ where: scope });
+      await tx.categoryRule.deleteMany({ where: scope });
+      await tx.merchantCategoryMemory.deleteMany({ where: scope });
+      await tx.category.deleteMany({
+        where: scopedCategoryPrimaryKey(workspaceId, categoryId),
+      });
     });
     revalidatePath("/categories");
     revalidatePath("/dashboard");
