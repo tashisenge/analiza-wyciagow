@@ -21,7 +21,8 @@ const prismaTransaction = vi.fn((callback: (tx: typeof transactionClient) => unk
 
 vi.mock("@/lib/db", () => ({
   prisma: {
-    $transaction: (...args: unknown[]) => prismaTransaction(...args),
+    $transaction: (callback: (tx: typeof transactionClient) => unknown) =>
+      prismaTransaction(callback),
     category: {
       findFirst: (...args: unknown[]) => categoryFindFirst(...args),
       deleteMany: (...args: unknown[]) => categoryDeleteMany(...args),
