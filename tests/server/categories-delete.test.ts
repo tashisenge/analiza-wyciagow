@@ -3,11 +3,25 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const transactionUpdateMany = vi.fn().mockResolvedValue({ count: 0 });
 const categoryRuleDeleteMany = vi.fn().mockResolvedValue({ count: 0 });
 const merchantMemoryDeleteMany = vi.fn().mockResolvedValue({ count: 0 });
+const optimizationOpportunityUpdateMany = vi.fn().mockResolvedValue({ count: 0 });
+const categoryBudgetDeleteMany = vi.fn().mockResolvedValue({ count: 0 });
 const categoryDeleteMany = vi.fn().mockResolvedValue({ count: 1 });
 const categoryFindFirst = vi.fn();
+const transactionClient = {
+  transaction: { updateMany: transactionUpdateMany },
+  categoryRule: { deleteMany: categoryRuleDeleteMany },
+  merchantCategoryMemory: { deleteMany: merchantMemoryDeleteMany },
+  optimizationOpportunity: { updateMany: optimizationOpportunityUpdateMany },
+  categoryBudget: { deleteMany: categoryBudgetDeleteMany },
+  category: { deleteMany: categoryDeleteMany },
+};
+const prismaTransaction = vi.fn((callback: (tx: typeof transactionClient) => unknown) =>
+  callback(transactionClient),
+);
 
 vi.mock("@/lib/db", () => ({
   prisma: {
+    $transaction: (...args: unknown[]) => prismaTransaction(...args),
     category: {
       findFirst: (...args: unknown[]) => categoryFindFirst(...args),
       deleteMany: (...args: unknown[]) => categoryDeleteMany(...args),
@@ -37,6 +51,7 @@ import { deleteCategory } from "@/server/actions/categories";
 describe("deleteCategory IDOR protection", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    categoryDeleteMany.mockResolvedValue({ count: 1 });
   });
 
   it("rejects category from another workspace without mutating data", async () => {
@@ -71,6 +86,28 @@ describe("deleteCategory IDOR protection", () => {
     });
     expect(categoryRuleDeleteMany).toHaveBeenCalledWith({ where: expectedScope });
     expect(merchantMemoryDeleteMany).toHaveBeenCalledWith({ where: expectedScope });
+    expect(categoryDeleteMany).toHaveBeenCalledWith({
+      where: { id: "cat-1", workspaceId: "ws-mine" },
+    });
+  });
+
+  it("cleans every category dependency in one transaction", async () => {
+    categoryFindFirst.mockResolvedValue({
+      id: "cat-1",
+      workspaceId: "ws-mine",
+      isDefault: false,
+    });
+
+    const result = await deleteCategory("cat-1");
+
+    expect(result).toEqual({ ok: true });
+    const expectedScope = { workspaceId: "ws-mine", categoryId: "cat-1" };
+    expect(prismaTransaction).toHaveBeenCalledTimes(1);
+    expect(optimizationOpportunityUpdateMany).toHaveBeenCalledWith({
+      where: expectedScope,
+      data: { categoryId: null },
+    });
+    expect(categoryBudgetDeleteMany).toHaveBeenCalledWith({ where: expectedScope });
     expect(categoryDeleteMany).toHaveBeenCalledWith({
       where: { id: "cat-1", workspaceId: "ws-mine" },
     });
