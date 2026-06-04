@@ -51,4 +51,18 @@ describe("persistBulkReviewDecisions", () => {
     expect(result).toMatchObject({ ok: true, updatedCount: 2, failedCount: 0 });
     expect(updateMany).toHaveBeenCalledTimes(2);
   });
+
+  it("does not count transactions that were already resolved", async () => {
+    updateMany.mockResolvedValueOnce({ count: 0 });
+
+    const result = await persistBulkReviewDecisions({
+      workspaceId: "ws-1",
+      transactionIds: ["tx-1"],
+      decision: "mbank",
+      categoryIdByName: new Map(),
+    });
+
+    expect(result).toMatchObject({ ok: true, updatedCount: 0, failedCount: 1 });
+    expect(result.ok && result.errors[0]).toContain("nie wymaga weryfikacji");
+  });
 });
