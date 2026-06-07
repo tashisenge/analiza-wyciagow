@@ -5,8 +5,6 @@ import {
 } from "@/lib/categories/default-categories";
 import { prisma } from "@/lib/db";
 
-type ExistingCategory = Awaited<ReturnType<typeof prisma.category.findMany>>[number];
-
 async function createCanonicalCategory(
   workspaceId: string,
   def: DefaultCategoryDef,
@@ -23,24 +21,7 @@ async function createCanonicalCategory(
   });
 }
 
-async function syncCanonicalFlags(found: ExistingCategory, def: DefaultCategoryDef): Promise<void> {
-  if (
-    found.excludeFromOptimization === def.excludeFromOptimization &&
-    found.isDiscretionary === def.isDiscretionary
-  ) {
-    return;
-  }
-
-  await prisma.category.update({
-    where: { id: found.id },
-    data: {
-      excludeFromOptimization: def.excludeFromOptimization,
-      isDiscretionary: def.isDiscretionary,
-    },
-  });
-}
-
-/** Tworzy brakujące kanoniczne kategorie i ustawia flagi stałych wydatków. */
+/** Tworzy brakujące kanoniczne kategorie, zachowując istniejące ustawienia użytkownika. */
 export async function ensureCanonicalCategories(workspaceId: string): Promise<void> {
   const existing = await prisma.category.findMany({ where: { workspaceId } });
   const byName = new Map(existing.map((c) => [c.name, c]));
@@ -49,10 +30,20 @@ export async function ensureCanonicalCategories(workspaceId: string): Promise<vo
     const found = byName.get(def.name);
     if (!found) {
       await createCanonicalCategory(workspaceId, def);
-      continue;
     }
-    await syncCanonicalFlags(found, def);
   }
+}
+
+async function hasRelatedCategoryConfig(
+  workspaceId: string,
+  categoryId: string,
+): Promise<boolean> {
+  const [ruleCount, memoryCount, budgetCount] = await Promise.all([
+    prisma.categoryRule.count({ where: { workspaceId, categoryId } }),
+    prisma.merchantCategoryMemory.count({ where: { workspaceId, categoryId } }),
+    prisma.categoryBudget.count({ where: { workspaceId, categoryId } }),
+  ]);
+  return ruleCount > 0 || memoryCount > 0 || budgetCount > 0;
 }
 
 export async function deleteEmptyOrphanCategories(workspaceId: string): Promise<number> {
@@ -63,11 +54,17 @@ export async function deleteEmptyOrphanCategories(workspaceId: string): Promise<
     if (isCanonicalCategoryName(category.name) || !category.isDefault) {
       continue;
     }
-    const count = await prisma.transaction.count({ where: { categoryId: category.id } });
-    if (count === 0) {
-      await prisma.category.delete({ where: { id: category.id } });
-      deleted += 1;
+    const count = await prisma.transaction.count({
+      where: { workspaceId, categoryId: category.id },
+    });
+    if (count > 0) {
+      continue;
     }
+    if (await hasRelatedCategoryConfig(workspaceId, category.id)) {
+      continue;
+    }
+    await prisma.category.delete({ where: { id: category.id } });
+    deleted += 1;
   }
 
   return deleted;
