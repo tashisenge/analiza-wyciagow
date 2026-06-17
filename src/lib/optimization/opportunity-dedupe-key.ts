@@ -3,6 +3,15 @@ import type { DetectedOpportunity } from "@/lib/optimization/types";
 export function buildDedupeKey(
   opportunity: DetectedOpportunity,
   monthKey: string,
+  accountContext: "firma" | "dom" | "razem",
+): string {
+  const base = opportunity.dedupeKey;
+  return `${accountContext}:${base}:${monthKey}`;
+}
+
+export function buildLegacyDedupeKey(
+  opportunity: DetectedOpportunity,
+  monthKey: string,
 ): string {
   const base = opportunity.dedupeKey;
   return `${base}:${monthKey}`;

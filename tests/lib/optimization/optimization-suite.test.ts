@@ -51,7 +51,8 @@ describe("optimization helpers", () => {
       evidenceTransactionIds: [],
       dedupeKey: "RECURRING:X",
     };
-    expect(buildDedupeKey(item, "2026-03")).toBe("RECURRING:X:2026-03");
+    expect(buildDedupeKey(item, "2026-03", "firma")).toBe("firma:RECURRING:X:2026-03");
+    expect(buildDedupeKey(item, "2026-03", "dom")).toBe("dom:RECURRING:X:2026-03");
     expect(monthKeyFromDate(new Date("2026-03-15"))).toBe("2026-03");
   });
 

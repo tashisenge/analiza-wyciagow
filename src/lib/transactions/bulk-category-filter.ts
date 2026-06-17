@@ -43,6 +43,27 @@ function applyMbankCategoryFilter(
   };
 }
 
+function applyTagFilter(where: Prisma.TransactionWhereInput, tagId?: string): void {
+  if (!tagId?.trim()) {
+    return;
+  }
+  where.tags = { some: { tagId: tagId.trim() } };
+}
+
+function applyCategoryFilter(
+  where: Prisma.TransactionWhereInput,
+  filters: BulkCategoryFilters,
+  workspaceId: string,
+): void {
+  if (filters.categoryId?.trim()) {
+    where.categoryId = filters.categoryId.trim();
+    return;
+  }
+  if (filters.categoryName?.trim()) {
+    where.category = { name: filters.categoryName.trim(), workspaceId };
+  }
+}
+
 function applyDateRangeFilter(
   where: Prisma.TransactionWhereInput,
   dateFrom?: string,
@@ -76,10 +97,12 @@ export function buildBulkCategoryWhere(
 
   applyCounterpartyFilter(where, filters.counterpartyContains);
   applyMbankCategoryFilter(where, filters.mbankCategory);
+  applyTagFilter(where, filters.tagId);
 
   if (filters.uncategorizedOnly) {
     where.categoryId = null;
   }
+  applyCategoryFilter(where, filters, workspaceId);
 
   applyDateRangeFilter(where, filters.dateFrom, filters.dateTo);
 
