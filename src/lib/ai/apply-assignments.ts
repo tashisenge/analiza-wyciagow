@@ -13,7 +13,7 @@ export async function applyCategoryAssignments(
     }
     const updated = await prisma.transaction.updateMany({
       where: { id: txId, workspaceId },
-      data: { categoryId },
+      data: { categoryId, mbankReviewResolvedAt: null },
     });
     total += updated.count;
   }

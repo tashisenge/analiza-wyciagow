@@ -78,7 +78,7 @@ export async function deleteCategory(categoryId: string): Promise<CategoryAction
     const scope = scopedCategoryId(workspaceId, categoryId);
     await prisma.transaction.updateMany({
       where: scope,
-      data: { categoryId: null },
+      data: { categoryId: null, mbankReviewResolvedAt: null },
     });
     await prisma.categoryRule.deleteMany({ where: scope });
     await prisma.merchantCategoryMemory.deleteMany({ where: scope });
