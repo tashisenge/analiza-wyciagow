@@ -29,12 +29,12 @@ describe("applyBulkCategoryUpdate", () => {
     expect(result.rememberedMerchants).toBe(1);
     expect(updateMany).toHaveBeenCalledWith({
       where: { workspaceId: "ws-1", id: { in: ["t1", "t2"] } },
-      data: { categoryId: "cat-1" },
+      data: { categoryId: "cat-1", mbankReviewResolvedAt: null },
     });
     expect(upsert).toHaveBeenCalledTimes(1);
   });
 
-  it("clears category when categoryId is null", async () => {
+  it("clears category and stale review resolution when categoryId is null", async () => {
     const updateMany = vi.fn().mockResolvedValue({ count: 1 });
     const prisma = {
       transaction: {
@@ -56,7 +56,7 @@ describe("applyBulkCategoryUpdate", () => {
     expect(result.rememberedMerchants).toBe(0);
     expect(updateMany).toHaveBeenCalledWith({
       where: { workspaceId: "ws-1", id: { in: ["t1"] } },
-      data: { categoryId: null },
+      data: { categoryId: null, mbankReviewResolvedAt: null },
     });
   });
 });

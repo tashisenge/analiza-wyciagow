@@ -67,7 +67,7 @@ describe("deleteCategory IDOR protection", () => {
     const expectedScope = { workspaceId: "ws-mine", categoryId: "cat-1" };
     expect(transactionUpdateMany).toHaveBeenCalledWith({
       where: expectedScope,
-      data: { categoryId: null },
+      data: { categoryId: null, mbankReviewResolvedAt: null },
     });
     expect(categoryRuleDeleteMany).toHaveBeenCalledWith({ where: expectedScope });
     expect(merchantMemoryDeleteMany).toHaveBeenCalledWith({ where: expectedScope });
