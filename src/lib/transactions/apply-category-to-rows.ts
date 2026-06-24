@@ -32,7 +32,7 @@ export async function applyCategoryToTransactionRows(input: {
       workspaceId: input.workspaceId,
       id: { in: input.rows.map((row) => row.id) },
     },
-    data: { categoryId: input.categoryId },
+    data: { categoryId: input.categoryId, mbankReviewResolvedAt: null },
   });
   const rememberedMerchants = await rememberIfRequested({
     prisma: input.prisma,

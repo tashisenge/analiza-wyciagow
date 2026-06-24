@@ -69,7 +69,7 @@ interface ApplyCategoryOptions {
 async function applyCategoryToTransactions(options: ApplyCategoryOptions): Promise<void> {
   await prisma.transaction.updateMany({
     where: { workspaceId: options.workspaceId, id: { in: options.idsToUpdate } },
-    data: { categoryId: options.categoryId },
+    data: { categoryId: options.categoryId, mbankReviewResolvedAt: null },
   });
   if (!options.categoryId) {
     return;
