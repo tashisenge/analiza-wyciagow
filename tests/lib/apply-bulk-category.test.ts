@@ -29,7 +29,7 @@ describe("applyBulkCategoryUpdate", () => {
     expect(result.rememberedMerchants).toBe(1);
     expect(updateMany).toHaveBeenCalledWith({
       where: { workspaceId: "ws-1", id: { in: ["t1", "t2"] } },
-      data: { categoryId: "cat-1" },
+      data: { categoryId: "cat-1", mbankReviewResolvedAt: null },
     });
     expect(upsert).toHaveBeenCalledTimes(1);
   });
@@ -56,7 +56,7 @@ describe("applyBulkCategoryUpdate", () => {
     expect(result.rememberedMerchants).toBe(0);
     expect(updateMany).toHaveBeenCalledWith({
       where: { workspaceId: "ws-1", id: { in: ["t1"] } },
-      data: { categoryId: null },
+      data: { categoryId: null, mbankReviewResolvedAt: null },
     });
   });
 });

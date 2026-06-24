@@ -76,7 +76,7 @@ describe("updateTransactionCategory", () => {
     expect(result).toEqual({ ok: true, updatedCount: 1 });
     expect(transactionUpdateMany).toHaveBeenCalledWith({
       where: { workspaceId: "ws-mine", id: { in: ["tx-1"] } },
-      data: { categoryId: "cat-1" },
+      data: { categoryId: "cat-1", mbankReviewResolvedAt: null },
     });
   });
 });
