@@ -26,6 +26,8 @@ describe("persistBulkReviewDecisions", () => {
       id: "tx-1",
       mbankCategory: "Transport",
       categoryId: "cat-old",
+      mbankReviewResolvedAt: null,
+      category: { name: "Fuel" },
     });
     updateMany.mockResolvedValue({ count: 1 });
   });
@@ -50,5 +52,43 @@ describe("persistBulkReviewDecisions", () => {
 
     expect(result).toMatchObject({ ok: true, updatedCount: 2, failedCount: 0 });
     expect(updateMany).toHaveBeenCalledTimes(2);
+  });
+
+  it("does not overwrite transactions already resolved by another review action", async () => {
+    findFirst.mockResolvedValue({
+      id: "tx-1",
+      mbankCategory: "Transport",
+      categoryId: "cat-old",
+      mbankReviewResolvedAt: new Date("2026-01-01"),
+      category: { name: "Fuel" },
+    });
+
+    const result = await persistBulkReviewDecisions({
+      workspaceId: "ws-1",
+      transactionIds: ["tx-1"],
+      decision: "mbank",
+      categoryIdByName: new Map(),
+    });
+
+    expect(result).toMatchObject({ ok: true, updatedCount: 0, failedCount: 1 });
+    expect(updateMany).not.toHaveBeenCalled();
+  });
+
+  it("reports failure when a concurrent review action wins the update race", async () => {
+    updateMany.mockResolvedValue({ count: 0 });
+
+    const result = await persistBulkReviewDecisions({
+      workspaceId: "ws-1",
+      transactionIds: ["tx-1"],
+      decision: "mbank",
+      categoryIdByName: new Map(),
+    });
+
+    expect(result).toMatchObject({ ok: true, updatedCount: 0, failedCount: 1 });
+    expect(updateMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({ mbankReviewResolvedAt: null }),
+      }),
+    );
   });
 });
