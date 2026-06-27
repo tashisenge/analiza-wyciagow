@@ -15,7 +15,7 @@ vi.mock("@/lib/transactions/bulk-category-targets", () => ({
   resolveBulkAccountIds: (...args: unknown[]) => resolveBulkAccountIds(...args),
 }));
 
-import { loadReviewQueue } from "@/lib/review/load-review-queue";
+import { hasReviewQueueItems, loadReviewQueue } from "@/lib/review/load-review-queue";
 
 function candidate(id: string, categoryName: string) {
   return {
@@ -58,5 +58,27 @@ describe("loadReviewQueue", () => {
     expect(result.total).toBe(1);
     expect(result.items).toHaveLength(1);
     expect(result.items[0]?.id).toBe("true-1");
+  });
+});
+
+describe("hasReviewQueueItems", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    resolveBulkAccountIds.mockResolvedValue(["acc-1"]);
+  });
+
+  it("uses a bounded scan for dashboard existence checks", async () => {
+    findMany.mockImplementation((args: { skip?: number; take?: number }) => {
+      const skip = args.skip ?? 0;
+      const take = args.take ?? 250;
+      if (skip <= 10_000) {
+        return Array.from({ length: take }, (_, offset) =>
+          candidate(`false-${String(skip + offset)}`, "Transport"),
+        );
+      }
+      throw new Error("dashboard scan should be bounded");
+    });
+
+    await expect(hasReviewQueueItems("ws-1")).resolves.toBe(false);
   });
 });
