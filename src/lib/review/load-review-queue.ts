@@ -136,9 +136,8 @@ export async function hasReviewQueueItems(
   filters: ReviewQueueFilters = {},
 ): Promise<boolean> {
   const accountIds = await resolveBulkAccountIds(workspaceId, filters.context);
-  let dbSkip = 0;
 
-  while (dbSkip <= REVIEW_DASHBOARD_MAX_SCAN) {
+  for (let dbSkip = 0; dbSkip <= REVIEW_DASHBOARD_MAX_SCAN; ) {
     const batch = await fetchReviewBatch({
       workspaceId,
       accountIds,
