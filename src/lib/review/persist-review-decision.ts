@@ -44,7 +44,7 @@ async function resolveAndUpdateReviewCategory(input: {
 
   const updated = await updateReviewCategory(
     input.workspaceId,
-    input.tx.id,
+    input.tx,
     resolved.categoryId,
   );
   if (!updated) {
@@ -64,11 +64,17 @@ function transactionNeedsReview(tx: ReviewDecisionTransaction): boolean {
 
 async function updateReviewCategory(
   workspaceId: string,
-  transactionId: string,
+  tx: ReviewDecisionTransaction,
   categoryId: string | null,
 ): Promise<boolean> {
   const result = await prisma.transaction.updateMany({
-    where: { id: transactionId, workspaceId, mbankReviewResolvedAt: null },
+    where: {
+      id: tx.id,
+      workspaceId,
+      categoryId: tx.categoryId,
+      mbankCategory: tx.mbankCategory,
+      mbankReviewResolvedAt: null,
+    },
     data: {
       categoryId,
       mbankReviewResolvedAt: new Date(),

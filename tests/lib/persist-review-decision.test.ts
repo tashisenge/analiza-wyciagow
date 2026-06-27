@@ -45,6 +45,8 @@ describe("persistReviewDecision", () => {
       where: {
         id: "tx-1",
         workspaceId: "ws-1",
+        categoryId: "cat-fuel",
+        mbankCategory: "Transport",
         mbankReviewResolvedAt: null,
       },
       data: {
