@@ -26,6 +26,8 @@ describe("persistBulkReviewDecisions", () => {
       id: "tx-1",
       mbankCategory: "Transport",
       categoryId: "cat-old",
+      mbankReviewResolvedAt: null,
+      category: { name: "Paliwo" },
     });
     updateMany.mockResolvedValue({ count: 1 });
   });
