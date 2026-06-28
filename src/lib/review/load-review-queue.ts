@@ -11,7 +11,7 @@ import { resolveBulkAccountIds } from "@/lib/transactions/bulk-category-targets"
 
 export const REVIEW_PAGE_SIZE = 50;
 const REVIEW_SCAN_BATCH = 250;
-const REVIEW_MAX_SCAN = 10_000;
+const REVIEW_HAS_ITEMS_MAX_SCAN = 1_000;
 
 type ReviewCandidateRow = Awaited<
   ReturnType<
@@ -65,7 +65,11 @@ interface FetchBatchInput {
 async function fetchReviewBatch(input: FetchBatchInput): Promise<ReviewCandidateRow[]> {
   const sort = parseReviewSort(input.filters);
   return prisma.transaction.findMany({
-    where: buildReviewQueueWhere(input.workspaceId, input.accountIds, toDbFilters(input.filters)),
+    where: buildReviewQueueWhere(
+      input.workspaceId,
+      input.accountIds,
+      toDbFilters(input.filters),
+    ),
     include: { category: { select: { name: true } } },
     orderBy: buildReviewOrderBy(sort),
     take: REVIEW_SCAN_BATCH,
@@ -81,8 +85,13 @@ async function collectReviewItems(
   const collected: ReviewQueueItem[] = [];
   let dbSkip = 0;
 
-  while (dbSkip < REVIEW_MAX_SCAN) {
-    const batch = await fetchReviewBatch({ workspaceId, accountIds, filters, skip: dbSkip });
+  for (;;) {
+    const batch = await fetchReviewBatch({
+      workspaceId,
+      accountIds,
+      filters,
+      skip: dbSkip,
+    });
     if (batch.length === 0) {
       break;
     }
@@ -94,6 +103,26 @@ async function collectReviewItems(
   }
 
   return sortReviewItems(collected, parseReviewSort(filters));
+}
+
+function batchHasReviewItems(
+  batch: ReviewCandidateRow[],
+  filters: ReviewQueueFilters,
+): boolean {
+  return mapReviewItems(batch, filters.reason).length > 0;
+}
+
+function reviewPresenceBatchStatus(
+  batch: ReviewCandidateRow[],
+  filters: ReviewQueueFilters,
+): "found" | "done" | "continue" {
+  if (batch.length === 0) {
+    return "done";
+  }
+  if (batchHasReviewItems(batch, filters)) {
+    return "found";
+  }
+  return batch.length < REVIEW_SCAN_BATCH ? "done" : "continue";
 }
 
 export async function loadReviewQueue(
@@ -120,4 +149,28 @@ export async function countReviewQueue(
 ): Promise<number> {
   const { total } = await loadReviewQueue(workspaceId, 1, filters);
   return total;
+}
+
+export async function hasReviewQueueItems(
+  workspaceId: string,
+  filters: ReviewQueueFilters = {},
+): Promise<boolean> {
+  const accountIds = await resolveBulkAccountIds(workspaceId, filters.context);
+  let dbSkip = 0;
+
+  while (dbSkip < REVIEW_HAS_ITEMS_MAX_SCAN) {
+    const batch = await fetchReviewBatch({
+      workspaceId,
+      accountIds,
+      filters,
+      skip: dbSkip,
+    });
+    const status = reviewPresenceBatchStatus(batch, filters);
+    if (status !== "continue") {
+      return status === "found";
+    }
+    dbSkip += batch.length;
+  }
+
+  return false;
 }
