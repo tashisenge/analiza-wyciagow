@@ -15,7 +15,7 @@ vi.mock("@/lib/transactions/bulk-category-targets", () => ({
   resolveBulkAccountIds: (...args: unknown[]) => resolveBulkAccountIds(...args),
 }));
 
-import { loadReviewQueue } from "@/lib/review/load-review-queue";
+import { hasReviewQueueItems, loadReviewQueue } from "@/lib/review/load-review-queue";
 
 function makeCandidate(
   id: string,
@@ -72,5 +72,21 @@ describe("loadReviewQueue", () => {
     expect(result.total).toBe(1);
     expect(result.items).toHaveLength(1);
     expect(result.items[0]?.id).toBe("true-after-cap");
+  });
+
+  it("checks dashboard review presence with a bounded scan", async () => {
+    transactionFindMany.mockImplementation(({ skip }: { skip: number }) => {
+      if (skip < 10_000) {
+        return Promise.resolve(
+          Array.from({ length: 250 }, (_, index) =>
+            makeCandidate(`false-${String(skip + index)}`, "Transport"),
+          ),
+        );
+      }
+      return Promise.resolve([makeCandidate("true-after-bound", "Paliwo")]);
+    });
+
+    await expect(hasReviewQueueItems("ws-1")).resolves.toBe(false);
+    expect(transactionFindMany).toHaveBeenCalledTimes(4);
   });
 });

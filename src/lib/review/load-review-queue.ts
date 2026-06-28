@@ -11,6 +11,7 @@ import { resolveBulkAccountIds } from "@/lib/transactions/bulk-category-targets"
 
 export const REVIEW_PAGE_SIZE = 50;
 const REVIEW_SCAN_BATCH = 250;
+const REVIEW_HAS_ITEMS_MAX_SCAN = 1_000;
 
 type ReviewCandidateRow = Awaited<
   ReturnType<
@@ -128,4 +129,33 @@ export async function countReviewQueue(
 ): Promise<number> {
   const { total } = await loadReviewQueue(workspaceId, 1, filters);
   return total;
+}
+
+export async function hasReviewQueueItems(
+  workspaceId: string,
+  filters: ReviewQueueFilters = {},
+): Promise<boolean> {
+  const accountIds = await resolveBulkAccountIds(workspaceId, filters.context);
+  let dbSkip = 0;
+
+  while (dbSkip < REVIEW_HAS_ITEMS_MAX_SCAN) {
+    const batch = await fetchReviewBatch({
+      workspaceId,
+      accountIds,
+      filters,
+      skip: dbSkip,
+    });
+    if (batch.length === 0) {
+      return false;
+    }
+    if (mapReviewItems(batch, filters.reason).length > 0) {
+      return true;
+    }
+    dbSkip += batch.length;
+    if (batch.length < REVIEW_SCAN_BATCH) {
+      return false;
+    }
+  }
+
+  return false;
 }
