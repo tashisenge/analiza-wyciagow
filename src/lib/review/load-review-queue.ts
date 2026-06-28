@@ -112,6 +112,19 @@ function batchHasReviewItems(
   return mapReviewItems(batch, filters.reason).length > 0;
 }
 
+function reviewPresenceBatchStatus(
+  batch: ReviewCandidateRow[],
+  filters: ReviewQueueFilters,
+): "found" | "done" | "continue" {
+  if (batch.length === 0) {
+    return "done";
+  }
+  if (batchHasReviewItems(batch, filters)) {
+    return "found";
+  }
+  return batch.length < REVIEW_SCAN_BATCH ? "done" : "continue";
+}
+
 export async function loadReviewQueue(
   workspaceId: string,
   page = 1,
@@ -152,16 +165,11 @@ export async function hasReviewQueueItems(
       filters,
       skip: dbSkip,
     });
-    if (batch.length === 0) {
-      return false;
-    }
-    if (batchHasReviewItems(batch, filters)) {
-      return true;
+    const status = reviewPresenceBatchStatus(batch, filters);
+    if (status !== "continue") {
+      return status === "found";
     }
     dbSkip += batch.length;
-    if (batch.length < REVIEW_SCAN_BATCH) {
-      return false;
-    }
   }
 
   return false;
