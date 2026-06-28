@@ -105,6 +105,13 @@ async function collectReviewItems(
   return sortReviewItems(collected, parseReviewSort(filters));
 }
 
+function batchHasReviewItems(
+  batch: ReviewCandidateRow[],
+  filters: ReviewQueueFilters,
+): boolean {
+  return mapReviewItems(batch, filters.reason).length > 0;
+}
+
 export async function loadReviewQueue(
   workspaceId: string,
   page = 1,
@@ -148,7 +155,7 @@ export async function hasReviewQueueItems(
     if (batch.length === 0) {
       return false;
     }
-    if (mapReviewItems(batch, filters.reason).length > 0) {
+    if (batchHasReviewItems(batch, filters)) {
       return true;
     }
     dbSkip += batch.length;
