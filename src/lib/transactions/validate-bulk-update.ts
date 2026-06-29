@@ -8,6 +8,10 @@ const filtersSchema = z.object({
   counterpartyContains: z.string().optional(),
   mbankCategory: z.string().optional(),
   uncategorizedOnly: z.boolean().optional(),
+  discretionaryOnly: z.boolean().optional(),
+  categoryId: z.string().optional(),
+  categoryName: z.string().optional(),
+  tagId: z.string().optional(),
   dateFrom: z
     .string()
     .regex(/^\d{4}-\d{2}-\d{2}$/)
