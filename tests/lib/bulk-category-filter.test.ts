@@ -59,4 +59,24 @@ describe("buildBulkCategoryWhere", () => {
       mode: "insensitive",
     });
   });
+
+  it("keeps list-only filters when building bulk targets", () => {
+    const where = buildBulkCategoryWhere({
+      workspaceId: "ws-1",
+      accountIds: ["acc-a"],
+      filters: {
+        counterpartyContains: "netflix",
+        discretionaryOnly: true,
+        tagId: "tag-1",
+        categoryId: "cat-1",
+      },
+    });
+
+    expect(where).toMatchObject({
+      counterparty: { contains: "netflix", mode: "insensitive" },
+      categoryId: "cat-1",
+      category: { isDiscretionary: true },
+      tags: { some: { tagId: "tag-1" } },
+    });
+  });
 });
