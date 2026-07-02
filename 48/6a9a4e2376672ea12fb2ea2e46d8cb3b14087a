@@ -1,0 +1,21 @@
+src/components/discretionary/DiscretionaryPageNotices.tsx
+  s_85314170cfee79::t_1bacc823006478 22-23
+src/components/review/ReviewBulkPanel.tsx
+  s_85314170cfee79::t_75a1a91a6ad740 9,80-84
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.8",
+  "base_commit_sha": "486a9a4e2376672ea12fb2ea2e46d8cb3b14087a",
+  "prompts": {},
+  "sessions": {
+    "s_85314170cfee79": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "925d78f4-419f-4502-8b73-efd6bd888d97",
+        "model": "default"
+      },
+      "human_author": "Adam Michalczyk <tashisenge@gmail.com>"
+    }
+  }
+}
