@@ -1,0 +1,21 @@
+tests/lib/discretionary/aggregate-and-coverage.test.ts
+  s_6c4a050d5bfcd5::t_56e96bcb7e3a4b 1-50
+tests/lib/discretionary/map-transactions-for-discretionary.test.ts
+  s_6c4a050d5bfcd5::t_a1efb6b9478bd2 1-24
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.8",
+  "base_commit_sha": "7eb7335815d859c51b3afe3d90c24f13bba57403",
+  "prompts": {},
+  "sessions": {
+    "s_6c4a050d5bfcd5": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "d9d66a15-8eca-4199-81d4-693a7720c199",
+        "model": "default"
+      },
+      "human_author": "Adam Michalczyk <tashisenge@gmail.com>"
+    }
+  }
+}
