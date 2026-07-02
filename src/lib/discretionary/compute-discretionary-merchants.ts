@@ -8,7 +8,12 @@ function percentChange(current: number, previous: number): number | null {
 }
 
 export function rankDiscretionaryMerchants(
-  rows: { counterparty: string; currentPln: number; previousPln: number; count: number }[],
+  rows: {
+    counterparty: string;
+    currentPln: number;
+    previousPln: number;
+    count: number;
+  }[],
   limit: number,
 ): DiscretionaryMerchantRow[] {
   return [...rows]

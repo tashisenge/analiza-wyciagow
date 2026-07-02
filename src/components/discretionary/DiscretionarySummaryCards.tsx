@@ -25,7 +25,7 @@ export function DiscretionarySummaryCards({
   periodLabel,
 }: DiscretionarySummaryCardsProps): React.JSX.Element {
   return (
-    <div className="grid gap-4 sm:grid-cols-3">
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
       <article className="section-card">
         <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
           Suma opcjonalnych · {periodLabel}
@@ -55,6 +55,18 @@ export function DiscretionarySummaryCards({
             : "—"}
         </p>
         <p className="mt-1 text-sm text-slate-600">Wszystkie wydatki w okresie</p>
+      </article>
+
+      <article className="section-card">
+        <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+          Udział w dochodzie
+        </p>
+        <p className="mt-2 text-2xl font-semibold text-slate-900">
+          {summary.shareOfIncomePercent !== null
+            ? `${summary.shareOfIncomePercent.toFixed(1)}%`
+            : "—"}
+        </p>
+        <p className="mt-1 text-sm text-slate-600">Wpływy w okresie (kontekst)</p>
       </article>
 
       <article className="section-card">

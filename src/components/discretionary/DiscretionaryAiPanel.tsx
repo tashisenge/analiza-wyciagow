@@ -67,7 +67,8 @@ export function DiscretionaryAiPanel({
 
       {!aiAvailable ? (
         <p className="mt-2 text-sm text-amber-900">
-          Dodaj ANTHROPIC_API_KEY lub OPENAI_API_KEY w .env / Vercel, aby generować raport.
+          Dodaj ANTHROPIC_API_KEY lub OPENAI_API_KEY w .env / Vercel, aby generować
+          raport.
         </p>
       ) : null}
 
@@ -87,9 +88,7 @@ export function DiscretionaryAiPanel({
       {message ? <p className="alert-success mt-3">{message}</p> : null}
       {error ? <p className="alert-error mt-3">{error}</p> : null}
 
-      {hasHistory ? (
-        <DiscretionaryAiHistory entries={insightHistory} />
-      ) : null}
+      {hasHistory ? <DiscretionaryAiHistory entries={insightHistory} /> : null}
 
       {!hasHistory && aiAvailable && canGenerate ? (
         <p className="mt-3 text-sm text-amber-900">

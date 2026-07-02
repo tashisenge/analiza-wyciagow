@@ -8,7 +8,9 @@ export function ReviewQueueBanner({
   if (banner) {
     return (
       <p
-        className={banner.type === "success" ? "alert-success text-sm" : "alert-error text-sm"}
+        className={
+          banner.type === "success" ? "alert-success text-sm" : "alert-error text-sm"
+        }
         role="status"
       >
         {banner.text}

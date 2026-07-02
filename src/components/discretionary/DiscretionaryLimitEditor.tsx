@@ -21,8 +21,8 @@ export function DiscretionaryLimitEditor({
     <section className="section-card max-w-md">
       <h2 className="section-title">Limit miesięczny</h2>
       <p className="mt-1 text-sm text-slate-600">
-        Dotyczy kontekstu <strong>{context}</strong>. Porównywany z sumą opcjonalnych w wybranym
-        okresie.
+        Dotyczy kontekstu <strong>{context}</strong>. Porównywany z sumą opcjonalnych w
+        wybranym okresie.
       </p>
       <form
         className="mt-4 flex flex-wrap items-end gap-2"

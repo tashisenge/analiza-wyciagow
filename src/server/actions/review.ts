@@ -113,7 +113,9 @@ export async function applyBulkReviewDecisions(input: {
   } catch (error) {
     return {
       ok: false,
-      error: logActionError("review.applyBulkDecisions", error, { context: { workspaceId } }),
+      error: logActionError("review.applyBulkDecisions", error, {
+        context: { workspaceId },
+      }),
     };
   }
 }

@@ -1,5 +1,8 @@
 import type { ContextFilter } from "@/lib/analytics/filters";
-import type { DiscretionaryMerchantRow, DiscretionaryPeriodSummary } from "@/lib/discretionary/types";
+import type {
+  DiscretionaryMerchantRow,
+  DiscretionaryPeriodSummary,
+} from "@/lib/discretionary/types";
 
 export const DISCRETIONARY_INSIGHT_KIND = "discretionary" as const;
 
@@ -23,7 +26,9 @@ export interface DiscretionaryInsightPayload {
   topMerchants: DiscretionaryMerchantRow[];
 }
 
-export function isDiscretionaryInsightPayload(value: unknown): value is DiscretionaryInsightPayload {
+export function isDiscretionaryInsightPayload(
+  value: unknown,
+): value is DiscretionaryInsightPayload {
   if (typeof value !== "object" || value === null) {
     return false;
   }

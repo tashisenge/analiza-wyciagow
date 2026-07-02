@@ -16,7 +16,9 @@ export function DiscretionaryMerchantsTable({
     <section className="section-card">
       <h2 className="section-title">Top kontrahenci (opcjonalne)</h2>
       {merchants.length === 0 ? (
-        <p className="mt-2 text-sm text-slate-600">Brak wydatków opcjonalnych w tym okresie.</p>
+        <p className="mt-2 text-sm text-slate-600">
+          Brak wydatków opcjonalnych w tym okresie.
+        </p>
       ) : (
         <table className="mt-4 w-full text-left text-sm">
           <thead>
@@ -30,7 +32,9 @@ export function DiscretionaryMerchantsTable({
           <tbody>
             {merchants.map((row) => (
               <tr key={row.counterparty} className="border-b border-slate-100">
-                <td className="py-2 pr-4 font-medium text-slate-900">{row.counterparty}</td>
+                <td className="py-2 pr-4 font-medium text-slate-900">
+                  {row.counterparty}
+                </td>
                 <td className="py-2 pr-4">
                   <AmountValue>{row.totalPln.toFixed(2)} PLN</AmountValue>
                 </td>

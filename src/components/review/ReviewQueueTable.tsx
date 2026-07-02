@@ -48,9 +48,10 @@ export function ReviewQueueTable({
   const [pendingId, setPendingId] = useState<string | null>(null);
   const [hiddenIds, setHiddenIds] = useState<Set<string>>(() => new Set());
   const [rowMessages, setRowMessages] = useState<Record<string, RowMessage>>({});
-  const [banner, setBanner] = useState<{ type: "success" | "error"; text: string } | null>(
-    null,
-  );
+  const [banner, setBanner] = useState<{
+    type: "success" | "error";
+    text: string;
+  } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [customCategoryByTx, setCustomCategoryByTx] = useState<Record<string, string>>(
     {},

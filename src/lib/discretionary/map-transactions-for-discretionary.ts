@@ -39,3 +39,19 @@ export function sumExpensePln(
   }
   return total;
 }
+
+export function sumIncomePln(
+  transactions: { amount: string; countsInAnalytics: boolean }[],
+): number {
+  let total = 0;
+  for (const tx of transactions) {
+    if (!tx.countsInAnalytics) {
+      continue;
+    }
+    const value = Number.parseFloat(tx.amount);
+    if (Number.isFinite(value) && value > 0) {
+      total += value;
+    }
+  }
+  return total;
+}

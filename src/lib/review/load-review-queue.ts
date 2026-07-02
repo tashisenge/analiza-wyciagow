@@ -65,7 +65,11 @@ interface FetchBatchInput {
 async function fetchReviewBatch(input: FetchBatchInput): Promise<ReviewCandidateRow[]> {
   const sort = parseReviewSort(input.filters);
   return prisma.transaction.findMany({
-    where: buildReviewQueueWhere(input.workspaceId, input.accountIds, toDbFilters(input.filters)),
+    where: buildReviewQueueWhere(
+      input.workspaceId,
+      input.accountIds,
+      toDbFilters(input.filters),
+    ),
     include: { category: { select: { name: true } } },
     orderBy: buildReviewOrderBy(sort),
     take: REVIEW_SCAN_BATCH,
@@ -82,7 +86,12 @@ async function collectReviewItems(
   let dbSkip = 0;
 
   while (dbSkip < REVIEW_MAX_SCAN) {
-    const batch = await fetchReviewBatch({ workspaceId, accountIds, filters, skip: dbSkip });
+    const batch = await fetchReviewBatch({
+      workspaceId,
+      accountIds,
+      filters,
+      skip: dbSkip,
+    });
     if (batch.length === 0) {
       break;
     }

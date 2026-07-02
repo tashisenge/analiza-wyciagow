@@ -123,7 +123,8 @@ function parseReviewSortField(value: string | undefined): ReviewSortField | unde
 }
 
 export function parseReviewQueueFilters(params: ReviewSearchParams): ReviewQueueFilters {
-  const sortDir = params.sortDir === "asc" ? "asc" : params.sortDir === "desc" ? "desc" : undefined;
+  const sortDir =
+    params.sortDir === "asc" ? "asc" : params.sortDir === "desc" ? "desc" : undefined;
   return {
     counterpartyContains: trimOrUndefined(params.counterparty),
     mbankCategory: trimOrUndefined(params.mbankCategory),

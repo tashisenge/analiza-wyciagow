@@ -7,11 +7,16 @@ import {
   fetchDiscretionaryCategoryIds,
   fetchDiscretionaryTransactions,
 } from "@/lib/discretionary/fetch-discretionary-data";
-import type { DiscretionaryMerchantRow, DiscretionaryPeriodSummary } from "@/lib/discretionary/types";
+import type {
+  DiscretionaryMerchantRow,
+  DiscretionaryPeriodSummary,
+  DiscretionaryPersonRow,
+} from "@/lib/discretionary/types";
 
 export interface DiscretionaryPageData {
   summary: DiscretionaryPeriodSummary;
   merchants: DiscretionaryMerchantRow[];
+  personBreakdown: DiscretionaryPersonRow[];
   monthlyLimit: number | null;
   limitUsedPercent: number | null;
   discretionaryCategoryIds: string[];

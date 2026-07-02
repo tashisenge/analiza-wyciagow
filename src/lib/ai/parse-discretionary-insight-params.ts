@@ -1,10 +1,10 @@
-import {
-  type DiscretionaryInsightRequestParams,
-} from "@/lib/ai/discretionary-insight-types";
+import { type DiscretionaryInsightRequestParams } from "@/lib/ai/discretionary-insight-types";
 import { resolveDateRange } from "@/lib/analytics/date-range";
 import type { ContextFilter } from "@/lib/analytics/filters";
 
-export function parseDiscretionaryInsightParams(params: DiscretionaryInsightRequestParams): {
+export function parseDiscretionaryInsightParams(
+  params: DiscretionaryInsightRequestParams,
+): {
   context: ContextFilter;
   range: ReturnType<typeof resolveDateRange>;
 } {
@@ -16,7 +16,8 @@ export function parseDiscretionaryInsightParams(params: DiscretionaryInsightRequ
       : "month";
   const now = new Date();
   const year = params.year > 2000 ? params.year : now.getFullYear();
-  const month = params.month >= 1 && params.month <= 12 ? params.month : now.getMonth() + 1;
+  const month =
+    params.month >= 1 && params.month <= 12 ? params.month : now.getMonth() + 1;
   const range = resolveDateRange(period, now, {
     year: period === "month" || period === "year" ? year : undefined,
     month: period === "month" ? month : undefined,

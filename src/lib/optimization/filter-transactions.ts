@@ -10,7 +10,9 @@ export function isExcludedCategory(category: {
   return shouldExcludeCategoryFromOptimization(category);
 }
 
-export async function dismissFixedCategoryOpportunities(workspaceId: string): Promise<number> {
+export async function dismissFixedCategoryOpportunities(
+  workspaceId: string,
+): Promise<number> {
   const open = await prisma.optimizationOpportunity.findMany({
     where: { workspaceId, status: "OPEN" },
     include: { category: true },

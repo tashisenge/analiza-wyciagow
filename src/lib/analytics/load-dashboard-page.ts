@@ -4,6 +4,7 @@ import { parseDashboardParams } from "@/lib/analytics/dashboard-params";
 import { resolveDateRange } from "@/lib/analytics/date-range";
 import { loadDashboardData } from "@/lib/analytics/load-dashboard";
 import { prisma } from "@/lib/db";
+import { loadImportFreshness } from "@/lib/import/load-import-freshness";
 
 export async function loadDashboardPageContext(
   searchParams: { context?: string; period?: string; year?: string; month?: string },
@@ -18,6 +19,7 @@ export async function loadDashboardPageContext(
   aiStatus: Awaited<ReturnType<typeof getWorkspaceAiStatus>>;
   insightHistory: Awaited<ReturnType<typeof loadAiInsightHistory>>;
   excludedCategoryCount: number;
+  importFreshness: Awaited<ReturnType<typeof loadImportFreshness>>;
 }> {
   const {
     context,
@@ -32,7 +34,7 @@ export async function loadDashboardPageContext(
     year: period === "month" || period === "year" ? year : undefined,
     month: period === "month" ? month : undefined,
   });
-  const [data, aiStatus, insightHistory, workspace] = await Promise.all([
+  const [data, aiStatus, insightHistory, workspace, importFreshness] = await Promise.all([
     loadDashboardData(workspaceId, context, range),
     getWorkspaceAiStatus(workspaceId),
     loadAiInsightHistory(workspaceId),
@@ -40,6 +42,7 @@ export async function loadDashboardPageContext(
       where: { id: workspaceId },
       select: { analysisExcludedCategoryIds: true },
     }),
+    loadImportFreshness(workspaceId),
   ]);
   return {
     context,
@@ -51,5 +54,6 @@ export async function loadDashboardPageContext(
     aiStatus,
     insightHistory,
     excludedCategoryCount: workspace?.analysisExcludedCategoryIds.length ?? 0,
+    importFreshness,
   };
 }

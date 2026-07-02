@@ -28,7 +28,9 @@ describe("page-filters", () => {
   });
 
   it("skips category filter when uncategorized is active", () => {
-    expect(prismaCategoryFilter({ uncategorized: "1", categoryId: "c1" }, "ws1")).toEqual({});
+    expect(prismaCategoryFilter({ uncategorized: "1", categoryId: "c1" }, "ws1")).toEqual(
+      {},
+    );
   });
 
   it("detects active filter for uncategorized", () => {
@@ -87,7 +89,8 @@ describe("page-filters", () => {
 
 describe("buildTransactionsHref", () => {
   it("sets category while preserving context", async () => {
-    const { buildTransactionsHref } = await import("@/lib/transactions/build-transactions-url");
+    const { buildTransactionsHref } =
+      await import("@/lib/transactions/build-transactions-url");
     const href = buildTransactionsHref(
       { context: "dom", dateFrom: "2026-01-01" },
       { categoryId: "cat-1" },
@@ -98,7 +101,8 @@ describe("buildTransactionsHref", () => {
   });
 
   it("clears category when patch omits it", async () => {
-    const { buildTransactionsHref } = await import("@/lib/transactions/build-transactions-url");
+    const { buildTransactionsHref } =
+      await import("@/lib/transactions/build-transactions-url");
     const href = buildTransactionsHref(
       { categoryId: "cat-1", context: "firma" },
       { categoryId: undefined },
@@ -108,7 +112,8 @@ describe("buildTransactionsHref", () => {
   });
 
   it("preserves sort params", async () => {
-    const { buildTransactionsHref } = await import("@/lib/transactions/build-transactions-url");
+    const { buildTransactionsHref } =
+      await import("@/lib/transactions/build-transactions-url");
     const href = buildTransactionsHref(
       { sort: "similar", sortDir: "desc", context: "dom" },
       { counterparty: "lidl" },

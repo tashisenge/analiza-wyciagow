@@ -65,7 +65,10 @@ async function toggleOptimizationExclusionAction(
   excludeFromOptimization: boolean,
 ): Promise<void> {
   "use server";
-  const result = await setCategoryOptimizationExclusion(categoryId, excludeFromOptimization);
+  const result = await setCategoryOptimizationExclusion(
+    categoryId,
+    excludeFromOptimization,
+  );
   if (!result.ok) {
     redirect(`/categories?error=${encodeURIComponent(result.error)}`);
   }

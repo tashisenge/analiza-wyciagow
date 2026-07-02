@@ -6,6 +6,7 @@ import type { DiscretionaryMerchantRow } from "@/lib/discretionary/types";
 export interface MappedDiscretionaryTx {
   amount: string;
   counterparty: string;
+  tagNames: string[];
   category: { isDiscretionary: boolean; name: string } | null;
   countsInAnalytics: boolean;
 }
@@ -31,7 +32,9 @@ function accumulateCurrentPeriod(
   return totals;
 }
 
-function accumulatePreviousPeriod(transactions: MappedDiscretionaryTx[]): Map<string, number> {
+function accumulatePreviousPeriod(
+  transactions: MappedDiscretionaryTx[],
+): Map<string, number> {
   const totals = new Map<string, number>();
   for (const tx of transactions) {
     if (!isDiscretionaryExpense(tx)) {

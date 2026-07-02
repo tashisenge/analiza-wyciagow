@@ -38,6 +38,8 @@ describe("buildCategoryChangeRedirectUrl", () => {
       { ok: true, updatedCount: 2 },
       "",
     );
-    expect(decodeURIComponent(url.split("msg=")[1] ?? "")).toContain("Usunięto kategorię");
+    expect(decodeURIComponent(url.split("msg=")[1] ?? "")).toContain(
+      "Usunięto kategorię",
+    );
   });
 });

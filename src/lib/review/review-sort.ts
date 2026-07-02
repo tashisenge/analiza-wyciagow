@@ -63,7 +63,10 @@ export function buildReviewOrderBy(
   }
 }
 
-function compareCounterparty(left: SortableReviewItem, right: SortableReviewItem): number {
+function compareCounterparty(
+  left: SortableReviewItem,
+  right: SortableReviewItem,
+): number {
   return left.counterparty.localeCompare(right.counterparty, "pl");
 }
 

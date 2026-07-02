@@ -6,6 +6,7 @@ interface TxWithCategory {
   amount: { toString(): string };
   counterparty: string;
   category: { isDiscretionary: boolean; name: string } | null;
+  tags?: { tag: { name: string } }[];
 }
 
 export function mapTransactionForDiscretionary(
@@ -15,6 +16,7 @@ export function mapTransactionForDiscretionary(
   return {
     amount: tx.amount.toString(),
     counterparty: tx.counterparty,
+    tagNames: tx.tags?.map((entry) => entry.tag.name) ?? [],
     category: tx.category
       ? { isDiscretionary: tx.category.isDiscretionary, name: tx.category.name }
       : null,

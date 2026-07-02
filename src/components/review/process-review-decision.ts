@@ -52,7 +52,9 @@ function handleReviewSaved(input: ProcessReviewDecisionInput): void {
   input.router.refresh();
 }
 
-export async function processReviewDecision(input: ProcessReviewDecisionInput): Promise<void> {
+export async function processReviewDecision(
+  input: ProcessReviewDecisionInput,
+): Promise<void> {
   const result = await applyReviewDecision({
     transactionId: input.transactionId,
     decision: input.decision,

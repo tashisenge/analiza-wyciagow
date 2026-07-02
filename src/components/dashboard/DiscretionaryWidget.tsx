@@ -46,9 +46,14 @@ export function DiscretionaryWidget({
         limitUsedPercent={limitUsedPercent}
       />
       <p className="mt-2 text-sm text-orange-900">
-        <AmountValue className="font-semibold">{summary.totalPln.toFixed(2)} PLN</AmountValue>
+        <AmountValue className="font-semibold">
+          {summary.totalPln.toFixed(2)} PLN
+        </AmountValue>
         {summary.shareOfExpensesPercent !== null ? (
           <> · {summary.shareOfExpensesPercent.toFixed(1)}% wydatków</>
+        ) : null}
+        {summary.shareOfIncomePercent !== null ? (
+          <> · {summary.shareOfIncomePercent.toFixed(1)}% dochodu</>
         ) : null}
         {summary.vsPreviousPeriodPercent !== null ? (
           <>

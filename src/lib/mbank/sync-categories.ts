@@ -51,7 +51,12 @@ export async function assignMbankCategoriesForWorkspace(
 
   await syncMbankCategories(workspaceId);
   const byName = await buildCategoriesByName(workspaceId);
-  const updated = await applyResolvedCategories({ transactions, rules, memories, byName });
+  const updated = await applyResolvedCategories({
+    transactions,
+    rules,
+    memories,
+    byName,
+  });
   await deleteEmptyOrphanCategories(workspaceId);
   return updated;
 }

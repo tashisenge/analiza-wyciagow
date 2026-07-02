@@ -20,6 +20,7 @@ import {
   RecurringPaymentsWidget,
   SubscriptionsWidget,
 } from "@/components/dashboard/RecurringWidgets";
+import { StaleImportAlert } from "@/components/dashboard/StaleImportAlert";
 import { PageHeader } from "@/components/ui/PageHeader";
 import type { DashboardData } from "@/lib/analytics/dashboard-types";
 import type { resolveDateRange } from "@/lib/analytics/date-range";
@@ -131,6 +132,10 @@ export default async function DashboardPage({
           </div>
         }
       />
+
+      {page.importFreshness.isStale && page.importFreshness.daysSinceImport !== null ? (
+        <StaleImportAlert daysSinceImport={page.importFreshness.daysSinceImport} />
+      ) : null}
 
       <PeriodSummaryCards
         summary={data.summary}

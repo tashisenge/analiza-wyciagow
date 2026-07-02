@@ -17,7 +17,10 @@ function isCountedExpense(tx: ExpenseTx, pairedKeys: Set<string>): boolean {
   return Number.isFinite(value) && value < 0;
 }
 
-export function expenseCoveragePercent(current: ExpenseTx[], pairedKeys: Set<string>): number {
+export function expenseCoveragePercent(
+  current: ExpenseTx[],
+  pairedKeys: Set<string>,
+): number {
   let expenseCount = 0;
   let categorizedExpenseCount = 0;
 

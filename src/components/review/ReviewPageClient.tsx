@@ -60,7 +60,9 @@ export function ReviewPageClient({
 
   function toggleId(id: string): void {
     setSelectedIds((prev) =>
-      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id].slice(0, 500),
+      prev.includes(id)
+        ? prev.filter((item) => item !== id)
+        : [...prev, id].slice(0, 500),
     );
   }
 

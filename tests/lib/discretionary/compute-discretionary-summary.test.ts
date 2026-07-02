@@ -8,11 +8,13 @@ describe("computeDiscretionarySummary", () => {
       currentDiscretionaryPln: 300,
       currentDiscretionaryCount: 5,
       currentTotalExpensesPln: 1000,
+      currentTotalIncomePln: 2000,
       previousDiscretionaryPln: 200,
     });
     expect(result.totalPln).toBe(300);
     expect(result.transactionCount).toBe(5);
     expect(result.shareOfExpensesPercent).toBe(30);
+    expect(result.shareOfIncomePercent).toBe(15);
     expect(result.vsPreviousPeriodPercent).toBe(50);
   });
 
@@ -21,9 +23,11 @@ describe("computeDiscretionarySummary", () => {
       currentDiscretionaryPln: 0,
       currentDiscretionaryCount: 0,
       currentTotalExpensesPln: 0,
+      currentTotalIncomePln: 0,
       previousDiscretionaryPln: 0,
     });
     expect(result.shareOfExpensesPercent).toBeNull();
+    expect(result.shareOfIncomePercent).toBeNull();
     expect(result.vsPreviousPeriodPercent).toBeNull();
   });
 });

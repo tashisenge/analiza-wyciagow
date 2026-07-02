@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { ContextToggle } from "@/components/dashboard/ContextToggle";
@@ -8,6 +7,8 @@ import { DiscretionaryAiPanel } from "@/components/discretionary/DiscretionaryAi
 import { DiscretionaryLimitAlert } from "@/components/discretionary/DiscretionaryLimitAlert";
 import { DiscretionaryLimitEditor } from "@/components/discretionary/DiscretionaryLimitEditor";
 import { DiscretionaryMerchantsTable } from "@/components/discretionary/DiscretionaryMerchantsTable";
+import { DiscretionaryPageNotices } from "@/components/discretionary/DiscretionaryPageNotices";
+import { DiscretionaryPersonBreakdown } from "@/components/discretionary/DiscretionaryPersonBreakdown";
 import { DiscretionarySummaryCards } from "@/components/discretionary/DiscretionarySummaryCards";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { parseDashboardParams } from "@/lib/analytics/dashboard-params";
@@ -20,7 +21,12 @@ const BASE_PATH = "/opcjonalne";
 export default async function OpcjonalnePage({
   searchParams,
 }: {
-  searchParams: Promise<{ context?: string; period?: string; year?: string; month?: string }>;
+  searchParams: Promise<{
+    context?: string;
+    period?: string;
+    year?: string;
+    month?: string;
+  }>;
 }): Promise<React.JSX.Element> {
   const session = await auth();
   if (!session?.user) {
@@ -28,7 +34,12 @@ export default async function OpcjonalnePage({
   }
 
   const params = await searchParams;
-  const { context, period, year: yearParam, month: monthParam } = parseDashboardParams(params);
+  const {
+    context,
+    period,
+    year: yearParam,
+    month: monthParam,
+  } = parseDashboardParams(params);
   const now = new Date();
   const year = yearParam ?? now.getFullYear();
   const month = monthParam ?? now.getMonth() + 1;
@@ -68,7 +79,12 @@ export default async function OpcjonalnePage({
               />
             ) : null}
             {period === "year" ? (
-              <YearPicker context={context} period={period} year={year} basePath={BASE_PATH} />
+              <YearPicker
+                context={context}
+                period={period}
+                year={year}
+                basePath={BASE_PATH}
+              />
             ) : null}
             <ContextToggle
               active={context}
@@ -87,25 +103,11 @@ export default async function OpcjonalnePage({
         limitUsedPercent={data.limitUsedPercent}
       />
 
-      {data.coveragePercent < 80 ? (
-        <p className="alert-warning text-sm">
-          Tylko {data.coveragePercent.toFixed(1)}% wydatków ma przypisaną kategorię — wnioski mogą być
-          niepełne.{" "}
-          <Link href={`/transactions?uncategorized=1&context=${context}`} className="link-brand">
-            Uzupełnij kategorie
-          </Link>
-        </p>
-      ) : null}
-
-      {data.discretionaryCategoryIds.length === 0 ? (
-        <p className="section-card text-sm text-slate-600">
-          Brak kategorii oznaczonych jako opcjonalne.{" "}
-          <Link href="/categories" className="link-brand">
-            Przejdź do kategorii
-          </Link>{" "}
-          i zaznacz „Opcjonalny” przy np. Rozrywka.
-        </p>
-      ) : null}
+      <DiscretionaryPageNotices
+        context={context}
+        coveragePercent={data.coveragePercent}
+        discretionaryCategoryCount={data.discretionaryCategoryIds.length}
+      />
 
       <DiscretionarySummaryCards
         summary={data.summary}
@@ -113,6 +115,8 @@ export default async function OpcjonalnePage({
         limitUsedPercent={data.limitUsedPercent}
         periodLabel={range.label}
       />
+
+      <DiscretionaryPersonBreakdown rows={data.personBreakdown} />
 
       <DiscretionaryLimitEditor context={context} currentLimit={data.monthlyLimit} />
 

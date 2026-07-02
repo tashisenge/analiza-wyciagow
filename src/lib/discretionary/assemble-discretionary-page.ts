@@ -6,6 +6,7 @@ import { mapDiscretionaryPeriods } from "@/lib/discretionary/map-discretionary-p
 import {
   sumDiscretionaryPln,
   sumExpensePln,
+  sumIncomePln,
 } from "@/lib/discretionary/map-transactions-for-discretionary";
 import type { DiscretionaryPeriodSummary } from "@/lib/discretionary/types";
 
@@ -20,6 +21,7 @@ function buildSummary(
     currentDiscretionaryPln: currentDiscretionary.totalPln,
     currentDiscretionaryCount: currentDiscretionary.count,
     currentTotalExpensesPln: sumExpensePln(currentMapped),
+    currentTotalIncomePln: sumIncomePln(currentMapped),
     previousDiscretionaryPln: previousDiscretionary.totalPln,
   });
 }

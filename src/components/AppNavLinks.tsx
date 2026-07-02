@@ -78,7 +78,10 @@ export function AppNavLinks(): React.JSX.Element {
   return (
     <div className="flex flex-col">
       <div className="flex items-center gap-2 py-3">
-        <Link href="/dashboard" className="mr-1 shrink-0 text-sm font-bold text-brand-800">
+        <Link
+          href="/dashboard"
+          className="mr-1 shrink-0 text-sm font-bold text-brand-800"
+        >
           Analiza wyciągów
         </Link>
 
@@ -100,8 +103,8 @@ export function AppNavLinks(): React.JSX.Element {
 
         <div className="hidden items-center gap-2 md:flex">
           <InfoTip label="Ukrywanie kwot">
-            Przed pokazaniem ekranu komuś włącz „Ukryj kwoty” — maskuje i bluruje wszystkie kwoty w
-            tej przeglądarce.
+            Przed pokazaniem ekranu komuś włącz „Ukryj kwoty” — maskuje i bluruje
+            wszystkie kwoty w tej przeglądarce.
           </InfoTip>
           <PrivacyAmountsToggle compact />
         </div>

@@ -46,7 +46,9 @@ export function ReviewQueueActions({
     if (!suggestion) {
       return;
     }
-    const category = categories.find((cat) => cat.name === suggestion.recommendedCategory);
+    const category = categories.find(
+      (cat) => cat.name === suggestion.recommendedCategory,
+    );
     if (!category) {
       onError(`Brak kategorii „${suggestion.recommendedCategory}” w aplikacji`);
       return;
@@ -56,7 +58,9 @@ export function ReviewQueueActions({
 
   return (
     <div className="flex flex-col gap-1">
-      {pending ? <p className="text-xs font-medium text-brand-700">Zapisywanie…</p> : null}
+      {pending ? (
+        <p className="text-xs font-medium text-brand-700">Zapisywanie…</p>
+      ) : null}
       {rowMessage ? (
         <p className={statusMessageClass(rowMessage.type)} role="status">
           {rowMessage.text}

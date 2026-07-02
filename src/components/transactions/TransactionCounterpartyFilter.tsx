@@ -10,10 +10,14 @@ export function TransactionCounterpartyFilter(): React.JSX.Element {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [pending, startTransition] = useTransition();
-  const [counterparty, setCounterparty] = useState(searchParams.get("counterparty") ?? "");
+  const [counterparty, setCounterparty] = useState(
+    searchParams.get("counterparty") ?? "",
+  );
 
   function applyFilter(): void {
-    const params = parseTransactionSearchParams(Object.fromEntries(searchParams.entries()));
+    const params = parseTransactionSearchParams(
+      Object.fromEntries(searchParams.entries()),
+    );
     startTransition(() => {
       router.push(
         buildTransactionsHref(params, {
@@ -25,7 +29,9 @@ export function TransactionCounterpartyFilter(): React.JSX.Element {
 
   function clearFilter(): void {
     setCounterparty("");
-    const params = parseTransactionSearchParams(Object.fromEntries(searchParams.entries()));
+    const params = parseTransactionSearchParams(
+      Object.fromEntries(searchParams.entries()),
+    );
     startTransition(() => {
       router.push(buildTransactionsHref(params, { counterparty: undefined }));
     });

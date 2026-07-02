@@ -11,7 +11,6 @@ import { runGenerateDiscretionaryInsight } from "@/lib/ai/run-generate-discretio
 import { auth } from "@/lib/auth";
 import { logActionError } from "@/lib/logger";
 
-
 export async function aiGenerateDiscretionaryInsight(
   params: DiscretionaryInsightRequestParams,
 ): Promise<AiActionResult> {

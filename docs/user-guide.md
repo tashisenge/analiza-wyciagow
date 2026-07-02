@@ -27,15 +27,15 @@ Więcej: [import-mbank.md](import-mbank.md).
 
 Przełącznik **firma / dom / razem** filtruje wszystkie liczby i wykresy.
 
-| Element               | Co pokazuje                                            |
-| --------------------- | ------------------------------------------------------ |
-| Karty KPI             | Wydatki, wpływy, bilans + zmiana % vs poprzedni okres  |
-| Wykres kategorii      | Udział wydatków w slice’ach                            |
-| Top kontrahenci       | Najwięksi odbiorcy pieniędzy, zmiana m/m               |
-| Baner „bez kategorii” | Ile transakcji wymaga ręcznego ogarnięcia              |
-| Widget optymalizacji  | Top 3 możliwości oszczędności + link do pełnej listy   |
-| Wydatki opcjonalne    | Suma „głupot”, udział w wydatkach, limit miesięczny    |
-| Panel AI              | Mapowanie mBank, batch kategoryzacji, analiza tekstowa |
+| Element               | Co pokazuje                                                                 |
+| --------------------- | --------------------------------------------------------------------------- |
+| Karty KPI             | Wydatki, wpływy, bilans + zmiana % vs poprzedni okres                       |
+| Wykres kategorii      | Udział wydatków w slice’ach                                                 |
+| Top kontrahenci       | Najwięksi odbiorcy pieniędzy, zmiana m/m                                    |
+| Baner „bez kategorii” | Ile transakcji wymaga ręcznego ogarnięcia                                   |
+| Widget optymalizacji  | Top 3 możliwości oszczędności + link do pełnej listy                        |
+| Wydatki opcjonalne    | Suma „głupot”, udział w wydatkach i dochodzie, limit miesięczny, alert ≥80% |
+| Panel AI              | Mapowanie mBank, batch kategoryzacji, analiza tekstowa                      |
 
 **Zakres dat:** miesiąc / kwartał / rok (przełącznik nad wykresami).
 
@@ -63,12 +63,13 @@ Na stronie **Kategorie**:
 1. Na **Kategorie** zaznacz, które kategorie są opcjonalne (np. Rozrywka, Restauracje).
 2. Na **Opcjonalne** (`/opcjonalne`) ustaw **limit miesięczny** dla kontekstu firma/dom/razem.
 3. Co miesiąc: dashboard → widget „Wydatki opcjonalne” → szczegóły → jedna wspólna decyzja, co ograniczyć.
-4. Aplikacja **nie rozdziela** wydatków na osoby — to jeden wspólny widok. Jeśli chcecie oznaczać „kto”, użyjcie **tagów** (np. `Adam`, `Żona`) na transakcjach.
+4. Aplikacja **nie rozdziela** wydatków na osoby w jednej sumie — to jeden wspólny widok limitu. Jeśli chcecie oznaczać „kto”, użyjcie **tagów** (np. `Adam`, `Żona`) na transakcjach.
 5. Filtr **Tylko opcjonalne** na liście transakcji: przycisk „Opcjonalne” lub `/transactions?discretionary=1`.
-6. **Kto wydał:** na transakcjach przypisz tag **Adam** lub **Żona** (tworzone automatycznie) — filtry na liście transakcji.
+6. **Kto wydał:** na transakcjach przypisz tag **Adam** lub **Żona** (tworzone automatycznie) — filtry na liście transakcji. Na `/opcjonalne` sekcja **Kto ile** pokazuje sumę opcjonalnych per osoba.
 7. **Analiza AI** uwzględnia teraz sekcję o wydatkach opcjonalnych i limicie (jeśli ustawiony).
-8. Przy **przekroczeniu limitu** zobaczycie żółty alert na dashboardzie i na `/opcjonalne`.
-9. **Raport AI (głupoty)** na `/opcjonalne`: osobny przycisk „Raport AI za ten okres” — tylko wydatki opcjonalne, niezależny od analizy na dashboardzie. Historia raportów jest zapisywana per kontekst (firma/dom/razem).
+8. Przy **zbliżaniu się do limitu (≥80%)** lub **przekroczeniu** zobaczycie żółty alert na dashboardzie i na `/opcjonalne`.
+9. Karta **Udział w dochodzie** pokazuje, jaki procent wpływów w okresie poszło na opcjonalne.
+10. **Raport AI (głupoty)** na `/opcjonalne`: osobny przycisk „Raport AI za ten okres” — tylko wydatki opcjonalne, niezależny od analizy na dashboardzie. Historia raportów jest zapisywana per kontekst (firma/dom/razem).
 
 Kolejność przypisania kategorii przy imporcie:
 

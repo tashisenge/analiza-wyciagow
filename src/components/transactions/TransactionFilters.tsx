@@ -55,9 +55,9 @@ export function TransactionFilters({
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const selectedCategoryId = params.categoryId ?? "";
-  const personTags = PERSON_TAG_NAMES.map((name) => tags.find((tag) => tag.name === name)).filter(
-    (tag): tag is TagOption => tag !== undefined,
-  );
+  const personTags = PERSON_TAG_NAMES.map((name) =>
+    tags.find((tag) => tag.name === name),
+  ).filter((tag): tag is TagOption => tag !== undefined);
 
   function onCategoryChange(categoryId: string): void {
     startTransition(() => {
@@ -70,8 +70,8 @@ export function TransactionFilters({
       <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
         Filtr
         <InfoTip label="Filtry listy">
-          Szybkie filtry, tagi osób (Adam / Żona) i kategorie. Parametry dat i kontekstu zostają w
-          URL.
+          Szybkie filtry, tagi osób (Adam / Żona) i kategorie. Parametry dat i kontekstu
+          zostają w URL.
         </InfoTip>
       </span>
       {QUICK_FILTERS.map((filter) => (

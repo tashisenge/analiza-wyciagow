@@ -31,10 +31,7 @@ describe("review-sort", () => {
 
   it("sorts by amount descending", () => {
     const rows = sortReviewItems(
-      [
-        item({ id: "low", amount: "5.00" }),
-        item({ id: "high", amount: "99.00" }),
-      ],
+      [item({ id: "low", amount: "5.00" }), item({ id: "high", amount: "99.00" })],
       parseReviewSort({ sort: "amount", sortDir: "desc" }),
     );
     expect(rows.map((row) => row.id)).toEqual(["high", "low"]);

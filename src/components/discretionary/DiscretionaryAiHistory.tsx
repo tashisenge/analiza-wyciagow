@@ -6,7 +6,6 @@ import type { DiscretionaryAiInsightEntry } from "./discretionary-ai-types";
 
 import { MarkdownInsight } from "@/components/ai/MarkdownInsight";
 
-
 function formatDate(iso: string): string {
   return new Date(iso).toLocaleString("pl-PL", {
     day: "numeric",

@@ -23,7 +23,10 @@ async function createCanonicalCategory(
   });
 }
 
-async function syncCanonicalFlags(found: ExistingCategory, def: DefaultCategoryDef): Promise<void> {
+async function syncCanonicalFlags(
+  found: ExistingCategory,
+  def: DefaultCategoryDef,
+): Promise<void> {
   if (
     found.excludeFromOptimization === def.excludeFromOptimization &&
     found.isDiscretionary === def.isDiscretionary

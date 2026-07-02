@@ -26,7 +26,9 @@ function reviewQueueOrClause(): Prisma.TransactionWhereInput {
   };
 }
 
-function reviewExtraFilters(filters: ReviewQueueDbFilters): Prisma.TransactionWhereInput[] {
+function reviewExtraFilters(
+  filters: ReviewQueueDbFilters,
+): Prisma.TransactionWhereInput[] {
   const extra: Prisma.TransactionWhereInput[] = [];
   if (filters.categoryId) {
     extra.push({ categoryId: filters.categoryId });

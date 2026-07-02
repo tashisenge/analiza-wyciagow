@@ -17,7 +17,9 @@ export interface SortableTransactionRow {
   similarCounts: { byCounterparty: number };
 }
 
-export function parseTransactionSort(params: TransactionSearchParams): TransactionSortState {
+export function parseTransactionSort(
+  params: TransactionSearchParams,
+): TransactionSortState {
   const field: TransactionSortField =
     params.sort === "name" || params.sort === "similar" ? params.sort : "date";
   const direction: TransactionSortDirection = params.sortDir === "asc" ? "asc" : "desc";

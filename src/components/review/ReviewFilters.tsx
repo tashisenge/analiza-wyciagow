@@ -22,8 +22,16 @@ const CONTEXTS: { value: ContextFilter; label: string; tip: string }[] = [
 
 const REASON_FILTERS: { value: ReviewReason | "all"; label: string; tip: string }[] = [
   { value: "all", label: "Wszystkie rozbieżności", tip: "Pełna kolejka weryfikacji." },
-  { value: "mbank_uncategorized", label: "mBank bez kategorii", tip: "Bank nie przypisał kategorii." },
-  { value: "name_mismatch", label: "Różne nazwy", tip: "mBank i app mają różne kategorie." },
+  {
+    value: "mbank_uncategorized",
+    label: "mBank bez kategorii",
+    tip: "Bank nie przypisał kategorii.",
+  },
+  {
+    value: "name_mismatch",
+    label: "Różne nazwy",
+    tip: "mBank i app mają różne kategorie.",
+  },
   { value: "app_missing", label: "Brak w app", tip: "mBank ma kategorię, app nie." },
 ];
 

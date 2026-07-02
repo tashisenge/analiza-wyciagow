@@ -14,33 +14,34 @@
 
 ## File map
 
-| Plik | Odpowiedzialność |
-|------|------------------|
-| `prisma/schema.prisma` | `Category.isDiscretionary`, model `DiscretionaryBudget` |
-| `prisma/migrations/...` | migracja SQL |
-| `src/lib/categories/default-categories.ts` | domyślnie `Rozrywka` → opcjonalna |
-| `src/lib/categories/canonical-categories.ts` | sync `isDiscretionary` przy seed |
-| `src/lib/discretionary/types.ts` | typy widoku |
-| `src/lib/discretionary/is-discretionary-transaction.ts` | filtr tx |
-| `src/lib/discretionary/compute-discretionary-summary.ts` | sumy, %, delta okresu |
-| `src/lib/discretionary/compute-discretionary-merchants.ts` | top N kontrahentów |
-| `src/lib/discretionary/load-discretionary-page.ts` | orchestracja Prisma |
-| `src/server/actions/discretionary.ts` | limit + revalidate |
-| `src/server/actions/categories.ts` | `setCategoryDiscretionary` |
-| `src/app/(app)/opcjonalne/page.tsx` | strona raportu |
-| `src/components/discretionary/*` | UI |
-| `src/components/categories/CategoriesView.tsx` | checkbox „Opcjonalny” |
-| `src/components/dashboard/DiscretionaryWidget.tsx` | widget KPI + pasek limitu |
-| `src/app/(app)/dashboard/page.tsx` | wpięcie widgetu |
-| `src/components/AppNavLinks.tsx` | link menu |
-| `src/lib/transactions/page-filters.ts` | `?discretionary=1` |
-| `tests/lib/discretionary/*.test.ts` | unit testy |
+| Plik                                                       | Odpowiedzialność                                        |
+| ---------------------------------------------------------- | ------------------------------------------------------- |
+| `prisma/schema.prisma`                                     | `Category.isDiscretionary`, model `DiscretionaryBudget` |
+| `prisma/migrations/...`                                    | migracja SQL                                            |
+| `src/lib/categories/default-categories.ts`                 | domyślnie `Rozrywka` → opcjonalna                       |
+| `src/lib/categories/canonical-categories.ts`               | sync `isDiscretionary` przy seed                        |
+| `src/lib/discretionary/types.ts`                           | typy widoku                                             |
+| `src/lib/discretionary/is-discretionary-transaction.ts`    | filtr tx                                                |
+| `src/lib/discretionary/compute-discretionary-summary.ts`   | sumy, %, delta okresu                                   |
+| `src/lib/discretionary/compute-discretionary-merchants.ts` | top N kontrahentów                                      |
+| `src/lib/discretionary/load-discretionary-page.ts`         | orchestracja Prisma                                     |
+| `src/server/actions/discretionary.ts`                      | limit + revalidate                                      |
+| `src/server/actions/categories.ts`                         | `setCategoryDiscretionary`                              |
+| `src/app/(app)/opcjonalne/page.tsx`                        | strona raportu                                          |
+| `src/components/discretionary/*`                           | UI                                                      |
+| `src/components/categories/CategoriesView.tsx`             | checkbox „Opcjonalny”                                   |
+| `src/components/dashboard/DiscretionaryWidget.tsx`         | widget KPI + pasek limitu                               |
+| `src/app/(app)/dashboard/page.tsx`                         | wpięcie widgetu                                         |
+| `src/components/AppNavLinks.tsx`                           | link menu                                               |
+| `src/lib/transactions/page-filters.ts`                     | `?discretionary=1`                                      |
+| `tests/lib/discretionary/*.test.ts`                        | unit testy                                              |
 
 ---
 
 ### Task 1: Schema — kategoria opcjonalna + limit miesięczny
 
 **Files:**
+
 - Modify: `prisma/schema.prisma` (model `Category`, nowy `DiscretionaryBudget`)
 - Create: `prisma/migrations/20260524140000_discretionary_spending/migration.sql`
 
@@ -92,6 +93,7 @@ git commit -m "feat(db): discretionary categories and monthly limit"
 ### Task 2: Domyślne kategorie — Rozrywka opcjonalna
 
 **Files:**
+
 - Modify: `src/lib/categories/default-categories.ts`
 - Modify: `src/lib/categories/canonical-categories.ts`
 - Modify: `src/lib/seed-default-categories.ts`
@@ -136,6 +138,7 @@ git commit -m "feat: mark Rozrywka as discretionary by default"
 ### Task 3: Pure logic — czy transakcja jest opcjonalna
 
 **Files:**
+
 - Create: `src/lib/discretionary/is-discretionary-transaction.ts`
 - Create: `tests/lib/discretionary/is-discretionary-transaction.test.ts`
 
@@ -238,6 +241,7 @@ git commit -m "feat: discretionary expense predicate"
 ### Task 4: Pure logic — podsumowanie okresu
 
 **Files:**
+
 - Create: `src/lib/discretionary/types.ts`
 - Create: `src/lib/discretionary/compute-discretionary-summary.ts`
 - Create: `tests/lib/discretionary/compute-discretionary-summary.test.ts`
@@ -346,6 +350,7 @@ git commit -m "feat: compute discretionary period summary"
 ### Task 5: Pure logic — top kontrahenci opcjonalni
 
 **Files:**
+
 - Create: `src/lib/discretionary/compute-discretionary-merchants.ts`
 - Create: `tests/lib/discretionary/compute-discretionary-merchants.test.ts`
 
@@ -386,7 +391,12 @@ function percentChange(current: number, previous: number): number | null {
 }
 
 export function rankDiscretionaryMerchants(
-  rows: { counterparty: string; currentPln: number; previousPln: number; count: number }[],
+  rows: {
+    counterparty: string;
+    currentPln: number;
+    previousPln: number;
+    count: number;
+  }[],
   limit: number,
 ): DiscretionaryMerchantRow[] {
   return [...rows]
@@ -414,6 +424,7 @@ git commit -m "feat: rank discretionary merchants"
 ### Task 6: Loader strony `/opcjonalne`
 
 **Files:**
+
 - Create: `src/lib/discretionary/map-transactions-for-discretionary.ts`
 - Create: `src/lib/discretionary/load-discretionary-page.ts`
 
@@ -497,6 +508,7 @@ git commit -m "feat: load discretionary page aggregates"
 ### Task 7: Server actions — limit i toggle kategorii
 
 **Files:**
+
 - Modify: `src/server/actions/categories.ts`
 - Create: `src/server/actions/discretionary.ts`
 - Modify: `src/app/(app)/categories/page.tsx`
@@ -548,6 +560,7 @@ git commit -m "feat: toggle discretionary category and monthly limit action"
 ### Task 8: Strona `/opcjonalne`
 
 **Files:**
+
 - Create: `src/app/(app)/opcjonalne/page.tsx`
 - Create: `src/components/discretionary/DiscretionaryPageClient.tsx`
 - Create: `src/components/discretionary/DiscretionarySummaryCards.tsx`
@@ -569,6 +582,7 @@ Parametry URL jak dashboard: `context`, `period`, `year`, `month` — użyj `res
 - [ ] **Step 2: Summary cards**
 
 Karty (użyj `AmountValue`):
+
 1. **Suma opcjonalnych** + delta % vs poprzedni okres
 2. **Udział w wydatkach** (%)
 3. **Limit miesięczny** — pasek postępu (zielony <80%, żółty 80–100%, czerwony >100%) lub „Nie ustawiono”
@@ -607,6 +621,7 @@ git commit -m "feat: discretionary spending report page"
 ### Task 9: Widget na dashboardzie
 
 **Files:**
+
 - Create: `src/components/dashboard/DiscretionaryWidget.tsx`
 - Modify: `src/lib/analytics/load-dashboard-page.ts` (lub `load-dashboard.ts`) — dołącz `discretionarySummary` + `discretionaryLimit`
 - Modify: `src/app/(app)/dashboard/page.tsx`
@@ -624,6 +639,7 @@ discretionary?: {
 - [ ] **Step 2: Widget**
 
 Sekcja `section-card border-orange-200` (spójnie z recurring):
+
 - Tytuł: **Wydatki opcjonalne**
 - Jedna linia: suma PLN, % budżetu, % wszystkich wydatków
 - Mini pasek limitu jeśli ustawiony
@@ -645,6 +661,7 @@ git commit -m "feat: discretionary widget on dashboard"
 ### Task 10: Filtr transakcji opcjonalnych
 
 **Files:**
+
 - Modify: `src/lib/transactions/page-filters.ts`
 - Modify: `src/lib/transactions/load-transactions-page.ts`
 - Modify: `src/components/transactions/TransactionsPageClient.tsx` (opcjonalnie chip „Tylko opcjonalne”)
@@ -669,11 +686,13 @@ git commit -m "feat: filter transactions to discretionary categories"
 ### Task 11: Dokumentacja użytkownika
 
 **Files:**
+
 - Modify: `docs/user-guide.md`
 
 - [ ] **Step 1: Sekcja „Wydatki opcjonalne”**
 
 Opisz workflow z analizy JTBD:
+
 1. Oznacz kategorie na `/categories`
 2. Ustaw limit na `/opcjonalne`
 3. Co miesiąc: dashboard → opcjonalne → 1 decyzja
@@ -714,14 +733,14 @@ npm run test:smoke
 
 ## Self-review (spec → plan)
 
-| Wymaganie JTBD | Task |
-|----------------|------|
-| Zrozumieć gdzie idą „głupoty” | 3–6, 8 (raport + top merchant) |
-| Mniej wydawać (limit + %) | 4, 7, 8 (limit editor + pasek) |
-| Skategoryzować | 1–2, 7 (checkbox kategorii) |
-| Wnioski (trend, delta, top 5) | 4–5, 8–9 |
-| Para (wspólny workspace) | zakres planu; user-guide tagi |
-| Ja + żona osobno | poza zakresem — tylko wzmianka w docs |
+| Wymaganie JTBD                | Task                                  |
+| ----------------------------- | ------------------------------------- |
+| Zrozumieć gdzie idą „głupoty” | 3–6, 8 (raport + top merchant)        |
+| Mniej wydawać (limit + %)     | 4, 7, 8 (limit editor + pasek)        |
+| Skategoryzować                | 1–2, 7 (checkbox kategorii)           |
+| Wnioski (trend, delta, top 5) | 4–5, 8–9                              |
+| Para (wspólny workspace)      | zakres planu; user-guide tagi         |
+| Ja + żona osobno              | poza zakresem — tylko wzmianka w docs |
 
 **Placeholder scan:** brak TBD.
 
