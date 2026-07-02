@@ -19,8 +19,8 @@ export function DiscretionaryPageNotices({
     <>
       {coveragePercent < 80 ? (
         <p className="alert-warning text-sm">
-          Tylko {coveragePercent.toFixed(1)}% wydatków ma przypisaną kategorię — wnioski mogą być
-          niepełne.{" "}
+          Tylko {coveragePercent.toFixed(1)}% wydatków ma przypisaną kategorię — wnioski
+          mogą być niepełne.{" "}
           <Link
             href={`/transactions?uncategorized=1&context=${context}`}
             className="link-brand"

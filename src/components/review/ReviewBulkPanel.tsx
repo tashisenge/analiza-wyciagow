@@ -6,10 +6,7 @@ import { useState, useTransition } from "react";
 import { ReviewBulkDecisionButtons } from "@/components/review/ReviewBulkDecisionButtons";
 import type { MbankVerifySuggestion } from "@/lib/ai/verify-mbank-assignments";
 import type { BulkReviewDecision } from "@/lib/review/persist-bulk-review-decisions";
-import {
-  submitBulkReview,
-  suggestionsForIds,
-} from "@/lib/review/review-bulk-actions";
+import { submitBulkReview, suggestionsForIds } from "@/lib/review/review-bulk-actions";
 
 interface CategoryOption {
   id: string;
@@ -80,7 +77,11 @@ export function ReviewBulkPanel({
           {message.text}
         </p>
       ) : null}
-      <ReviewBulkDecisionButtons pending={pending} aiCount={aiCount} onDecision={runBulk} />
+      <ReviewBulkDecisionButtons
+        pending={pending}
+        aiCount={aiCount}
+        onDecision={runBulk}
+      />
       <div className="flex flex-wrap items-center gap-2">
         <select
           value={categoryId}
