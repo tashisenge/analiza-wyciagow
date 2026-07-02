@@ -1,0 +1,29 @@
+vitest.config.ts
+  s_85314170cfee79::t_c4ad78f0d348f6 20-27
+  s_6c4a050d5bfcd5::t_bee5cf5e847617 88-96
+  s_85314170cfee79::t_c390371a0dba99 75-87
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.8",
+  "base_commit_sha": "45cde25abede2410118cf15020c2925f639b99db",
+  "prompts": {},
+  "sessions": {
+    "s_6c4a050d5bfcd5": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "d9d66a15-8eca-4199-81d4-693a7720c199",
+        "model": "default"
+      },
+      "human_author": "Adam Michalczyk <tashisenge@gmail.com>"
+    },
+    "s_85314170cfee79": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "925d78f4-419f-4502-8b73-efd6bd888d97",
+        "model": "default"
+      },
+      "human_author": "Adam Michalczyk <tashisenge@gmail.com>"
+    }
+  }
+}
