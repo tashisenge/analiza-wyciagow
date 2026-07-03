@@ -1,0 +1,109 @@
+src/lib/transactions/transaction-cursor.ts
+  s_7c3a9a5482bc4a::t_4c3fb4e27390e9 1-2
+  s_7c3a9a5482bc4a::t_06f355487c0d81 3-26,30-31,36-45,56-64,66-97,103-104,107-123,125-126
+  s_7c3a9a5482bc4a::t_35effcb280be59 65
+  s_7c3a9a5482bc4a::t_4765f53639f49c 27-29,32-35,46-55,98-102,105-106,124
+tests/lib/analytics/savings-ritual-state.test.ts
+  s_7c3a9a5482bc4a::t_cd11bcfdbb3620 1-46,48-66
+  s_7c3a9a5482bc4a::t_9592ebcc624f6e 47
+src/lib/transactions/page-filters.ts
+  s_7c3a9a5482bc4a::t_ccbcf93b92dbde 16
+  s_7c3a9a5482bc4a::t_6e7f104b7fba8b 58
+src/lib/transactions/transaction-sort.ts
+  s_7c3a9a5482bc4a::t_f628363839f615 38-41,43-46
+  s_7c3a9a5482bc4a::t_f1b53f73103b62 85
+  s_7c3a9a5482bc4a::t_1aaabab5b3d87d 42
+docs/user-guide.md
+  s_7c3a9a5482bc4a::t_78a78145a1d9d4 47,50
+  s_7c3a9a5482bc4a::t_64f6976844ab4f 36
+  s_7c3a9a5482bc4a::t_c0c04c064aee89 93-95
+src/lib/transactions/load-transactions-page.ts
+  s_7c3a9a5482bc4a::t_2bc0376e2e9bf7 90-91,103-104,127-128
+  s_7c3a9a5482bc4a::t_6d2ed589a3b4b6 8-11,15,95
+src/app/(app)/dashboard/page.tsx
+  s_7c3a9a5482bc4a::t_d883082bf3cd96 74-84
+  s_7c3a9a5482bc4a::t_75709fcf12c9ff 7-10
+  s_7c3a9a5482bc4a::t_07210488852346 6
+  s_7c3a9a5482bc4a::t_b3518a4d633182 85
+src/components/optimization/ImplementedSavingsSummary.tsx
+  s_7c3a9a5482bc4a::t_9d5ff4de8ec1a1 1-51
+src/lib/transactions/build-transactions-url.ts
+  s_7c3a9a5482bc4a::t_3a5179a9c3eeae 29
+src/lib/transactions/transaction-filter-hrefs.ts
+  s_7c3a9a5482bc4a::t_4baa76a98d2d11 51
+  s_7c3a9a5482bc4a::t_6837df4a45fa77 63,71
+  s_7c3a9a5482bc4a::t_84e2cc3b1c16af 19
+src/components/dashboard/DashboardSections.tsx
+  s_7c3a9a5482bc4a::t_1ebfdc7d39ef93 1-71
+src/lib/optimization/load-optimization-data.ts
+  s_7c3a9a5482bc4a::t_8aa28aaea8c30d 113-127,164,169,171
+  s_7c3a9a5482bc4a::t_7d08d2a447ed5d 128-150,160-161,165-168,170
+  s_7c3a9a5482bc4a::t_0299180fcf28b6 6-8
+  s_7c3a9a5482bc4a::t_1f6a629900120e 107
+  s_7c3a9a5482bc4a::t_1568aa7f54c248 5
+src/app/(app)/optimize/page.tsx
+  s_7c3a9a5482bc4a::t_43bcd8d33939c6 5
+  s_7c3a9a5482bc4a::t_e7517eabd5fc06 41-42
+src/app/(app)/transactions/page.tsx
+  s_7c3a9a5482bc4a::t_ad86715449a0a1 78
+  s_7c3a9a5482bc4a::t_ec337e1be1ce0f 143-149
+  s_7c3a9a5482bc4a::t_c0fea947011b94 118-119,121
+  s_7c3a9a5482bc4a::t_1963451db84129 95
+  s_7c3a9a5482bc4a::t_ecead496c1bdf8 7
+  s_7c3a9a5482bc4a::t_2f1cacd6b3803d 132-133,135
+  s_7c3a9a5482bc4a::t_69cc0a298e7138 107
+  s_7c3a9a5482bc4a::t_c03e733f984823 120,134
+tests/lib/page-filters.test.ts
+  s_7c3a9a5482bc4a::t_5826dccc9c7e8a 77
+  s_7c3a9a5482bc4a::t_0e47ccde8db5c1 89-94
+src/components/dashboard/DashboardSavingsRitualSection.tsx
+  s_7c3a9a5482bc4a::t_b38d8f8aeeeaee 1-37
+tests/lib/optimization/aggregate-savings-impact.test.ts
+  s_7c3a9a5482bc4a::t_9fb03ec4c14836 1-28
+tests/lib/transaction-cursor.test.ts
+  s_7c3a9a5482bc4a::t_587f591ae961f1 1-61,63-69
+  s_7c3a9a5482bc4a::t_7b39adae0dfa10 62
+src/lib/analytics/savings-ritual-steps.ts
+  s_7c3a9a5482bc4a::t_a3ceff7743f0e2 2,4-5,7-19,21-22,24-41
+  s_7c3a9a5482bc4a::t_413c42d1360161 1,3,6,20,23
+src/components/transactions/TransactionsPagination.tsx
+  s_7c3a9a5482bc4a::t_fe682efc12f12f 1-32,34-66
+  s_7c3a9a5482bc4a::t_35722e3efbe2e7 33
+eslint.config.mjs
+  s_7c3a9a5482bc4a::t_4260e018d27e22 131,138
+vitest.config.ts
+  s_7c3a9a5482bc4a::t_61b35d2cd13dff 54
+src/components/dashboard/SavingsRitualWidget.tsx
+  s_7c3a9a5482bc4a::t_fd5263c28ec440 1-67
+src/lib/analytics/savings-ritual-state.ts
+  s_7c3a9a5482bc4a::t_228b50fb5eee16 1,11-47,70-74,79-84
+  s_7c3a9a5482bc4a::t_ebce67146f76fe 6-9
+  s_7c3a9a5482bc4a::t_421db2c6233845 2-5,10,48-69,75-78
+src/lib/transactions/fetch-transactions-page-bundle.ts
+  s_7c3a9a5482bc4a::t_1384c36edbcf0b 35
+  s_7c3a9a5482bc4a::t_0131ca9580d71c 40
+  s_7c3a9a5482bc4a::t_d877459ee6e72a 42
+  s_7c3a9a5482bc4a::t_5d5ad579dee330 48
+  s_7c3a9a5482bc4a::t_9dd646e1750d74 1-8,10-18,20-34,36-39,41,43-47,49-129
+  s_7c3a9a5482bc4a::t_dcaa5639767a55 9,19
+src/lib/optimization/aggregate-savings-impact.ts
+  s_7c3a9a5482bc4a::t_bb24e548bd8bab 1-35
+src/components/transactions/TransactionFilters.tsx
+  s_7c3a9a5482bc4a::t_1232f0a4a445dd 34
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "f4cb17b711b849c0d64aa6eb2f166d27e2a8a868",
+  "prompts": {},
+  "sessions": {
+    "s_7c3a9a5482bc4a": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "90c241b9-9ba4-4090-aff4-9df35aa8f358",
+        "model": "default"
+      },
+      "human_author": "Adam Michalczyk <tashisenge@gmail.com>"
+    }
+  }
+}
