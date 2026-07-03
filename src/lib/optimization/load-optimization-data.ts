@@ -136,15 +136,16 @@ async function loadOptimizeLists(
   dismissedCount: number;
   categories: { id: string; name: string }[];
 }> {
-  const [open, implemented, allImplemented, dismissedCount, categories] = await Promise.all([
-    loadOpenOpportunities(workspaceId, context),
-    loadImplementedOpportunities(workspaceId, context, monthStart),
-    loadAllImplementedOpportunities(workspaceId, context),
-    prisma.optimizationOpportunity.count({
-      where: { workspaceId, status: "DISMISSED", accountContext: context },
-    }),
-    prisma.category.findMany({ where: { workspaceId }, orderBy: { name: "asc" } }),
-  ]);
+  const [open, implemented, allImplemented, dismissedCount, categories] =
+    await Promise.all([
+      loadOpenOpportunities(workspaceId, context),
+      loadImplementedOpportunities(workspaceId, context, monthStart),
+      loadAllImplementedOpportunities(workspaceId, context),
+      prisma.optimizationOpportunity.count({
+        where: { workspaceId, status: "DISMISSED", accountContext: context },
+      }),
+      prisma.category.findMany({ where: { workspaceId }, orderBy: { name: "asc" } }),
+    ]);
   return { open, implemented, allImplemented, dismissedCount, categories };
 }
 

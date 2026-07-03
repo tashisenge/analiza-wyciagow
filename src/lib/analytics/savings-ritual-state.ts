@@ -45,7 +45,10 @@ function isLimitOk(input: SavingsRitualInput): boolean {
   );
 }
 
-function limitStep(input: SavingsRitualInput, links: SavingsRitualLinks): SavingsRitualStep {
+function limitStep(
+  input: SavingsRitualInput,
+  links: SavingsRitualLinks,
+): SavingsRitualStep {
   const done = isLimitOk(input);
   return {
     id: "limit",

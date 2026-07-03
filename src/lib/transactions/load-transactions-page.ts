@@ -12,7 +12,10 @@ import {
 import { loadPairedOwnAccountTransferKeys } from "@/lib/transactions/load-workspace-transfer-pairs";
 import type { TransactionSearchParams } from "@/lib/transactions/page-filters";
 import { buildSimilarCountsByTransactionId } from "@/lib/transactions/similar-transaction-count";
-import { parseTransactionSort, sortTransactionRows } from "@/lib/transactions/transaction-sort";
+import {
+  parseTransactionSort,
+  sortTransactionRows,
+} from "@/lib/transactions/transaction-sort";
 
 interface TransactionRow extends TransactionTableRow {
   tags: { id: string; name: string; color: string }[];

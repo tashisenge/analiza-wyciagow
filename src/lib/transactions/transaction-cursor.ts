@@ -45,7 +45,9 @@ function decodeKeysetCursor(raw: string): KeysetCursor | null {
   return { kind: "keyset", bookedAt, id };
 }
 
-export function decodeTransactionCursor(raw: string | undefined): TransactionCursor | null {
+export function decodeTransactionCursor(
+  raw: string | undefined,
+): TransactionCursor | null {
   if (!raw?.trim()) {
     return null;
   }
@@ -121,6 +123,9 @@ export function nextPageCursor(
       id: last.id,
     });
   }
-  const skip = current?.kind === "offset" ? current.skip + TRANSACTION_PAGE_SIZE : TRANSACTION_PAGE_SIZE;
+  const skip =
+    current?.kind === "offset"
+      ? current.skip + TRANSACTION_PAGE_SIZE
+      : TRANSACTION_PAGE_SIZE;
   return encodeTransactionCursor({ kind: "offset", skip });
 }

@@ -1,6 +1,13 @@
-import type { SavingsRitualInput, SavingsRitualLinks, SavingsRitualStep } from "@/lib/analytics/savings-ritual-state";
+import type {
+  SavingsRitualInput,
+  SavingsRitualLinks,
+  SavingsRitualStep,
+} from "@/lib/analytics/savings-ritual-state";
 
-function importStep(input: SavingsRitualInput, links: SavingsRitualLinks): SavingsRitualStep {
+function importStep(
+  input: SavingsRitualInput,
+  links: SavingsRitualLinks,
+): SavingsRitualStep {
   const done = input.hasImport && !input.isStaleImport;
   return {
     id: "import",

@@ -93,23 +93,29 @@ export async function fetchTransactionsPageBundle(
 }> {
   const sort = parseTransactionSort(params);
   const cursor = resolvePaginationCursor(params.cursor, sort);
-  const [rawTransactions, categories, filterCategory, transferCategoryId, allTags, subscriptionMarkers] =
-    await Promise.all([
-      fetchTransactionsPage(workspaceId, accountIds, params),
-      prisma.category.findMany({ where: { workspaceId }, orderBy: { name: "asc" } }),
-      params.categoryId
-        ? prisma.category.findFirst({
-            where: { id: params.categoryId, workspaceId },
-            select: { name: true },
-          })
-        : null,
-      ensureTransferCategory(workspaceId),
-      prisma.tag.findMany({ where: { workspaceId }, orderBy: { name: "asc" } }),
-      prisma.subscriptionMarker.findMany({
-        where: { workspaceId },
-        select: { counterparty: true },
-      }),
-    ]);
+  const [
+    rawTransactions,
+    categories,
+    filterCategory,
+    transferCategoryId,
+    allTags,
+    subscriptionMarkers,
+  ] = await Promise.all([
+    fetchTransactionsPage(workspaceId, accountIds, params),
+    prisma.category.findMany({ where: { workspaceId }, orderBy: { name: "asc" } }),
+    params.categoryId
+      ? prisma.category.findFirst({
+          where: { id: params.categoryId, workspaceId },
+          select: { name: true },
+        })
+      : null,
+    ensureTransferCategory(workspaceId),
+    prisma.tag.findMany({ where: { workspaceId }, orderBy: { name: "asc" } }),
+    prisma.subscriptionMarker.findMany({
+      where: { workspaceId },
+      select: { counterparty: true },
+    }),
+  ]);
 
   const hasMore = rawTransactions.length > TRANSACTION_PAGE_SIZE;
   const transactions = hasMore
