@@ -1,0 +1,29 @@
+src/lib/analytics/savings-ritual-state.ts
+  s_85314170cfee79::t_6363d5a1eaf5ae 48-51
+src/lib/analytics/savings-ritual-steps.ts
+  s_85314170cfee79::t_72726c8bdf6310 1-5,7-10
+src/lib/optimization/load-optimization-data.ts
+  s_85314170cfee79::t_d56be15f7a3e85 139-148
+src/lib/transactions/fetch-transactions-page-bundle.ts
+  s_85314170cfee79::t_a3b7a9a4169dcb 96-118
+src/lib/transactions/load-transactions-page.ts
+  s_85314170cfee79::t_4965a098286df7 15-18
+src/lib/transactions/transaction-cursor.ts
+  s_85314170cfee79::t_5e9fbf728eb9e4 48-50,126-129
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "090c7cd08b6f1e874f685c90389dd70031a3b495",
+  "prompts": {},
+  "sessions": {
+    "s_85314170cfee79": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "925d78f4-419f-4502-8b73-efd6bd888d97",
+        "model": "default"
+      },
+      "human_author": "Adam Michalczyk <tashisenge@gmail.com>"
+    }
+  }
+}
