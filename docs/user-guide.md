@@ -33,6 +33,7 @@ Przełącznik **firma / dom / razem** filtruje wszystkie liczby i wykresy.
 | Wykres kategorii      | Udział wydatków w slice’ach                                                 |
 | Top kontrahenci       | Najwięksi odbiorcy pieniędzy, zmiana m/m                                    |
 | Baner „bez kategorii” | Ile transakcji wymaga ręcznego ogarnięcia                                   |
+| Rytuał oszczędzania   | 4 kroki: świeży import, pokrycie ≥80%, limit OK, opcjonalny raport AI       |
 | Widget optymalizacji  | Top 3 możliwości oszczędności + link do pełnej listy                        |
 | Wydatki opcjonalne    | Suma „głupot”, udział w wydatkach i dochodzie, limit miesięczny, alert ≥80% |
 | Panel AI              | Mapowanie mBank, batch kategoryzacji, analiza tekstowa                      |
@@ -43,9 +44,10 @@ Przełącznik **firma / dom / razem** filtruje wszystkie liczby i wykresy.
 
 ## 4. Transakcje
 
-- Lista do **200** ostatnich pozycji (filtr kontekstu firma/dom/razem).
+- Lista **paginowana** — 50 pozycji na stronę; parametr `cursor` w URL zachowuje filtry między stronami.
 - Kliknij kategorię w wierszu, aby ją zmienić — aplikacja **zapamięta kontrahenta** na przyszłość.
 - Filtry w URL: brak kategorii, kategoria, kontrahent (link z kart optymalizacji).
+- Zmiana filtra lub sortowania resetuje paginację (pierwsza strona).
 
 ---
 
@@ -88,8 +90,9 @@ W skrócie:
 
 1. Kliknij **Odśwież możliwości** — system wykryje powtarzalne opłaty, wpadki, skoki wydatków i przekroczenia limitów.
 2. Przejrzyj listę z **szacowanymi oszczędnościami** (PLN/mies.).
-3. Ustaw **limity per kategoria** — przy przekroczeniu pojawi się alert.
-4. Oznacz kartę jako **Wdrożone** lub **Odrzuć** — wdrożone można zweryfikować po ~30 dniach (badge „Działa”).
+3. Sekcja **Wdrożone → efekt** pokazuje zbiorczo: ile zmian wdrożono, ile zweryfikowano (badge „Działa”) i sumę szacowanych oszczędności.
+4. Ustaw **limity per kategoria** — przy przekroczeniu pojawi się alert.
+5. Oznacz kartę jako **Wdrożone** lub **Odrzuć** — wdrożone można zweryfikować po ~30 dniach (badge „Działa”).
 
 Dla subskrypcji i opłat powtarzalnych: **Szukaj alternatyw** (wymaga kluczy API w `.env` u administratora).
 

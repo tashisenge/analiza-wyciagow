@@ -16,6 +16,7 @@ const CLEAR_LIST_FILTERS: FilterPatch = {
   discretionary: undefined,
   tagId: undefined,
   uncategorized: undefined,
+  cursor: undefined,
 };
 
 const QUICK_FILTER_PATCHES: Record<
@@ -47,6 +48,7 @@ export function buildTransactionTagFilterHref(
     uncategorized: undefined,
     categoryId: undefined,
     categoryName: undefined,
+    cursor: undefined,
   });
 }
 
@@ -58,6 +60,7 @@ export function buildTransactionCategoryFilterHref(
     return buildTransactionsHref(params, {
       categoryId: undefined,
       categoryName: undefined,
+      cursor: undefined,
     });
   }
   return buildTransactionsHref(params, {
@@ -65,5 +68,6 @@ export function buildTransactionCategoryFilterHref(
     categoryName: undefined,
     uncategorized: undefined,
     discretionary: undefined,
+    cursor: undefined,
   });
 }

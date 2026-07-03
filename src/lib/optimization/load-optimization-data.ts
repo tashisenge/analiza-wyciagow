@@ -3,6 +3,10 @@ import type { Prisma } from "@prisma/client";
 import type { ContextFilter } from "@/lib/analytics/filters";
 import { prisma } from "@/lib/db";
 import {
+  aggregateSavingsImpact,
+  type SavingsImpactSummary,
+} from "@/lib/optimization/aggregate-savings-impact";
+import {
   fetchAccountIds,
   fetchBudgetsForContext,
   sixMonthsAgo,
@@ -100,9 +104,48 @@ type OpportunityList = Awaited<ReturnType<typeof loadOpenOpportunities>>;
 interface OptimizePageData {
   open: OpportunityList;
   implemented: OpportunityList;
+  savingsImpact: SavingsImpactSummary;
   dismissedCount: number;
   budgets: Awaited<ReturnType<typeof loadBudgetSpentRows>>;
   categories: { id: string; name: string }[];
+}
+
+async function loadAllImplementedOpportunities(
+  workspaceId: string,
+  context: ContextFilter,
+): Promise<OpportunityWithRelations[]> {
+  return prisma.optimizationOpportunity.findMany({
+    where: {
+      workspaceId,
+      status: "IMPLEMENTED",
+      accountContext: context,
+    },
+    include: opportunityInclude,
+    orderBy: { resolvedAt: "desc" },
+  });
+}
+
+async function loadOptimizeLists(
+  workspaceId: string,
+  context: ContextFilter,
+  monthStart: Date,
+): Promise<{
+  open: OpportunityList;
+  implemented: OpportunityList;
+  allImplemented: OpportunityList;
+  dismissedCount: number;
+  categories: { id: string; name: string }[];
+}> {
+  const [open, implemented, allImplemented, dismissedCount, categories] = await Promise.all([
+    loadOpenOpportunities(workspaceId, context),
+    loadImplementedOpportunities(workspaceId, context, monthStart),
+    loadAllImplementedOpportunities(workspaceId, context),
+    prisma.optimizationOpportunity.count({
+      where: { workspaceId, status: "DISMISSED", accountContext: context },
+    }),
+    prisma.category.findMany({ where: { workspaceId }, orderBy: { name: "asc" } }),
+  ]);
+  return { open, implemented, allImplemented, dismissedCount, categories };
 }
 
 async function fetchOptimizePageCore(
@@ -114,16 +157,18 @@ async function fetchOptimizePageCore(
     budgets: Awaited<ReturnType<typeof fetchBudgetsForContext>>;
   }
 > {
-  const [open, implemented, dismissedCount, budgets, categories] = await Promise.all([
-    loadOpenOpportunities(workspaceId, context),
-    loadImplementedOpportunities(workspaceId, context, monthStart),
-    prisma.optimizationOpportunity.count({
-      where: { workspaceId, status: "DISMISSED", accountContext: context },
-    }),
+  const [lists, budgets] = await Promise.all([
+    loadOptimizeLists(workspaceId, context, monthStart),
     fetchBudgetsForContext(workspaceId, context),
-    prisma.category.findMany({ where: { workspaceId }, orderBy: { name: "asc" } }),
   ]);
-  return { open, implemented, dismissedCount, budgets, categories };
+  return {
+    open: lists.open,
+    implemented: lists.implemented,
+    savingsImpact: aggregateSavingsImpact(lists.allImplemented),
+    dismissedCount: lists.dismissedCount,
+    budgets,
+    categories: lists.categories,
+  };
 }
 
 export async function loadOptimizePageData(

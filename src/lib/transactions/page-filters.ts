@@ -13,6 +13,7 @@ export interface TransactionSearchParams {
   dateTo?: string;
   sort?: string;
   sortDir?: string;
+  cursor?: string;
   msg?: string;
 }
 
@@ -54,6 +55,7 @@ export function parseTransactionSearchParams(
     dateTo: trimOrUndefined(singleSearchParam(raw.dateTo)),
     sort: trimOrUndefined(singleSearchParam(raw.sort)),
     sortDir: trimOrUndefined(singleSearchParam(raw.sortDir)),
+    cursor: trimOrUndefined(singleSearchParam(raw.cursor)),
     msg: trimOrUndefined(singleSearchParam(raw.msg)),
     error: trimOrUndefined(singleSearchParam(raw.error)),
   };

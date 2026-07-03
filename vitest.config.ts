@@ -51,6 +51,7 @@ const COVERAGE_EXCLUDE = [
   "src/lib/transactions/bulk-category-targets.ts",
   "src/lib/transactions/execute-bulk-category-update.ts",
   "src/lib/transactions/load-transactions-page.ts",
+  "src/lib/transactions/fetch-transactions-page-bundle.ts",
   "src/lib/transactions/transaction-list-extra-where.ts",
   "src/lib/transactions/validate-bulk-update.ts",
   "src/lib/transactions/has-bulk-selection.ts",

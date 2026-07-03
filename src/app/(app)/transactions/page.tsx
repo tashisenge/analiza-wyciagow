@@ -4,6 +4,7 @@ import { TransactionFilters } from "@/components/transactions/TransactionFilters
 import { TransactionFlashMessage } from "@/components/transactions/TransactionFlashMessage";
 import { TransactionsHelpPanel } from "@/components/transactions/TransactionsHelpPanel";
 import { TransactionsPageClient } from "@/components/transactions/TransactionsPageClient";
+import { TransactionsPagination } from "@/components/transactions/TransactionsPagination";
 import { PageHeader } from "@/components/ui/PageHeader";
 import type { ContextFilter } from "@/lib/analytics/filters";
 import { auth } from "@/lib/auth";
@@ -74,7 +75,7 @@ export default async function TransactionsPage({
       <PageHeader
         title="Transakcje"
         lead="Kategoryzuj pojedynczo lub masowo po kontrahencie. Taguj operacje i oznaczaj subskrypcje."
-        tip="Lista pokazuje do 200 ostatnich pozycji z wybranych kont."
+        tip="Lista jest paginowana (50 pozycji na stronę). Parametr cursor w URL zachowuje filtry."
         actions={
           <TransactionFilters
             active={transactionActiveFilter(params)}
@@ -87,16 +88,11 @@ export default async function TransactionsPage({
       {pageData.filterCategoryName ? (
         <p className="text-sm text-slate-600">
           Filtr: kategoria <strong>{pageData.filterCategoryName}</strong> —{" "}
-          {pageData.rows.length > 0 ? (
-            <>
-              pokazano <strong>{String(pageData.rows.length)}</strong>
-              {pageData.rows.length >= 200 ? "+" : ""} transakcji (max 200) —{" "}
-            </>
-          ) : null}
           <a
             href={buildTransactionsHref(params, {
               categoryId: undefined,
               categoryName: undefined,
+              cursor: undefined,
             })}
             className="link-brand"
           >
@@ -108,7 +104,7 @@ export default async function TransactionsPage({
         <p className="text-sm text-slate-600">
           Filtr: tag <strong>{pageData.filterTagName}</strong> —{" "}
           <a
-            href={buildTransactionsHref(params, { tagId: undefined })}
+            href={buildTransactionsHref(params, { tagId: undefined, cursor: undefined })}
             className="link-brand"
           >
             wyczyść filtr tagu
@@ -119,7 +115,10 @@ export default async function TransactionsPage({
         <p className="text-sm text-slate-600">
           Filtr: tylko wydatki <strong>opcjonalne</strong> —{" "}
           <a
-            href={buildTransactionsHref(params, { discretionary: undefined })}
+            href={buildTransactionsHref(params, {
+              discretionary: undefined,
+              cursor: undefined,
+            })}
             className="link-brand"
           >
             wyczyść
@@ -130,7 +129,10 @@ export default async function TransactionsPage({
         <p className="text-sm text-slate-600">
           Filtr: kontrahent zawiera <strong>{params.counterparty}</strong> —{" "}
           <a
-            href={buildTransactionsHref(params, { counterparty: undefined })}
+            href={buildTransactionsHref(params, {
+              counterparty: undefined,
+              cursor: undefined,
+            })}
             className="link-brand"
           >
             wyczyść filtr nazwy
@@ -138,6 +140,13 @@ export default async function TransactionsPage({
         </p>
       ) : null}
       <TransactionFlashMessage error={params.error} msg={params.msg} />
+      <TransactionsPagination
+        params={params}
+        rowCount={pageData.rows.length}
+        nextCursor={pageData.nextCursor}
+        prevCursor={pageData.prevCursor}
+        buildHref={buildTransactionsHref}
+      />
       <TransactionsHelpPanel />
       <TransactionsPageClient
         rows={pageData.rows}

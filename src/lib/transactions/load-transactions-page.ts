@@ -1,32 +1,18 @@
-import type { Prisma } from "@prisma/client";
-
 import type { ContextFilter } from "@/lib/analytics/filters";
 import { accountIdsForContext } from "@/lib/analytics/filters";
-import { ensureTransferCategory } from "@/lib/categories/ensure-transfer-category";
 import { prisma } from "@/lib/db";
 import {
   buildTransactionTableRows,
   type TransactionTableRow,
 } from "@/lib/transactions/build-transaction-table-rows";
-import { buildTransactionsWhere } from "@/lib/transactions/build-transactions-where";
+import {
+  fetchTransactionsPageBundle,
+  type PageTransaction,
+} from "@/lib/transactions/fetch-transactions-page-bundle";
 import { loadPairedOwnAccountTransferKeys } from "@/lib/transactions/load-workspace-transfer-pairs";
 import type { TransactionSearchParams } from "@/lib/transactions/page-filters";
 import { buildSimilarCountsByTransactionId } from "@/lib/transactions/similar-transaction-count";
-import {
-  buildTransactionOrderBy,
-  parseTransactionSort,
-  sortTransactionRows,
-} from "@/lib/transactions/transaction-sort";
-
-const transactionPageInclude = {
-  category: true,
-  account: true,
-  tags: { include: { tag: true } },
-} satisfies Prisma.TransactionInclude;
-
-type PageTransaction = Prisma.TransactionGetPayload<{
-  include: typeof transactionPageInclude;
-}>;
+import { parseTransactionSort, sortTransactionRows } from "@/lib/transactions/transaction-sort";
 
 interface TransactionRow extends TransactionTableRow {
   tags: { id: string; name: string; color: string }[];
@@ -51,57 +37,6 @@ function mapTransactionRows(
       isSubscription: subscriptionSet.has(row.counterparty),
     };
   });
-}
-
-async function fetchTransactionsBundle(
-  workspaceId: string,
-  accountIds: string[],
-  params: TransactionSearchParams,
-): Promise<{
-  transactions: PageTransaction[];
-  categories: { id: string; name: string }[];
-  filterCategory: { name: string } | null;
-  transferCategoryId: string;
-  allTags: { id: string; name: string; color: string }[];
-  subscriptionMarkers: { counterparty: string }[];
-}> {
-  const sort = parseTransactionSort(params);
-  const [
-    transactions,
-    categories,
-    filterCategory,
-    transferCategoryId,
-    allTags,
-    subscriptionMarkers,
-  ] = await Promise.all([
-    prisma.transaction.findMany({
-      where: buildTransactionsWhere(workspaceId, accountIds, params),
-      orderBy: buildTransactionOrderBy(sort),
-      take: 200,
-      include: transactionPageInclude,
-    }),
-    prisma.category.findMany({ where: { workspaceId }, orderBy: { name: "asc" } }),
-    params.categoryId
-      ? prisma.category.findFirst({
-          where: { id: params.categoryId, workspaceId },
-          select: { name: true },
-        })
-      : null,
-    ensureTransferCategory(workspaceId),
-    prisma.tag.findMany({ where: { workspaceId }, orderBy: { name: "asc" } }),
-    prisma.subscriptionMarker.findMany({
-      where: { workspaceId },
-      select: { counterparty: true },
-    }),
-  ]);
-  return {
-    transactions,
-    categories,
-    filterCategory,
-    transferCategoryId,
-    allTags,
-    subscriptionMarkers,
-  };
 }
 
 async function buildTransactionRows(input: {
@@ -152,10 +87,12 @@ export async function loadTransactionsPageData(
   allTags: { id: string; name: string; color: string }[];
   filterCategoryName: string | undefined;
   filterTagName: string | undefined;
+  nextCursor: string | null;
+  prevCursor: string | null;
 }> {
   const accounts = await prisma.account.findMany({ where: { workspaceId } });
   const accountIds = accountIdsForContext(accounts, context);
-  const bundle = await fetchTransactionsBundle(workspaceId, accountIds, params);
+  const bundle = await fetchTransactionsPageBundle(workspaceId, accountIds, params);
   const {
     transactions,
     categories,
@@ -163,6 +100,8 @@ export async function loadTransactionsPageData(
     transferCategoryId,
     allTags,
     subscriptionMarkers,
+    nextCursor,
+    prevCursor,
   } = bundle;
 
   const sort = parseTransactionSort(params);
@@ -185,5 +124,7 @@ export async function loadTransactionsPageData(
     filterTagName: params.tagId
       ? allTags.find((tag) => tag.id === params.tagId)?.name
       : undefined,
+    nextCursor,
+    prevCursor,
   };
 }

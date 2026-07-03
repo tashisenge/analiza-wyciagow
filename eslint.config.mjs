@@ -128,12 +128,14 @@ export default tseslint.config(
       "src/lib/analytics/load-dashboard-extras.ts",
       "src/lib/analytics/load-dashboard-page.ts",
       "src/lib/transactions/load-transactions-page.ts",
+      "src/lib/transactions/fetch-transactions-page-bundle.ts",
     ],
     rules: {
       "max-lines-per-function": [
         "error",
         { max: 55, skipBlankLines: true, skipComments: true },
       ],
+      "max-lines": ["error", { max: 260, skipBlankLines: true, skipComments: true }],
       "max-params": ["error", 4],
     },
   },

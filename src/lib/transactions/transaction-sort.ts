@@ -35,6 +35,15 @@ export function buildTransactionOrderBy(
   return { bookedAt: sort.direction };
 }
 
+export function buildTransactionPageOrderBy(
+  sort: TransactionSortState,
+): Prisma.TransactionOrderByWithRelationInput[] {
+  if (sort.field === "name") {
+    return [{ counterparty: sort.direction }, { bookedAt: "desc" }, { id: "desc" }];
+  }
+  return [{ bookedAt: sort.direction }, { id: sort.direction }];
+}
+
 export function sortTransactionRows<T extends SortableTransactionRow>(
   rows: T[],
   sort: TransactionSortState,
@@ -73,5 +82,5 @@ export function buildTransactionSortHref(
   const current = parseTransactionSort(params);
   const nextDirection: TransactionSortDirection =
     current.field === field && current.direction === "desc" ? "asc" : "desc";
-  return buildHref(params, { sort: field, sortDir: nextDirection });
+  return buildHref(params, { sort: field, sortDir: nextDirection, cursor: undefined });
 }

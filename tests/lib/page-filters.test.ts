@@ -74,6 +74,7 @@ describe("page-filters", () => {
       dateTo: undefined,
       sort: undefined,
       sortDir: undefined,
+      cursor: undefined,
       msg: undefined,
       error: undefined,
     });
@@ -83,6 +84,12 @@ describe("page-filters", () => {
     expect(parseTransactionSearchParams({ sort: "name", sortDir: "asc" })).toMatchObject({
       sort: "name",
       sortDir: "asc",
+    });
+  });
+
+  it("parses cursor param", () => {
+    expect(parseTransactionSearchParams({ cursor: "off:50" })).toMatchObject({
+      cursor: "off:50",
     });
   });
 });

@@ -2,17 +2,14 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { AiPanel } from "@/components/dashboard/AiPanel";
-import { CategoryBreakdownPanel } from "@/components/dashboard/CategoryBreakdownPanel";
-import { DashboardCategorySection } from "@/components/dashboard/CategoryChart";
 import { ContextToggle } from "@/components/dashboard/ContextToggle";
+import { DashboardSavingsRitualSection } from "@/components/dashboard/DashboardSavingsRitualSection";
+import {
+  DashboardChartsSection,
+  DashboardTrendSection,
+} from "@/components/dashboard/DashboardSections";
 import { DateRangeToggle } from "@/components/dashboard/DateRangeToggle";
 import { DiscretionaryWidget } from "@/components/dashboard/DiscretionaryWidget";
-import { MerchantChart } from "@/components/dashboard/MerchantChart";
-import { MerchantList } from "@/components/dashboard/MerchantList";
-import {
-  MonthlyTrendChart,
-  YearlySummaryCards,
-} from "@/components/dashboard/MonthlyTrendChart";
 import { OptimizeWidget } from "@/components/dashboard/OptimizeWidget";
 import { MonthPicker, YearPicker } from "@/components/dashboard/PeriodPicker";
 import { PeriodSummaryCards } from "@/components/dashboard/PeriodSummary";
@@ -22,72 +19,9 @@ import {
 } from "@/components/dashboard/RecurringWidgets";
 import { StaleImportAlert } from "@/components/dashboard/StaleImportAlert";
 import { PageHeader } from "@/components/ui/PageHeader";
-import type { DashboardData } from "@/lib/analytics/dashboard-types";
-import type { resolveDateRange } from "@/lib/analytics/date-range";
 import { loadDashboardPageContext } from "@/lib/analytics/load-dashboard-page";
 import { auth } from "@/lib/auth";
 import { countReviewQueue } from "@/lib/review/load-review-queue";
-
-function DashboardTrendSection({
-  data,
-  range,
-  year,
-}: {
-  data: DashboardData;
-  range: ReturnType<typeof resolveDateRange>;
-  year: number;
-}): React.JSX.Element {
-  if (range.isFullYear) {
-    return (
-      <section className="section-card space-y-4">
-        <h2 className="section-title">Podsumowanie roku {year}</h2>
-        <YearlySummaryCards summary={data.summary} year={year} />
-        <MonthlyTrendChart
-          points={data.yearlyMonths}
-          yearlyMonths={data.yearlyMonths}
-          title="Wydatki miesiąc po miesiącu"
-        />
-      </section>
-    );
-  }
-  return (
-    <section className="section-card">
-      <h2 className="section-title mb-3">Trend wydatków (ostatnie 6 miesięcy)</h2>
-      <MonthlyTrendChart points={data.monthlyTrend} />
-    </section>
-  );
-}
-
-function DashboardChartsSection({
-  data,
-  context,
-}: {
-  data: DashboardData;
-  context: string;
-}): React.JSX.Element {
-  return (
-    <>
-      <DashboardCategorySection slices={data.slices} context={context}>
-        <section className="grid gap-6 lg:grid-cols-2">
-          <div className="section-card">
-            <h2 className="section-title mb-3">Top kontrahenci</h2>
-            <MerchantChart merchants={data.merchants} />
-          </div>
-          <div className="section-card">
-            <h3 className="mb-2 font-medium text-slate-700">Lista kontrahentów</h3>
-            <MerchantList merchants={data.merchants} />
-          </div>
-        </section>
-      </DashboardCategorySection>
-      <section className="section-card">
-        <h3 className="mb-2 font-medium text-slate-700">
-          Transakcje w kategoriach — kliknij wiersz, aby rozwinąć
-        </h3>
-        <CategoryBreakdownPanel groups={data.categoryGroups} context={context} />
-      </section>
-    </>
-  );
-}
 
 export default async function DashboardPage({
   searchParams,
@@ -136,6 +70,18 @@ export default async function DashboardPage({
       {page.importFreshness.isStale && page.importFreshness.daysSinceImport !== null ? (
         <StaleImportAlert daysSinceImport={page.importFreshness.daysSinceImport} />
       ) : null}
+
+      <DashboardSavingsRitualSection
+        context={context}
+        period={period}
+        year={year}
+        month={month}
+        hasImport={page.importFreshness.daysSinceImport !== null}
+        isStaleImport={page.importFreshness.isStale}
+        categorizedPercent={data.categorizedPercent}
+        monthlyLimit={data.discretionaryMonthlyLimit}
+        limitUsedPercent={data.discretionaryLimitUsedPercent}
+      />
 
       <PeriodSummaryCards
         summary={data.summary}

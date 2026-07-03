@@ -26,6 +26,7 @@ export function appendTransactionSearchParams(
   setIfPresent(params, "dateTo", search.dateTo);
   setIfPresent(params, "sort", search.sort);
   setIfPresent(params, "sortDir", search.sortDir);
+  setIfPresent(params, "cursor", search.cursor);
 }
 
 export function buildTransactionsHref(

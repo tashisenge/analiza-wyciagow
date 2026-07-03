@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 
 import { ContextToggle } from "@/components/dashboard/ContextToggle";
 import { BudgetEditor } from "@/components/optimization/BudgetEditor";
+import { ImplementedSavingsSummary } from "@/components/optimization/ImplementedSavingsSummary";
 import { OptimizePanel } from "@/components/optimization/OptimizePanel";
 import { PageHeader } from "@/components/ui/PageHeader";
 import type { ContextFilter } from "@/lib/analytics/filters";
@@ -36,6 +37,8 @@ export default async function OptimizePage({
         Wykryte możliwości oszczędności, limity kategorii i śledzenie wdrożonych zmian.
         {data.dismissedCount > 0 ? ` Odrzuconych: ${String(data.dismissedCount)}.` : null}
       </p>
+
+      <ImplementedSavingsSummary summary={data.savingsImpact} />
 
       <OptimizePanel
         context={context}

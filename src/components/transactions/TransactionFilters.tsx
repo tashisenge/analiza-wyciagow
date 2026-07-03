@@ -31,7 +31,7 @@ interface TransactionFiltersProps {
 }
 
 const QUICK_FILTERS = [
-  { key: "all", label: "Wszystkie", tip: "Pełna lista (max 200)." },
+  { key: "all", label: "Wszystkie", tip: "Pełna lista (paginacja po 50)." },
   {
     key: "uncategorized",
     label: "Bez kategorii",
