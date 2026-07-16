@@ -129,4 +129,38 @@ describe("buildTransactionsHref", () => {
     expect(href).toContain("sortDir=desc");
     expect(href).toContain("counterparty=lidl");
   });
+
+  it("clears pagination when the counterparty filter changes", async () => {
+    const { buildTransactionsHref } =
+      await import("@/lib/transactions/build-transactions-url");
+    const href = buildTransactionsHref(
+      { cursor: "off:50", context: "dom" },
+      { counterparty: "lidl" },
+    );
+    expect(href).not.toContain("cursor=");
+    expect(href).toContain("counterparty=lidl");
+  });
+
+  it("clears pagination when the date range changes", async () => {
+    const { buildTransactionsHref } =
+      await import("@/lib/transactions/build-transactions-url");
+    const href = buildTransactionsHref(
+      { cursor: "off:50", context: "dom" },
+      { dateFrom: "2026-01-01", dateTo: "2026-01-31" },
+    );
+    expect(href).not.toContain("cursor=");
+    expect(href).toContain("dateFrom=2026-01-01");
+    expect(href).toContain("dateTo=2026-01-31");
+  });
+
+  it("keeps pagination when only the cursor changes", async () => {
+    const { buildTransactionsHref } =
+      await import("@/lib/transactions/build-transactions-url");
+    const href = buildTransactionsHref(
+      { context: "dom", counterparty: "lidl" },
+      { cursor: "off:50" },
+    );
+    expect(href).toContain("cursor=off%3A50");
+    expect(href).toContain("counterparty=lidl");
+  });
 });

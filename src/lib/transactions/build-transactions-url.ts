@@ -10,6 +10,12 @@ function setIfPresent(
   }
 }
 
+function changesPageContents(
+  patch: Partial<Record<keyof TransactionSearchParams, string | undefined>>,
+): boolean {
+  return Object.keys(patch).some((key) => key !== "cursor" && key !== "msg");
+}
+
 export function appendTransactionSearchParams(
   params: URLSearchParams,
   search: TransactionSearchParams,
@@ -34,6 +40,9 @@ export function buildTransactionsHref(
   patch: Partial<Record<keyof TransactionSearchParams, string | undefined>>,
 ): string {
   const merged: TransactionSearchParams = { ...current };
+  if (changesPageContents(patch) && !Object.hasOwn(patch, "cursor")) {
+    merged.cursor = undefined;
+  }
   for (const [key, value] of Object.entries(patch) as [
     keyof TransactionSearchParams,
     string | undefined,

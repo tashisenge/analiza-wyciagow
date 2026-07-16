@@ -3,6 +3,9 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useTransition } from "react";
 
+import { buildTransactionsHref } from "@/lib/transactions/build-transactions-url";
+import { parseTransactionSearchParams } from "@/lib/transactions/page-filters";
+
 export function TransactionDateFilters(): React.JSX.Element {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -11,19 +14,16 @@ export function TransactionDateFilters(): React.JSX.Element {
   const [dateTo, setDateTo] = useState(searchParams.get("dateTo") ?? "");
 
   function applyDates(): void {
-    const params = new URLSearchParams(searchParams.toString());
-    if (dateFrom) {
-      params.set("dateFrom", dateFrom);
-    } else {
-      params.delete("dateFrom");
-    }
-    if (dateTo) {
-      params.set("dateTo", dateTo);
-    } else {
-      params.delete("dateTo");
-    }
+    const params = parseTransactionSearchParams(
+      Object.fromEntries(searchParams.entries()),
+    );
     startTransition(() => {
-      router.push(`/transactions?${params.toString()}`);
+      router.push(
+        buildTransactionsHref(params, {
+          dateFrom: dateFrom || undefined,
+          dateTo: dateTo || undefined,
+        }),
+      );
     });
   }
 
