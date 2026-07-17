@@ -11,6 +11,7 @@ import {
   nextPageCursor,
   resolvePaginationCursor,
   TRANSACTION_PAGE_SIZE,
+  TRANSACTION_SIMILAR_SORT_LIMIT,
   type TransactionCursor,
 } from "@/lib/transactions/transaction-cursor";
 import {
@@ -64,14 +65,15 @@ async function fetchTransactionsPage(
 ): Promise<PageTransaction[]> {
   const sort = parseTransactionSort(params);
   const baseWhere = buildTransactionsWhere(workspaceId, accountIds, params);
-  const cursor = resolvePaginationCursor(params.cursor, sort);
+  const deferPagination = sort.field === "similar";
+  const cursor = deferPagination ? null : resolvePaginationCursor(params.cursor, sort);
   const where = buildCursorWhere(baseWhere, cursor, sort);
   const skip = cursor?.kind === "offset" ? cursor.skip : 0;
 
   return prisma.transaction.findMany({
     where,
     orderBy: buildTransactionPageOrderBy(sort),
-    take: TRANSACTION_PAGE_SIZE + 1,
+    take: deferPagination ? TRANSACTION_SIMILAR_SORT_LIMIT : TRANSACTION_PAGE_SIZE + 1,
     skip,
     include: transactionPageInclude,
   });
@@ -117,10 +119,12 @@ export async function fetchTransactionsPageBundle(
     }),
   ]);
 
-  const hasMore = rawTransactions.length > TRANSACTION_PAGE_SIZE;
-  const transactions = hasMore
-    ? rawTransactions.slice(0, TRANSACTION_PAGE_SIZE)
-    : rawTransactions;
+  const deferPagination = sort.field === "similar";
+  const hasMore = !deferPagination && rawTransactions.length > TRANSACTION_PAGE_SIZE;
+  const transactions =
+    deferPagination || !hasMore
+      ? rawTransactions
+      : rawTransactions.slice(0, TRANSACTION_PAGE_SIZE);
 
   return {
     transactions,
@@ -130,6 +134,6 @@ export async function fetchTransactionsPageBundle(
     allTags,
     subscriptionMarkers,
     nextCursor: hasMore ? nextPageCursor(transactions, sort, cursor) : null,
-    prevCursor: prevPageCursor(cursor, sort),
+    prevCursor: deferPagination ? null : prevPageCursor(cursor, sort),
   };
 }

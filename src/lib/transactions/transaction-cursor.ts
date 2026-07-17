@@ -3,6 +3,7 @@ import type { Prisma } from "@prisma/client";
 import type { TransactionSortState } from "@/lib/transactions/transaction-sort";
 
 export const TRANSACTION_PAGE_SIZE = 50;
+export const TRANSACTION_SIMILAR_SORT_LIMIT = 200;
 
 export interface KeysetCursor {
   kind: "keyset";
@@ -128,4 +129,29 @@ export function nextPageCursor(
       ? current.skip + TRANSACTION_PAGE_SIZE
       : TRANSACTION_PAGE_SIZE;
   return encodeTransactionCursor({ kind: "offset", skip });
+}
+
+export function paginateOffsetRows<T>(
+  rows: T[],
+  rawCursor: string | undefined,
+): {
+  rows: T[];
+  nextCursor: string | null;
+  prevCursor: string | null;
+} {
+  const decoded = decodeTransactionCursor(rawCursor);
+  const skip = decoded?.kind === "offset" ? decoded.skip : 0;
+  const pageRows = rows.slice(skip, skip + TRANSACTION_PAGE_SIZE);
+  const nextSkip = skip + TRANSACTION_PAGE_SIZE;
+  const prevSkip = skip - TRANSACTION_PAGE_SIZE;
+
+  return {
+    rows: pageRows,
+    nextCursor:
+      nextSkip < rows.length
+        ? encodeTransactionCursor({ kind: "offset", skip: nextSkip })
+        : null,
+    prevCursor:
+      prevSkip > 0 ? encodeTransactionCursor({ kind: "offset", skip: prevSkip }) : null,
+  };
 }

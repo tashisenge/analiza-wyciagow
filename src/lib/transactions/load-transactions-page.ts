@@ -12,6 +12,7 @@ import {
 import { loadPairedOwnAccountTransferKeys } from "@/lib/transactions/load-workspace-transfer-pairs";
 import type { TransactionSearchParams } from "@/lib/transactions/page-filters";
 import { buildSimilarCountsByTransactionId } from "@/lib/transactions/similar-transaction-count";
+import { paginateOffsetRows } from "@/lib/transactions/transaction-cursor";
 import {
   parseTransactionSort,
   sortTransactionRows,
@@ -108,7 +109,7 @@ export async function loadTransactionsPageData(
   } = bundle;
 
   const sort = parseTransactionSort(params);
-  const rows = sortTransactionRows(
+  const sortedRows = sortTransactionRows(
     await buildTransactionRows({
       workspaceId,
       accountIds,
@@ -118,16 +119,20 @@ export async function loadTransactionsPageData(
     }),
     sort,
   );
+  const pagination =
+    sort.field === "similar"
+      ? paginateOffsetRows(sortedRows, params.cursor)
+      : { rows: sortedRows, nextCursor, prevCursor };
 
   return {
-    rows,
+    rows: pagination.rows,
     categories,
     allTags,
     filterCategoryName: filterCategory?.name ?? params.categoryName,
     filterTagName: params.tagId
       ? allTags.find((tag) => tag.id === params.tagId)?.name
       : undefined,
-    nextCursor,
-    prevCursor,
+    nextCursor: pagination.nextCursor,
+    prevCursor: pagination.prevCursor,
   };
 }

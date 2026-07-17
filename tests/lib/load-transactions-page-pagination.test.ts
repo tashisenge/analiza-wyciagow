@@ -80,7 +80,9 @@ describe("loadTransactionsPageData similar sorting", () => {
     });
 
     expect(result.rows).toHaveLength(50);
-    expect(result.rows.every((row) => row.counterparty === "Repeated merchant")).toBe(true);
+    expect(result.rows.every((row) => row.counterparty === "Repeated merchant")).toBe(
+      true,
+    );
     expect(result.nextCursor).toBe("off:50");
     expect(result.prevCursor).toBeNull();
   });
