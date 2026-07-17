@@ -119,10 +119,10 @@ export async function fetchTransactionsPageBundle(
     }),
   ]);
 
-  const deferPagination = sort.field === "similar";
-  const hasMore = !deferPagination && rawTransactions.length > TRANSACTION_PAGE_SIZE;
+  const hasMore =
+    sort.field !== "similar" && rawTransactions.length > TRANSACTION_PAGE_SIZE;
   const transactions =
-    deferPagination || !hasMore
+    sort.field === "similar" || !hasMore
       ? rawTransactions
       : rawTransactions.slice(0, TRANSACTION_PAGE_SIZE);
 
@@ -134,6 +134,6 @@ export async function fetchTransactionsPageBundle(
     allTags,
     subscriptionMarkers,
     nextCursor: hasMore ? nextPageCursor(transactions, sort, cursor) : null,
-    prevCursor: deferPagination ? null : prevPageCursor(cursor, sort),
+    prevCursor: sort.field === "similar" ? null : prevPageCursor(cursor, sort),
   };
 }
