@@ -62,4 +62,26 @@ describe("fetchTransactionsPageBundle", () => {
     expect(bundle.nextCursor).toBeNull();
     expect(bundle.prevCursor).toBeNull();
   });
+
+  it("does not skip rows before sorting a later similar page", async () => {
+    transactionFindMany.mockResolvedValue(
+      Array.from({ length: 200 }, (_, index) => ({
+        id: `tx-${String(index)}`,
+        bookedAt: new Date(2026, 0, 1, 0, 0, index),
+      })),
+    );
+
+    await fetchTransactionsPageBundle("workspace-1", ["account-1"], {
+      sort: "similar",
+      sortDir: "desc",
+      cursor: "off:50",
+    });
+
+    expect(transactionFindMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        take: 200,
+        skip: 0,
+      }),
+    );
+  });
 });

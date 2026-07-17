@@ -30,6 +30,17 @@ export type PageTransaction = Prisma.TransactionGetPayload<{
   include: typeof transactionPageInclude;
 }>;
 
+export interface TransactionsPageBundle {
+  transactions: PageTransaction[];
+  categories: { id: string; name: string }[];
+  filterCategory: { name: string } | null;
+  transferCategoryId: string;
+  allTags: { id: string; name: string; color: string }[];
+  subscriptionMarkers: { counterparty: string }[];
+  nextCursor: string | null;
+  prevCursor: string | null;
+}
+
 function buildCursorWhere(
   baseWhere: Prisma.TransactionWhereInput,
   cursor: TransactionCursor | null,
@@ -83,16 +94,7 @@ export async function fetchTransactionsPageBundle(
   workspaceId: string,
   accountIds: string[],
   params: TransactionSearchParams,
-): Promise<{
-  transactions: PageTransaction[];
-  categories: { id: string; name: string }[];
-  filterCategory: { name: string } | null;
-  transferCategoryId: string;
-  allTags: { id: string; name: string; color: string }[];
-  subscriptionMarkers: { counterparty: string }[];
-  nextCursor: string | null;
-  prevCursor: string | null;
-}> {
+): Promise<TransactionsPageBundle> {
   const sort = parseTransactionSort(params);
   const cursor = resolvePaginationCursor(params.cursor, sort);
   const [
