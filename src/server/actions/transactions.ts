@@ -128,6 +128,16 @@ export interface UpdateCategoryOptions {
   candidateTransactionIds?: string[];
 }
 
+function isOutsideCandidateScope(
+  transactionId: string,
+  options: UpdateCategoryOptions | undefined,
+): boolean {
+  return (
+    options?.candidateTransactionIds !== undefined &&
+    !options.candidateTransactionIds.includes(transactionId)
+  );
+}
+
 interface PerformCategoryUpdateInput {
   workspaceId: string;
   transaction: Transaction;
@@ -168,6 +178,9 @@ export async function updateTransactionCategory(
   const workspaceId = await getWorkspaceId();
   if (!workspaceId) {
     return { ok: false, error: "Brak sesji" };
+  }
+  if (isOutsideCandidateScope(transactionId, options)) {
+    return { ok: false, error: "Transakcja nie należy do bieżącej strony" };
   }
 
   const clearing = !categoryId.trim();

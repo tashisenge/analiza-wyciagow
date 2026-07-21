@@ -18,6 +18,7 @@ import {
   parseTransactionSearchParams,
   transactionActiveFilter,
   type TransactionRawSearchParams,
+  type TransactionSearchParams,
 } from "@/lib/transactions/page-filters";
 import { updateTransactionCategory } from "@/server/actions/transactions";
 
@@ -25,7 +26,6 @@ async function changeCategoryAction(
   candidateTransactionIds: string[],
   formData: FormData,
 ): Promise<void> {
-  "use server";
   const txRaw = formData.get("transactionId");
   const catRaw = formData.get("categoryId");
   const returnToRaw = formData.get("returnTo");
@@ -47,6 +47,20 @@ async function changeCategoryAction(
   redirect(buildCategoryChangeRedirectUrl(returnTo, result, categoryId));
 }
 
+function buildBulkFilters(
+  params: TransactionSearchParams,
+  context: ContextFilter,
+): BulkCategoryFilters {
+  return {
+    counterpartyContains: params.counterparty,
+    mbankCategory: params.mbankCategory,
+    uncategorizedOnly: params.uncategorized === "1",
+    dateFrom: params.dateFrom,
+    dateTo: params.dateTo,
+    context: context === "razem" ? "razem" : context,
+  };
+}
+
 export default async function TransactionsPage({
   searchParams,
 }: {
@@ -65,19 +79,12 @@ export default async function TransactionsPage({
     params,
   );
   const candidateTransactionIds = pageData.rows.map((row) => row.id);
-  const boundChangeCategoryAction = changeCategoryAction.bind(
-    null,
-    candidateTransactionIds,
-  );
+  async function boundChangeCategoryAction(formData: FormData): Promise<void> {
+    "use server";
+    await changeCategoryAction(candidateTransactionIds, formData);
+  }
   const returnTo = buildTransactionsReturnTo(params);
-  const bulkFilters: BulkCategoryFilters = {
-    counterpartyContains: params.counterparty,
-    mbankCategory: params.mbankCategory,
-    uncategorizedOnly: params.uncategorized === "1",
-    dateFrom: params.dateFrom,
-    dateTo: params.dateTo,
-    context: context === "razem" ? "razem" : context,
-  };
+  const bulkFilters = buildBulkFilters(params, context);
 
   return (
     <div className="space-y-4">
