@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const transactionFindFirst = vi.fn();
 const transactionUpdateMany = vi.fn();
 const categoryFindFirst = vi.fn();
+const findSimilarTransactionIds = vi.fn().mockResolvedValue([]);
 
 vi.mock("@/lib/db", () => ({
   prisma: {
@@ -27,7 +28,7 @@ vi.mock("next/cache", () => ({
 }));
 
 vi.mock("@/lib/transactions/find-similar-transaction-ids", () => ({
-  findSimilarTransactionIds: vi.fn().mockResolvedValue([]),
+  findSimilarTransactionIds: (...args: unknown[]) => findSimilarTransactionIds(...args),
 }));
 
 import { updateTransactionCategory } from "@/server/actions/transactions";
@@ -78,5 +79,31 @@ describe("updateTransactionCategory", () => {
       where: { workspaceId: "ws-mine", id: { in: ["tx-1"] } },
       data: { categoryId: "cat-1" },
     });
+  });
+
+  it("limits similar updates to transactions visible on the current page", async () => {
+    transactionFindFirst.mockResolvedValue({
+      id: "tx-1",
+      counterparty: "LIDL",
+      amount: { toString: () => "10.00" },
+      currency: "PLN",
+    });
+    categoryFindFirst.mockResolvedValue({ id: "cat-1" });
+
+    await updateTransactionCategory("tx-1", "cat-1", {
+      applyToSimilar: true,
+      candidateTransactionIds: ["tx-1", "tx-visible"],
+    } as {
+      applyToSimilar: boolean;
+      candidateTransactionIds: string[];
+    });
+
+    expect(findSimilarTransactionIds).toHaveBeenCalledWith(
+      expect.objectContaining({
+        workspaceId: "ws-mine",
+        excludeTransactionId: "tx-1",
+        candidateTransactionIds: ["tx-1", "tx-visible"],
+      }),
+    );
   });
 });
