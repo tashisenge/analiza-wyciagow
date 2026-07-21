@@ -138,7 +138,7 @@ interface PerformCategoryUpdateInput {
 
 async function performCategoryUpdate(
   input: PerformCategoryUpdateInput,
-): Promise<{ ok: true; updatedCount: number } | { ok: false; error: string }> {
+): Promise<{ updatedCount: number }> {
   const clearing = !input.categoryId;
   const similarIds = await collectSimilarIds({
     workspaceId: input.workspaceId,
@@ -158,7 +158,7 @@ async function performCategoryUpdate(
     counterparty: input.transaction.counterparty,
     createRule: clearing ? false : (input.options?.createRule ?? false),
   });
-  return { ok: true, updatedCount: idsToUpdate.length };
+  return { updatedCount: idsToUpdate.length };
 }
 
 export async function updateTransactionCategory(
@@ -193,9 +193,6 @@ export async function updateTransactionCategory(
       categoryId: clearing ? null : categoryId,
       options,
     });
-    if (!result.ok) {
-      return { ok: false, error: result.error };
-    }
 
     revalidateCategoryPaths();
     return { ok: true, updatedCount: result.updatedCount };
