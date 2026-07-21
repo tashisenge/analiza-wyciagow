@@ -48,6 +48,19 @@ describe("updateTransactionCategory", () => {
     expect(transactionUpdateMany).not.toHaveBeenCalled();
   });
 
+  it("rejects an anchor outside the server-provided page candidates", async () => {
+    const result = await updateTransactionCategory("tx-off-page", "cat-1", {
+      candidateTransactionIds: ["tx-visible"],
+    });
+
+    expect(result).toEqual({
+      ok: false,
+      error: "Transakcja nie należy do bieżącej strony",
+    });
+    expect(transactionFindFirst).not.toHaveBeenCalled();
+    expect(transactionUpdateMany).not.toHaveBeenCalled();
+  });
+
   it("rejects invalid category", async () => {
     transactionFindFirst.mockResolvedValue({
       id: "tx-1",

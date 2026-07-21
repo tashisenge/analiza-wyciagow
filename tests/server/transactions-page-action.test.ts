@@ -8,13 +8,14 @@ function readSource(relativePath: string): string {
 }
 
 describe("transactions page category action", () => {
-  it("binds server-loaded page ids instead of trusting hidden form candidates", () => {
+  it("captures encrypted server-loaded page ids instead of trusting form candidates", () => {
     const pageSource = readSource("src/app/(app)/transactions/page.tsx");
     const formSource = readSource("src/components/transactions/CategoryAssignForm.tsx");
 
     expect(pageSource).toMatch(
-      /changeCategoryAction\.bind\(\s*null,\s*candidateTransactionIds,\s*\)/,
+      /async function boundChangeCategoryAction\(formData: FormData\).*?"use server";.*?changeCategoryAction\(candidateTransactionIds, formData\)/s,
     );
+    expect(pageSource).not.toContain("changeCategoryAction.bind(");
     expect(pageSource).not.toContain('formData.getAll("candidateTransactionId")');
     expect(formSource).not.toContain('name="candidateTransactionId"');
   });
