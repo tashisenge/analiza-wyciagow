@@ -18,11 +18,14 @@ import {
   parseTransactionSearchParams,
   transactionActiveFilter,
   type TransactionRawSearchParams,
+  type TransactionSearchParams,
 } from "@/lib/transactions/page-filters";
 import { updateTransactionCategory } from "@/server/actions/transactions";
 
-async function changeCategoryAction(formData: FormData): Promise<void> {
-  "use server";
+async function changeCategoryAction(
+  candidateTransactionIds: string[],
+  formData: FormData,
+): Promise<void> {
   const txRaw = formData.get("transactionId");
   const catRaw = formData.get("categoryId");
   const returnToRaw = formData.get("returnTo");
@@ -39,8 +42,23 @@ async function changeCategoryAction(formData: FormData): Promise<void> {
     applyToSimilar,
     matchSameAmount,
     createRule,
+    candidateTransactionIds,
   });
   redirect(buildCategoryChangeRedirectUrl(returnTo, result, categoryId));
+}
+
+function buildBulkFilters(
+  params: TransactionSearchParams,
+  context: ContextFilter,
+): BulkCategoryFilters {
+  return {
+    counterpartyContains: params.counterparty,
+    mbankCategory: params.mbankCategory,
+    uncategorizedOnly: params.uncategorized === "1",
+    dateFrom: params.dateFrom,
+    dateTo: params.dateTo,
+    context: context === "razem" ? "razem" : context,
+  };
 }
 
 export default async function TransactionsPage({
@@ -60,15 +78,13 @@ export default async function TransactionsPage({
     context,
     params,
   );
+  const candidateTransactionIds = pageData.rows.map((row) => row.id);
+  async function boundChangeCategoryAction(formData: FormData): Promise<void> {
+    "use server";
+    await changeCategoryAction(candidateTransactionIds, formData);
+  }
   const returnTo = buildTransactionsReturnTo(params);
-  const bulkFilters: BulkCategoryFilters = {
-    counterpartyContains: params.counterparty,
-    mbankCategory: params.mbankCategory,
-    uncategorizedOnly: params.uncategorized === "1",
-    dateFrom: params.dateFrom,
-    dateTo: params.dateTo,
-    context: context === "razem" ? "razem" : context,
-  };
+  const bulkFilters = buildBulkFilters(params, context);
 
   return (
     <div className="space-y-4">
@@ -155,7 +171,7 @@ export default async function TransactionsPage({
         returnTo={returnTo}
         listParams={params}
         bulkFilters={bulkFilters}
-        changeCategoryAction={changeCategoryAction}
+        changeCategoryAction={boundChangeCategoryAction}
       />
     </div>
   );

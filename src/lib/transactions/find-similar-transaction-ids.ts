@@ -10,6 +10,7 @@ export interface FindSimilarTransactionIdsOptions {
   workspaceId: string;
   counterparty: string;
   excludeTransactionId: string;
+  candidateTransactionIds: string[];
   onlyUncategorized: boolean;
   amount?: string | { toString(): string };
   currency?: string;
@@ -25,27 +26,37 @@ function buildAmountFilter(amount: string | { toString(): string }): {
   return { OR: [{ amount: positive }, { amount: negative }] };
 }
 
+function buildSimilarWhere(
+  options: FindSimilarTransactionIdsOptions,
+  counterparty: string,
+): Prisma.TransactionWhereInput {
+  return {
+    workspaceId: options.workspaceId,
+    id: {
+      in: options.candidateTransactionIds,
+      not: options.excludeTransactionId,
+    },
+    counterparty: { equals: counterparty, mode: "insensitive" },
+    ...(options.matchSameAmount && options.amount
+      ? buildAmountFilter(options.amount)
+      : {}),
+    ...(options.matchSameAmount && options.currency
+      ? { currency: options.currency }
+      : {}),
+    ...(options.onlyUncategorized ? { categoryId: null } : {}),
+  };
+}
+
 export async function findSimilarTransactionIds(
   options: FindSimilarTransactionIdsOptions,
 ): Promise<string[]> {
   const trimmed = options.counterparty.trim();
-  if (!trimmed) {
+  if (!trimmed || options.candidateTransactionIds.length === 0) {
     return [];
   }
 
   const rows = await options.prisma.transaction.findMany({
-    where: {
-      workspaceId: options.workspaceId,
-      id: { not: options.excludeTransactionId },
-      counterparty: { equals: trimmed, mode: "insensitive" },
-      ...(options.matchSameAmount && options.amount
-        ? buildAmountFilter(options.amount)
-        : {}),
-      ...(options.matchSameAmount && options.currency
-        ? { currency: options.currency }
-        : {}),
-      ...(options.onlyUncategorized ? { categoryId: null } : {}),
-    },
+    where: buildSimilarWhere(options, trimmed),
     select: { id: true },
     take: MAX_SIMILAR_UPDATES,
   });

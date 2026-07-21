@@ -7,6 +7,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { logActionError } from "@/lib/logger";
 import { findSimilarTransactionIds } from "@/lib/transactions/find-similar-transaction-ids";
+import { isTransactionInCandidateScope } from "@/lib/transactions/scoped-update";
 import { upsertCounterpartyRule } from "@/lib/transactions/upsert-counterparty-rule";
 
 async function getWorkspaceId(): Promise<string | null> {
@@ -40,6 +41,7 @@ interface CollectSimilarIdsOptions {
   currency: string;
   applyToSimilar: boolean;
   matchSameAmount: boolean;
+  candidateTransactionIds: string[];
 }
 
 async function collectSimilarIds(options: CollectSimilarIdsOptions): Promise<string[]> {
@@ -51,6 +53,7 @@ async function collectSimilarIds(options: CollectSimilarIdsOptions): Promise<str
     workspaceId: options.workspaceId,
     counterparty: options.counterparty,
     excludeTransactionId: options.transactionId,
+    candidateTransactionIds: options.candidateTransactionIds,
     onlyUncategorized: false,
     amount: options.amount,
     currency: options.currency,
@@ -123,6 +126,7 @@ export interface UpdateCategoryOptions {
   applyToSimilar?: boolean;
   matchSameAmount?: boolean;
   createRule?: boolean;
+  candidateTransactionIds?: string[];
 }
 
 interface PerformCategoryUpdateInput {
@@ -134,7 +138,7 @@ interface PerformCategoryUpdateInput {
 
 async function performCategoryUpdate(
   input: PerformCategoryUpdateInput,
-): Promise<{ ok: true; updatedCount: number } | { ok: false; error: string }> {
+): Promise<{ updatedCount: number }> {
   const clearing = !input.categoryId;
   const similarIds = await collectSimilarIds({
     workspaceId: input.workspaceId,
@@ -144,6 +148,7 @@ async function performCategoryUpdate(
     currency: input.transaction.currency,
     applyToSimilar: input.options?.applyToSimilar ?? false,
     matchSameAmount: input.options?.matchSameAmount ?? false,
+    candidateTransactionIds: input.options?.candidateTransactionIds ?? [],
   });
   const idsToUpdate = [input.transaction.id, ...similarIds];
   await applyCategoryToTransactions({
@@ -153,7 +158,7 @@ async function performCategoryUpdate(
     counterparty: input.transaction.counterparty,
     createRule: clearing ? false : (input.options?.createRule ?? false),
   });
-  return { ok: true, updatedCount: idsToUpdate.length };
+  return { updatedCount: idsToUpdate.length };
 }
 
 export async function updateTransactionCategory(
@@ -165,9 +170,10 @@ export async function updateTransactionCategory(
   if (!workspaceId) {
     return { ok: false, error: "Brak sesji" };
   }
-
+  if (!isTransactionInCandidateScope(transactionId, options?.candidateTransactionIds)) {
+    return { ok: false, error: "Transakcja nie należy do bieżącej strony" };
+  }
   const clearing = !categoryId.trim();
-
   try {
     const transaction = await loadTransaction(workspaceId, transactionId);
     if (!transaction) {
@@ -187,9 +193,6 @@ export async function updateTransactionCategory(
       categoryId: clearing ? null : categoryId,
       options,
     });
-    if (!result.ok) {
-      return { ok: false, error: result.error };
-    }
 
     revalidateCategoryPaths();
     return { ok: true, updatedCount: result.updatedCount };
