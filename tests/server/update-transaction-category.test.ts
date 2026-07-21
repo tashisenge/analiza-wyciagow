@@ -93,9 +93,6 @@ describe("updateTransactionCategory", () => {
     await updateTransactionCategory("tx-1", "cat-1", {
       applyToSimilar: true,
       candidateTransactionIds: ["tx-1", "tx-visible"],
-    } as {
-      applyToSimilar: boolean;
-      candidateTransactionIds: string[];
     });
 
     expect(findSimilarTransactionIds).toHaveBeenCalledWith(
