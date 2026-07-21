@@ -7,6 +7,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { logActionError } from "@/lib/logger";
 import { findSimilarTransactionIds } from "@/lib/transactions/find-similar-transaction-ids";
+import { isTransactionInCandidateScope } from "@/lib/transactions/scoped-update";
 import { upsertCounterpartyRule } from "@/lib/transactions/upsert-counterparty-rule";
 
 async function getWorkspaceId(): Promise<string | null> {
@@ -128,16 +129,6 @@ export interface UpdateCategoryOptions {
   candidateTransactionIds?: string[];
 }
 
-function isOutsideCandidateScope(
-  transactionId: string,
-  options: UpdateCategoryOptions | undefined,
-): boolean {
-  return (
-    options?.candidateTransactionIds !== undefined &&
-    !options.candidateTransactionIds.includes(transactionId)
-  );
-}
-
 interface PerformCategoryUpdateInput {
   workspaceId: string;
   transaction: Transaction;
@@ -179,12 +170,10 @@ export async function updateTransactionCategory(
   if (!workspaceId) {
     return { ok: false, error: "Brak sesji" };
   }
-  if (isOutsideCandidateScope(transactionId, options)) {
+  if (!isTransactionInCandidateScope(transactionId, options?.candidateTransactionIds)) {
     return { ok: false, error: "Transakcja nie należy do bieżącej strony" };
   }
-
   const clearing = !categoryId.trim();
-
   try {
     const transaction = await loadTransaction(workspaceId, transactionId);
     if (!transaction) {

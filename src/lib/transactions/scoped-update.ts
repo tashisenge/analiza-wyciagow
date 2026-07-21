@@ -11,3 +11,13 @@ export function scopedTransactionUpdate(
     data: { categoryId },
   };
 }
+
+export function isTransactionInCandidateScope(
+  transactionId: string,
+  candidateTransactionIds: string[] | undefined,
+): boolean {
+  return (
+    candidateTransactionIds === undefined ||
+    candidateTransactionIds.includes(transactionId)
+  );
+}
