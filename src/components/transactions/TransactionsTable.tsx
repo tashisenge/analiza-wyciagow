@@ -34,7 +34,6 @@ export function TransactionsTable({
 }: TransactionsTableProps): React.JSX.Element {
   const showSelection = Boolean(onToggleSelect);
   const colSpan = showSelection ? 8 : 7;
-  const candidateTransactionIds = transactions.map((transaction) => transaction.id);
 
   return (
     <div className="section-card overflow-x-auto p-0">
@@ -54,7 +53,6 @@ export function TransactionsTable({
                 tx={tx}
                 categories={categories}
                 allTags={allTags}
-                candidateTransactionIds={candidateTransactionIds}
                 returnTo={returnTo}
                 changeCategoryAction={changeCategoryAction}
                 selected={selectedIds.includes(tx.id)}

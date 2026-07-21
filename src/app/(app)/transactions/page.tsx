@@ -19,10 +19,12 @@ import {
   transactionActiveFilter,
   type TransactionRawSearchParams,
 } from "@/lib/transactions/page-filters";
-import { TRANSACTION_PAGE_SIZE } from "@/lib/transactions/transaction-cursor";
 import { updateTransactionCategory } from "@/server/actions/transactions";
 
-async function changeCategoryAction(formData: FormData): Promise<void> {
+async function changeCategoryAction(
+  candidateTransactionIds: string[],
+  formData: FormData,
+): Promise<void> {
   "use server";
   const txRaw = formData.get("transactionId");
   const catRaw = formData.get("categoryId");
@@ -35,13 +37,6 @@ async function changeCategoryAction(formData: FormData): Promise<void> {
   const applyToSimilar = formData.get("applyToSimilar") === "on";
   const matchSameAmount = formData.get("matchSameAmount") === "on";
   const createRule = formData.get("createRule") === "on";
-  const candidateTransactionIds = Array.from(
-    new Set(
-      formData
-        .getAll("candidateTransactionId")
-        .filter((value): value is string => typeof value === "string" && Boolean(value)),
-    ),
-  ).slice(0, TRANSACTION_PAGE_SIZE);
 
   const result = await updateTransactionCategory(transactionId, categoryId, {
     applyToSimilar,
@@ -68,6 +63,11 @@ export default async function TransactionsPage({
     session.user.workspaceId,
     context,
     params,
+  );
+  const candidateTransactionIds = pageData.rows.map((row) => row.id);
+  const boundChangeCategoryAction = changeCategoryAction.bind(
+    null,
+    candidateTransactionIds,
   );
   const returnTo = buildTransactionsReturnTo(params);
   const bulkFilters: BulkCategoryFilters = {
@@ -164,7 +164,7 @@ export default async function TransactionsPage({
         returnTo={returnTo}
         listParams={params}
         bulkFilters={bulkFilters}
-        changeCategoryAction={changeCategoryAction}
+        changeCategoryAction={boundChangeCategoryAction}
       />
     </div>
   );

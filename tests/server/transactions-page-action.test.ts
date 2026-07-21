@@ -12,8 +12,8 @@ describe("transactions page category action", () => {
     const pageSource = readSource("src/app/(app)/transactions/page.tsx");
     const formSource = readSource("src/components/transactions/CategoryAssignForm.tsx");
 
-    expect(pageSource).toContain(
-      "changeCategoryAction.bind(null, candidateTransactionIds)",
+    expect(pageSource).toMatch(
+      /changeCategoryAction\.bind\(\s*null,\s*candidateTransactionIds,\s*\)/,
     );
     expect(pageSource).not.toContain('formData.getAll("candidateTransactionId")');
     expect(formSource).not.toContain('name="candidateTransactionId"');
