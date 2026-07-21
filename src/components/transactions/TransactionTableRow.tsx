@@ -29,6 +29,7 @@ interface TransactionTableRowProps {
   tx: TransactionTableRowData;
   categories: { id: string; name: string }[];
   allTags: { id: string; name: string; color: string }[];
+  candidateTransactionIds: string[];
   returnTo: string;
   changeCategoryAction: (formData: FormData) => Promise<void>;
   selected: boolean;
@@ -67,6 +68,7 @@ export function TransactionTableRow({
   tx,
   categories,
   allTags,
+  candidateTransactionIds,
   returnTo,
   changeCategoryAction,
   selected,
@@ -134,6 +136,7 @@ export function TransactionTableRow({
           amountLabel={amountLabel}
           isOwnAccountTransfer={tx.isOwnAccountTransfer}
           hasCategory={Boolean(tx.categoryId)}
+          candidateTransactionIds={candidateTransactionIds}
           action={changeCategoryAction}
           returnTo={returnTo}
         />

@@ -10,6 +10,7 @@ export interface FindSimilarTransactionIdsOptions {
   workspaceId: string;
   counterparty: string;
   excludeTransactionId: string;
+  candidateTransactionIds: string[];
   onlyUncategorized: boolean;
   amount?: string | { toString(): string };
   currency?: string;
@@ -29,14 +30,17 @@ export async function findSimilarTransactionIds(
   options: FindSimilarTransactionIdsOptions,
 ): Promise<string[]> {
   const trimmed = options.counterparty.trim();
-  if (!trimmed) {
+  if (!trimmed || options.candidateTransactionIds.length === 0) {
     return [];
   }
 
   const rows = await options.prisma.transaction.findMany({
     where: {
       workspaceId: options.workspaceId,
-      id: { not: options.excludeTransactionId },
+      id: {
+        in: options.candidateTransactionIds,
+        not: options.excludeTransactionId,
+      },
       counterparty: { equals: trimmed, mode: "insensitive" },
       ...(options.matchSameAmount && options.amount
         ? buildAmountFilter(options.amount)

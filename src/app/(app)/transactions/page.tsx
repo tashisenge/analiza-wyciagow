@@ -19,6 +19,7 @@ import {
   transactionActiveFilter,
   type TransactionRawSearchParams,
 } from "@/lib/transactions/page-filters";
+import { TRANSACTION_PAGE_SIZE } from "@/lib/transactions/transaction-cursor";
 import { updateTransactionCategory } from "@/server/actions/transactions";
 
 async function changeCategoryAction(formData: FormData): Promise<void> {
@@ -34,11 +35,19 @@ async function changeCategoryAction(formData: FormData): Promise<void> {
   const applyToSimilar = formData.get("applyToSimilar") === "on";
   const matchSameAmount = formData.get("matchSameAmount") === "on";
   const createRule = formData.get("createRule") === "on";
+  const candidateTransactionIds = Array.from(
+    new Set(
+      formData
+        .getAll("candidateTransactionId")
+        .filter((value): value is string => typeof value === "string" && Boolean(value)),
+    ),
+  ).slice(0, TRANSACTION_PAGE_SIZE);
 
   const result = await updateTransactionCategory(transactionId, categoryId, {
     applyToSimilar,
     matchSameAmount,
     createRule,
+    candidateTransactionIds,
   });
   redirect(buildCategoryChangeRedirectUrl(returnTo, result, categoryId));
 }

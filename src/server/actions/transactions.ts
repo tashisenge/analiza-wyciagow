@@ -40,6 +40,7 @@ interface CollectSimilarIdsOptions {
   currency: string;
   applyToSimilar: boolean;
   matchSameAmount: boolean;
+  candidateTransactionIds: string[];
 }
 
 async function collectSimilarIds(options: CollectSimilarIdsOptions): Promise<string[]> {
@@ -51,6 +52,7 @@ async function collectSimilarIds(options: CollectSimilarIdsOptions): Promise<str
     workspaceId: options.workspaceId,
     counterparty: options.counterparty,
     excludeTransactionId: options.transactionId,
+    candidateTransactionIds: options.candidateTransactionIds,
     onlyUncategorized: false,
     amount: options.amount,
     currency: options.currency,
@@ -123,6 +125,7 @@ export interface UpdateCategoryOptions {
   applyToSimilar?: boolean;
   matchSameAmount?: boolean;
   createRule?: boolean;
+  candidateTransactionIds?: string[];
 }
 
 interface PerformCategoryUpdateInput {
@@ -144,6 +147,7 @@ async function performCategoryUpdate(
     currency: input.transaction.currency,
     applyToSimilar: input.options?.applyToSimilar ?? false,
     matchSameAmount: input.options?.matchSameAmount ?? false,
+    candidateTransactionIds: input.options?.candidateTransactionIds ?? [],
   });
   const idsToUpdate = [input.transaction.id, ...similarIds];
   await applyCategoryToTransactions({

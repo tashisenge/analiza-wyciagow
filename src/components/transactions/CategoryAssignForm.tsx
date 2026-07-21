@@ -22,6 +22,7 @@ interface CategoryAssignFormProps {
   amountLabel: string;
   isOwnAccountTransfer: boolean;
   hasCategory: boolean;
+  candidateTransactionIds: string[];
   action: (formData: FormData) => Promise<void>;
   returnTo?: string;
 }
@@ -35,6 +36,7 @@ export function CategoryAssignForm({
   amountLabel,
   isOwnAccountTransfer,
   hasCategory,
+  candidateTransactionIds,
   action,
   returnTo = "/transactions",
 }: CategoryAssignFormProps): React.JSX.Element {
@@ -51,6 +53,9 @@ export function CategoryAssignForm({
     <form action={action} className="space-y-1.5">
       <input type="hidden" name="transactionId" value={transactionId} />
       <input type="hidden" name="returnTo" value={returnTo} />
+      {candidateTransactionIds.map((id) => (
+        <input key={id} type="hidden" name="candidateTransactionId" value={id} />
+      ))}
       <select
         name="categoryId"
         defaultValue={defaultCategoryId}

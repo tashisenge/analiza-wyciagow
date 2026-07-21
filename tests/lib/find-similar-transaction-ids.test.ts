@@ -30,9 +30,7 @@ describe("findSimilarTransactionIds", () => {
   it("restricts matches to candidate transactions from the visible page", async () => {
     const findMany = vi.fn().mockResolvedValue([{ id: "tx-visible" }]);
 
-    await findSimilarTransactionIds(
-      options(findMany, ["tx-anchor", "tx-visible"]),
-    );
+    await findSimilarTransactionIds(options(findMany, ["tx-anchor", "tx-visible"]));
 
     expect(findMany).toHaveBeenCalledWith(
       expect.objectContaining({
