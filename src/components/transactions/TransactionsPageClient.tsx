@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { BulkCategoryPanel } from "@/components/transactions/BulkCategoryPanel";
 import { TransactionCounterpartyFilter } from "@/components/transactions/TransactionCounterpartyFilter";
@@ -8,6 +8,7 @@ import { TransactionDateFilters } from "@/components/transactions/TransactionDat
 import { TransactionsTable } from "@/components/transactions/TransactionsTable";
 import type { BulkCategoryFilters } from "@/lib/transactions/bulk-category-types";
 import type { TransactionSearchParams } from "@/lib/transactions/page-filters";
+import { selectedIdsForListKey } from "@/lib/transactions/selected-ids-for-list-key";
 
 interface CategoryOption {
   id: string;
@@ -64,6 +65,12 @@ export function TransactionsPageClient({
   changeCategoryAction,
 }: TransactionsPageClientProps): React.JSX.Element {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const listKeyRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    setSelectedIds((prev) => selectedIdsForListKey(prev, listKeyRef.current, returnTo));
+    listKeyRef.current = returnTo;
+  }, [returnTo]);
 
   function toggleId(id: string): void {
     setSelectedIds((prev) =>
