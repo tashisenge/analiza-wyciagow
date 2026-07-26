@@ -110,6 +110,51 @@ const budgetSchema = z.object({
   monthlyLimit: z.number().positive(),
 });
 
+async function categoryBelongsToWorkspace(
+  categoryId: string,
+  workspaceId: string,
+): Promise<boolean> {
+  const category = await prisma.category.findFirst({
+    where: { id: categoryId, workspaceId },
+    select: { id: true },
+  });
+  return category !== null;
+}
+
+async function persistCategoryBudget(
+  workspaceId: string,
+  data: z.infer<typeof budgetSchema>,
+): Promise<OptimizationActionResult> {
+  try {
+    await prisma.categoryBudget.upsert({
+      where: {
+        workspaceId_categoryId_accountContext: {
+          workspaceId,
+          categoryId: data.categoryId,
+          accountContext: data.accountContext,
+        },
+      },
+      create: {
+        workspaceId,
+        categoryId: data.categoryId,
+        accountContext: data.accountContext,
+        monthlyLimit: data.monthlyLimit,
+      },
+      update: { monthlyLimit: data.monthlyLimit },
+    });
+    revalidateOptimizationPages();
+    return { ok: true, message: "Budżet zapisany." };
+  } catch (error) {
+    return {
+      ok: false,
+      error: logActionError("optimization.budget", error, {
+        context: { workspaceId },
+        fallbackMessage: "Błąd zapisu budżetu",
+      }),
+    };
+  }
+}
+
 export async function upsertCategoryBudget(
   categoryId: string,
   accountContext: string,
@@ -123,35 +168,10 @@ export async function upsertCategoryBudget(
   if (!parsed.success) {
     return { ok: false, error: "Nieprawidłowe dane budżetu" };
   }
-
-  try {
-    await prisma.categoryBudget.upsert({
-      where: {
-        workspaceId_categoryId_accountContext: {
-          workspaceId,
-          categoryId: parsed.data.categoryId,
-          accountContext: parsed.data.accountContext,
-        },
-      },
-      create: {
-        workspaceId,
-        categoryId: parsed.data.categoryId,
-        accountContext: parsed.data.accountContext,
-        monthlyLimit: parsed.data.monthlyLimit,
-      },
-      update: { monthlyLimit: parsed.data.monthlyLimit },
-    });
-    revalidateOptimizationPages();
-    return { ok: true, message: "Budżet zapisany." };
-  } catch (error) {
-    return {
-      ok: false,
-      error: logActionError("optimization.budget", error, {
-        context: { workspaceId },
-        fallbackMessage: "Błąd zapisu budżetu",
-      }),
-    };
+  if (!(await categoryBelongsToWorkspace(parsed.data.categoryId, workspaceId))) {
+    return { ok: false, error: "Nieprawidłowa kategoria" };
   }
+  return persistCategoryBudget(workspaceId, parsed.data);
 }
 
 export async function deleteCategoryBudget(
