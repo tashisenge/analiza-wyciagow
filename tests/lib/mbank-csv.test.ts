@@ -70,4 +70,33 @@ broken;line
 2026-01-01;"TEST";"konto";"Kat";"nie-kwota";`;
     expect(() => parseMbankCsv(broken)).toThrow("Nieprawidłowa kwota");
   });
+
+  it("imports complete rows even when trailing empty header columns are absent on data lines", () => {
+    // Real mBank headers end with a trailing `;` (empty column). Spreadsheet
+    // re-saves often drop that trailing delimiter on data rows only.
+    const csv = `#Data operacji;#Opis operacji;#Rachunek;#Kategoria;#Kwota;
+2026-05-20;"NETTO ZAKUP";"konto";"Żywność";-13,38 PLN
+2026-05-21;"LIDL ZAKUP";"konto";"Żywność";-20,00 PLN;`;
+    const rows = parseMbankCsv(csv);
+    expect(rows).toHaveLength(2);
+    expect(rows[0]?.amount).toBe("-13.38");
+    expect(rows[1]?.amount).toBe("-20.00");
+  });
+
+  it("throws when amount cell is empty or currency-only instead of importing 0.00", () => {
+    const emptyAmount = `#Data operacji;#Opis operacji;#Rachunek;#Kategoria;#Kwota;
+2026-01-01;"TEST";"konto";"Kat";;`;
+    expect(() => parseMbankCsv(emptyAmount)).toThrow("Nieprawidłowa kwota");
+
+    const currencyOnly = `#Data operacji;#Opis operacji;#Rachunek;#Kategoria;#Kwota;
+2026-01-01;"TEST";"konto";"Kat";PLN;`;
+    expect(() => parseMbankCsv(currencyOnly)).toThrow("Nieprawidłowa kwota");
+  });
+
+  it("still accepts an explicit zero amount", () => {
+    const csv = `#Data operacji;#Opis operacji;#Rachunek;#Kategoria;#Kwota;
+2026-01-01;"TEST";"konto";"Kat";0,00 PLN;`;
+    const rows = parseMbankCsv(csv);
+    expect(rows[0]?.amount).toBe("0.00");
+  });
 });

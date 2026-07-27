@@ -26,15 +26,31 @@ const AMOUNT_CURRENCY_SUFFIX = /\s*([A-Za-z]{3})\s*$/;
 
 function parseMbankAmount(raw: string): { amount: string; currency: string } {
   const trimmed = raw.trim();
+  if (!trimmed) {
+    throw new Error(`Nieprawidłowa kwota: ${raw}`);
+  }
   const match = AMOUNT_CURRENCY_SUFFIX.exec(trimmed);
   const currency = match?.[1]?.toUpperCase() ?? "PLN";
   const numericPart = match ? trimmed.slice(0, match.index).trim() : trimmed;
   const normalized = numericPart.replace(/\s/g, "").replace(",", ".");
+  // Number("") === 0, so reject empty numeric parts before coercion.
+  if (!normalized) {
+    throw new Error(`Nieprawidłowa kwota: ${raw}`);
+  }
   const value = Number(normalized);
   if (Number.isNaN(value)) {
     throw new Error(`Nieprawidłowa kwota: ${raw}`);
   }
   return { amount: value.toFixed(2), currency };
+}
+
+/** mBank headers often end with a trailing `;` producing an empty column. */
+function trimTrailingEmptyHeaders(headers: string[]): string[] {
+  const trimmed = [...headers];
+  while (trimmed.length > 0 && (trimmed[trimmed.length - 1] ?? "") === "") {
+    trimmed.pop();
+  }
+  return trimmed;
 }
 
 /** Dzieli linię CSV z separatorem `;`, respektując cudzysłowy (opisy mogą zawierać `;`). */
@@ -132,6 +148,10 @@ function parseDataLines(input: ParseDataLinesInput): ParsedMbankRow[] {
   return rows;
 }
 
+function parseHeaderColumns(headerLine: string): string[] {
+  return trimTrailingEmptyHeaders(parseSemicolonCsvLine(headerLine).map(normalizeHeader));
+}
+
 /**
  * Parser eksportu mBank „Lista operacji” (CSV z preamble, separator `;`).
  */
@@ -153,7 +173,7 @@ export function parseMbankCsv(content: string): ParsedMbankRow[] {
   if (!headerLine) {
     throw new Error("Brak linii nagłówka w pliku CSV");
   }
-  const headers = parseSemicolonCsvLine(headerLine).map(normalizeHeader);
+  const headers = parseHeaderColumns(headerLine);
   const indexes = resolveColumnIndexes(headers);
   const rows = parseDataLines({ lines, headerIndex, headers, indexes });
 
