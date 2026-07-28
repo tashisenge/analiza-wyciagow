@@ -27,7 +27,7 @@ Możesz importować **nakładające się okresy** — duplikaty są pomijane na 
 ## Co się dzieje po imporcie
 
 1. Parser rozpoznaje kolumny mBank (`src/lib/mbank-csv.ts`).
-2. Dla każdego wiersza liczony jest `dedupeHash` — jeśli już istnieje w workspace, wiersz jest pominięty.
+2. Dla każdego wiersza liczony jest `dedupeHash` (data + kwota + opis + konto; identyczne wiersze w tym samym pliku dostają kolejne occurrence `#2`, `#3`, …) — jeśli hash już istnieje w workspace, wiersz jest pominięty.
 3. Kategoria przypisywana kolejno:
    - reguły użytkownika (najwyższy priorytet),
    - pamięć kontrahenta,

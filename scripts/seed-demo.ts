@@ -14,7 +14,11 @@ import {
 } from "../src/lib/mbank/sync-categories";
 import { parseMbankCsv } from "../src/lib/mbank-csv";
 import { seedCategoriesForWorkspace } from "../src/lib/seed-default-categories";
-import { buildTransactionDedupeHash } from "../src/lib/transaction-hash";
+import {
+  buildNaturalDedupeKey,
+  buildTransactionDedupeHash,
+  nextOccurrenceInFile,
+} from "../src/lib/transaction-hash";
 
 const LOCAL_CSV_PATH = join(
   process.cwd(),
@@ -117,13 +121,22 @@ async function importFullCsv(workspaceId: string, accountId: string): Promise<vo
 
   let newCount = 0;
   let skippedCount = 0;
+  const occurrenceCounts = new Map<string, number>();
 
   for (const row of rows) {
+    const naturalKey = buildNaturalDedupeKey({
+      bookedAt: row.bookedAt,
+      amount: row.amount,
+      description: row.description,
+      accountId,
+    });
+    const occurrence = nextOccurrenceInFile(occurrenceCounts, naturalKey);
     const dedupeHash = buildTransactionDedupeHash({
       bookedAt: row.bookedAt,
       amount: row.amount,
       description: row.description,
       accountId,
+      occurrence,
     });
     if (existingHashes.has(dedupeHash)) {
       skippedCount += 1;

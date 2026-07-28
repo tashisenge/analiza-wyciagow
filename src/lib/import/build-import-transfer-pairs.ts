@@ -1,5 +1,9 @@
 import type { ParsedMbankRow } from "@/lib/mbank-csv";
-import { buildTransactionDedupeHash } from "@/lib/transaction-hash";
+import {
+  buildNaturalDedupeKey,
+  buildTransactionDedupeHash,
+  nextOccurrenceInFile,
+} from "@/lib/transaction-hash";
 import {
   buildPairedOwnAccountTransferKeys,
   type OwnAccountTransferRef,
@@ -13,23 +17,38 @@ export interface ExistingTransferRef {
   bookedAt: Date;
 }
 
-function importRowKey(row: ParsedMbankRow, accountId: string): string {
+function importRowKey(
+  row: ParsedMbankRow,
+  accountId: string,
+  occurrence: number,
+): string {
   return buildTransactionDedupeHash({
     bookedAt: row.bookedAt,
     amount: row.amount,
     description: row.description,
     accountId,
+    occurrence,
   });
 }
 
-function rowToRef(row: ParsedMbankRow, accountId: string): OwnAccountTransferRef {
-  return {
-    key: importRowKey(row, accountId),
-    accountId,
-    amount: row.amount,
-    currency: row.currency,
-    bookedAt: row.bookedAt,
-  };
+function rowsToRefs(rows: ParsedMbankRow[], accountId: string): OwnAccountTransferRef[] {
+  const occurrenceCounts = new Map<string, number>();
+  return rows.map((row) => {
+    const naturalKey = buildNaturalDedupeKey({
+      bookedAt: row.bookedAt,
+      amount: row.amount,
+      description: row.description,
+      accountId,
+    });
+    const occurrence = nextOccurrenceInFile(occurrenceCounts, naturalKey);
+    return {
+      key: importRowKey(row, accountId, occurrence),
+      accountId,
+      amount: row.amount,
+      currency: row.currency,
+      bookedAt: row.bookedAt,
+    };
+  });
 }
 
 function existingToRef(tx: ExistingTransferRef): OwnAccountTransferRef {
@@ -47,12 +66,10 @@ export function buildImportPairedTransferKeys(
   rows: ParsedMbankRow[],
   existing: ExistingTransferRef[],
 ): Set<string> {
-  const refs: OwnAccountTransferRef[] = [
-    ...rows.map((row) => rowToRef(row, accountId)),
-    ...existing.map(existingToRef),
-  ];
+  const rowRefs = rowsToRefs(rows, accountId);
+  const refs: OwnAccountTransferRef[] = [...rowRefs, ...existing.map(existingToRef)];
   const paired = buildPairedOwnAccountTransferKeys(refs);
-  const importKeys = new Set(rows.map((row) => importRowKey(row, accountId)));
+  const importKeys = new Set(rowRefs.map((ref) => ref.key));
   const result = new Set<string>();
   for (const key of paired) {
     if (importKeys.has(key)) {
