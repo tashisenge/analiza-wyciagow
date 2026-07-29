@@ -2,26 +2,47 @@ import type { Prisma, Transaction } from "@prisma/client";
 
 import { prisma } from "@/lib/db";
 
-async function buildAiTargetWhere(
-  workspaceId: string,
-): Promise<Prisma.TransactionWhereInput> {
-  const bezKategorii = await prisma.category.findMany({
-    where: {
-      workspaceId,
-      name: { in: ["Bez kategorii", "bez kategorii", "Bez kategorii mBank"] },
-    },
-    select: { id: true },
-  });
-  const bezIds = bezKategorii.map((category) => category.id);
+/** Nazwy kubełka „Bez kategorii” w aplikacji (nie pole mBank). */
+export const AI_UNCATEGORIZED_CATEGORY_NAMES = [
+  "Bez kategorii",
+  "bez kategorii",
+  "Bez kategorii mBank",
+] as const;
 
+/**
+ * Transakcje kwalifikujące się do kategoryzacji AI: brak categoryId albo
+ * kubełek app «Bez kategorii». Nie używaj mbankCategory — użytkownik mógł
+ * już ręcznie przypisać sensowną kategorię przy mBank „Bez kategorii”.
+ */
+export function buildAiUncategorizedWhere(
+  workspaceId: string,
+  bezCategoryIds: string[],
+): Prisma.TransactionWhereInput {
   return {
     workspaceId,
     OR: [
       { categoryId: null },
-      ...(bezIds.length > 0 ? [{ categoryId: { in: bezIds } }] : []),
-      { mbankCategory: { contains: "bez kategorii", mode: "insensitive" } },
+      ...(bezCategoryIds.length > 0 ? [{ categoryId: { in: bezCategoryIds } }] : []),
     ],
   };
+}
+
+async function loadBezKategoriiIds(workspaceId: string): Promise<string[]> {
+  const bezKategorii = await prisma.category.findMany({
+    where: {
+      workspaceId,
+      name: { in: [...AI_UNCATEGORIZED_CATEGORY_NAMES] },
+    },
+    select: { id: true },
+  });
+  return bezKategorii.map((category) => category.id);
+}
+
+async function buildAiTargetWhere(
+  workspaceId: string,
+): Promise<Prisma.TransactionWhereInput> {
+  const bezIds = await loadBezKategoriiIds(workspaceId);
+  return buildAiUncategorizedWhere(workspaceId, bezIds);
 }
 
 export interface AiCategorizationTargets {
