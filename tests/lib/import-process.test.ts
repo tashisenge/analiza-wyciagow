@@ -75,7 +75,7 @@ describe("processCsvImport", () => {
       memories: [],
       categoriesByName: new Map([[TRANSFER_BETWEEN_ACCOUNTS_CATEGORY, "cat-transfer"]]),
     }).rows;
-    const pairedKeys = buildImportPairedTransferKeys("acc_dom", rows, [
+    const { pairedImportKeys } = buildImportPairedTransferKeys("acc_dom", rows, [
       {
         dedupeHash: "firma-out",
         accountId: "acc_firma",
@@ -91,7 +91,7 @@ describe("processCsvImport", () => {
       rules: [],
       memories: [],
       categoriesByName: new Map([[TRANSFER_BETWEEN_ACCOUNTS_CATEGORY, "cat-transfer"]]),
-      pairedImportKeys: pairedKeys,
+      pairedImportKeys,
     });
     const transferRow = result.toInsert.find((row) => row.amount === "1900.00");
     expect(transferRow?.categoryId).toBe("cat-transfer");
