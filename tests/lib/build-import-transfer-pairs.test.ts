@@ -28,7 +28,8 @@ describe("buildImportPairedTransferKeys", () => {
         },
       ],
     );
-    expect(paired.size).toBe(1);
+    expect(paired.pairedImportKeys.size).toBe(1);
+    expect(paired.existingPartnerHashes.has("existing-firma")).toBe(true);
   });
 
   it("returns empty when no pair in workspace", () => {
@@ -47,6 +48,37 @@ describe("buildImportPairedTransferKeys", () => {
       ],
       [],
     );
-    expect(paired.size).toBe(0);
+    expect(paired.pairedImportKeys.size).toBe(0);
+    expect(paired.existingPartnerHashes.size).toBe(0);
+  });
+
+  it("exposes existing partner hashes for sequential account imports", () => {
+    const bookedAt = new Date("2026-05-21");
+    const paired = buildImportPairedTransferKeys(
+      "acc-firma",
+      [
+        {
+          bookedAt,
+          amount: "-1900.00",
+          currency: "PLN",
+          description: "Przelew własne",
+          counterparty: "Ja",
+          mbankCategory: "Przelewy",
+          accountLabel: "firma",
+        },
+      ],
+      [
+        {
+          dedupeHash: "dom-in-first-import",
+          accountId: "acc-dom",
+          amount: "1900.00",
+          currency: "PLN",
+          bookedAt,
+        },
+      ],
+    );
+
+    expect([...paired.pairedImportKeys]).toHaveLength(1);
+    expect([...paired.existingPartnerHashes]).toEqual(["dom-in-first-import"]);
   });
 });

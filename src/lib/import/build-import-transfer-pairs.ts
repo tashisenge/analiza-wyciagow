@@ -13,6 +13,11 @@ export interface ExistingTransferRef {
   bookedAt: Date;
 }
 
+export interface ImportTransferPairResult {
+  pairedImportKeys: Set<string>;
+  existingPartnerHashes: Set<string>;
+}
+
 function importRowKey(row: ParsedMbankRow, accountId: string): string {
   return buildTransactionDedupeHash({
     bookedAt: row.bookedAt,
@@ -46,18 +51,22 @@ export function buildImportPairedTransferKeys(
   accountId: string,
   rows: ParsedMbankRow[],
   existing: ExistingTransferRef[],
-): Set<string> {
+): ImportTransferPairResult {
   const refs: OwnAccountTransferRef[] = [
     ...rows.map((row) => rowToRef(row, accountId)),
     ...existing.map(existingToRef),
   ];
   const paired = buildPairedOwnAccountTransferKeys(refs);
   const importKeys = new Set(rows.map((row) => importRowKey(row, accountId)));
-  const result = new Set<string>();
+  const existingHashes = new Set(existing.map((tx) => tx.dedupeHash));
+  const pairedImportKeys = new Set<string>();
+  const existingPartnerHashes = new Set<string>();
   for (const key of paired) {
     if (importKeys.has(key)) {
-      result.add(key);
+      pairedImportKeys.add(key);
+    } else if (existingHashes.has(key)) {
+      existingPartnerHashes.add(key);
     }
   }
-  return result;
+  return { pairedImportKeys, existingPartnerHashes };
 }
