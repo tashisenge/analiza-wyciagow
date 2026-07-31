@@ -43,8 +43,12 @@ function isOwnAccountTransferPair(
 export function findOwnAccountTransferPartnerKey(
   left: OwnAccountTransferRef,
   candidates: OwnAccountTransferRef[],
+  unavailableKeys: ReadonlySet<string> = new Set(),
 ): string | null {
   for (const right of candidates) {
+    if (unavailableKeys.has(right.key)) {
+      continue;
+    }
     if (isOwnAccountTransferPair(left, right)) {
       return right.key;
     }
@@ -63,7 +67,8 @@ export function buildPairedOwnAccountTransferKeys(
     if (paired.has(left.key) || usedPartners.has(left.key)) {
       continue;
     }
-    const partnerKey = findOwnAccountTransferPartnerKey(left, transactions);
+    // Exclude already-paired keys so one partner cannot match multiple left rows.
+    const partnerKey = findOwnAccountTransferPartnerKey(left, transactions, paired);
     if (!partnerKey) {
       continue;
     }

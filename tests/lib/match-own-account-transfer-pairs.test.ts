@@ -56,4 +56,74 @@ describe("buildPairedOwnAccountTransferKeys", () => {
     ]);
     expect(paired.size).toBe(0);
   });
+
+  it("pairs each partner at most once when multiple same-amount candidates exist", () => {
+    const paired = buildPairedOwnAccountTransferKeys([
+      {
+        key: "dom-transfer",
+        accountId: "dom",
+        amount: "2000.00",
+        currency: "PLN",
+        bookedAt: new Date("2026-05-20"),
+      },
+      {
+        key: "dom-salary",
+        accountId: "dom",
+        amount: "2000.00",
+        currency: "PLN",
+        bookedAt: new Date("2026-05-21"),
+      },
+      {
+        key: "firma-out",
+        accountId: "firma",
+        amount: "-2000.00",
+        currency: "PLN",
+        bookedAt: new Date("2026-05-20"),
+      },
+    ]);
+
+    expect(paired.has("dom-transfer")).toBe(true);
+    expect(paired.has("firma-out")).toBe(true);
+    expect(paired.has("dom-salary")).toBe(false);
+    expect(paired.size).toBe(2);
+  });
+
+  it("pairs two distinct 1:1 transfers with the same absolute amount", () => {
+    const paired = buildPairedOwnAccountTransferKeys([
+      {
+        key: "dom-1",
+        accountId: "dom",
+        amount: "500.00",
+        currency: "PLN",
+        bookedAt: new Date("2026-05-20"),
+      },
+      {
+        key: "firma-1",
+        accountId: "firma",
+        amount: "-500.00",
+        currency: "PLN",
+        bookedAt: new Date("2026-05-20"),
+      },
+      {
+        key: "dom-2",
+        accountId: "dom",
+        amount: "500.00",
+        currency: "PLN",
+        bookedAt: new Date("2026-05-22"),
+      },
+      {
+        key: "firma-2",
+        accountId: "firma",
+        amount: "-500.00",
+        currency: "PLN",
+        bookedAt: new Date("2026-05-22"),
+      },
+    ]);
+
+    expect(paired.size).toBe(4);
+    expect(paired.has("dom-1")).toBe(true);
+    expect(paired.has("firma-1")).toBe(true);
+    expect(paired.has("dom-2")).toBe(true);
+    expect(paired.has("firma-2")).toBe(true);
+  });
 });
