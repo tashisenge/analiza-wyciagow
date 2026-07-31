@@ -60,6 +60,44 @@ function applyDateRangeFilter(
   }
 }
 
+function applyDiscretionaryFilter(
+  where: Prisma.TransactionWhereInput,
+  discretionaryOnly?: boolean,
+): void {
+  if (discretionaryOnly) {
+    where.category = { isDiscretionary: true };
+  }
+}
+
+function applyTagFilter(where: Prisma.TransactionWhereInput, tagId?: string): void {
+  const trimmed = tagId?.trim();
+  if (trimmed) {
+    where.tags = { some: { tagId: trimmed } };
+  }
+}
+
+function applyCategoryScopeFilter(
+  where: Prisma.TransactionWhereInput,
+  workspaceId: string,
+  filters: BulkCategoryFilters,
+): void {
+  if (filters.uncategorizedOnly) {
+    where.categoryId = null;
+    return;
+  }
+
+  const categoryId = filters.categoryId?.trim();
+  if (categoryId) {
+    where.categoryId = categoryId;
+    return;
+  }
+
+  const categoryName = filters.categoryName?.trim();
+  if (categoryName) {
+    where.category = { name: categoryName, workspaceId };
+  }
+}
+
 export function buildBulkCategoryWhere(
   input: BuildBulkCategoryWhereInput,
 ): Prisma.TransactionWhereInput {
@@ -76,10 +114,9 @@ export function buildBulkCategoryWhere(
 
   applyCounterpartyFilter(where, filters.counterpartyContains);
   applyMbankCategoryFilter(where, filters.mbankCategory);
-
-  if (filters.uncategorizedOnly) {
-    where.categoryId = null;
-  }
+  applyDiscretionaryFilter(where, filters.discretionaryOnly);
+  applyTagFilter(where, filters.tagId);
+  applyCategoryScopeFilter(where, workspaceId, filters);
 
   applyDateRangeFilter(where, filters.dateFrom, filters.dateTo);
 
