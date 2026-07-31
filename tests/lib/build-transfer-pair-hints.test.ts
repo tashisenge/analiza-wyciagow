@@ -40,4 +40,46 @@ describe("buildTransferPairHintByTransactionId", () => {
     ]);
     expect(hints.size).toBe(0);
   });
+
+  it("keeps distinct same-amount pairs from sharing one partner hint", () => {
+    const hints = buildTransferPairHintByTransactionId([
+      {
+        id: "dom-1",
+        accountId: "dom",
+        accountType: "dom",
+        amount: "500.00",
+        currency: "PLN",
+        bookedAt: new Date("2026-05-20"),
+      },
+      {
+        id: "firma-1",
+        accountId: "firma",
+        accountType: "firma",
+        amount: "-500.00",
+        currency: "PLN",
+        bookedAt: new Date("2026-05-20"),
+      },
+      {
+        id: "dom-2",
+        accountId: "dom",
+        accountType: "dom",
+        amount: "500.00",
+        currency: "PLN",
+        bookedAt: new Date("2026-05-22"),
+      },
+      {
+        id: "firma-2",
+        accountId: "firma",
+        accountType: "firma",
+        amount: "-500.00",
+        currency: "PLN",
+        bookedAt: new Date("2026-05-22"),
+      },
+    ]);
+
+    expect(hints.get("dom-1")).toContain("2026-05-20");
+    expect(hints.get("firma-1")).toContain("2026-05-20");
+    expect(hints.get("dom-2")).toContain("2026-05-22");
+    expect(hints.get("firma-2")).toContain("2026-05-22");
+  });
 });

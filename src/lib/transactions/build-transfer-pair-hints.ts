@@ -38,6 +38,27 @@ function storeTransferPairHints(
   );
 }
 
+function claimTransferPairHint(input: {
+  left: TransferPairTransactionRef;
+  refs: OwnAccountTransferRef[];
+  byId: Map<string, TransferPairTransactionRef>;
+  claimed: Set<string>;
+  hints: Map<string, string>;
+}): void {
+  const partnerKey = findOwnAccountTransferPartnerKey(
+    toOwnAccountRef(input.left),
+    input.refs,
+    input.claimed,
+  );
+  const right = partnerKey ? input.byId.get(partnerKey) : undefined;
+  if (!right) {
+    return;
+  }
+  input.claimed.add(input.left.id);
+  input.claimed.add(right.id);
+  storeTransferPairHints(input.hints, input.left, right);
+}
+
 export function buildTransferPairHintByTransactionId(
   transactions: TransferPairTransactionRef[],
 ): Map<string, string> {
@@ -45,16 +66,13 @@ export function buildTransferPairHintByTransactionId(
   const refs = transactions.map(toOwnAccountRef);
   const pairedKeys = buildPairedOwnAccountTransferKeys(refs);
   const byId = new Map(transactions.map((tx) => [tx.id, tx]));
+  const claimed = new Set<string>();
 
   for (const left of transactions) {
     if (!pairedKeys.has(left.id) || hints.has(left.id)) {
       continue;
     }
-    const partnerKey = findOwnAccountTransferPartnerKey(toOwnAccountRef(left), refs);
-    const right = partnerKey ? byId.get(partnerKey) : undefined;
-    if (right) {
-      storeTransferPairHints(hints, left, right);
-    }
+    claimTransferPairHint({ left, refs, byId, claimed, hints });
   }
 
   return hints;
