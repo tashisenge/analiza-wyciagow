@@ -104,8 +104,8 @@ export function CategoryAssignForm({
       {hasCategory ? (
         <button
           type="submit"
-          name="categoryId"
-          value=""
+          name="clearCategory"
+          value="1"
           className="text-xs font-medium text-red-700 underline decoration-red-200 hover:text-red-800"
         >
           Usuń kategorię
