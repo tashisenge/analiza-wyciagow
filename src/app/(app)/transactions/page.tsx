@@ -19,15 +19,15 @@ import {
   transactionActiveFilter,
   type TransactionRawSearchParams,
 } from "@/lib/transactions/page-filters";
+import { resolveCategoryIdFromCategoryForm } from "@/lib/transactions/resolve-category-id-from-form";
 import { updateTransactionCategory } from "@/server/actions/transactions";
 
 async function changeCategoryAction(formData: FormData): Promise<void> {
   "use server";
   const txRaw = formData.get("transactionId");
-  const catRaw = formData.get("categoryId");
   const returnToRaw = formData.get("returnTo");
   const transactionId = typeof txRaw === "string" ? txRaw : "";
-  const categoryId = typeof catRaw === "string" ? catRaw : "";
+  const categoryId = resolveCategoryIdFromCategoryForm(formData);
   const returnTo =
     typeof returnToRaw === "string" && returnToRaw ? returnToRaw : "/transactions";
 
