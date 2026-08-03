@@ -6,6 +6,7 @@ import { z } from "zod";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { logActionError } from "@/lib/logger";
+import { runDeleteAllWorkspaceData } from "@/lib/workspace/build-delete-all-workspace-data-ops";
 
 export type WorkspaceActionResult = { ok: true } | { ok: false; error: string };
 
@@ -76,15 +77,13 @@ export async function deleteAllWorkspaceData(
   }
 
   try {
-    await prisma.$transaction([
-      prisma.transaction.deleteMany({ where: { workspaceId } }),
-      prisma.importBatch.deleteMany({ where: { workspaceId } }),
-      prisma.merchantCategoryMemory.deleteMany({ where: { workspaceId } }),
-      prisma.categoryRule.deleteMany({ where: { workspaceId } }),
-    ]);
+    await runDeleteAllWorkspaceData(prisma, workspaceId);
     revalidatePath("/dashboard");
     revalidatePath("/transactions");
     revalidatePath("/import");
+    revalidatePath("/optimize");
+    revalidatePath("/recurring");
+    revalidatePath("/opcjonalne");
     return { ok: true };
   } catch (error) {
     return {

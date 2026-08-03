@@ -27,8 +27,9 @@ export function SettingsDataSection({
       <section className="rounded-lg border border-red-200 bg-red-50/50 p-4">
         <h2 className="font-semibold text-red-900">Usuń wszystkie transakcje</h2>
         <p className="mt-1 text-sm text-red-800">
-          Usuwa transakcje i historię importów. Kategorie, konta i użytkownicy zostają.
-          Wpisz: <strong>{workspaceName}</strong>
+          Usuwa transakcje, historię importów oraz powiązane sugestie optymalizacji,
+          oznaczenia subskrypcji i wglądy AI. Kategorie, reguły kategoryzacji, pamięć
+          merchantów, konta i użytkownicy zostają. Wpisz: <strong>{workspaceName}</strong>
         </p>
         <form action={deleteDataAction} className="mt-3 flex flex-wrap gap-2">
           <input
