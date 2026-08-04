@@ -100,8 +100,13 @@ export async function fetchDashboardRaw(
   };
 }
 
-export function analyticsTransactions(transactions: TxWithCategory[]): TxWithCategory[] {
-  const pairedKeys = buildPairedOwnAccountTransferKeys(
+export function buildAnalyticsPairedKeys(
+  transactions: Pick<
+    TxWithCategory,
+    "id" | "accountId" | "amount" | "currency" | "bookedAt"
+  >[],
+): Set<string> {
+  return buildPairedOwnAccountTransferKeys(
     transactions.map((tx) => ({
       key: tx.id,
       accountId: tx.accountId,
@@ -110,6 +115,13 @@ export function analyticsTransactions(transactions: TxWithCategory[]): TxWithCat
       bookedAt: tx.bookedAt,
     })),
   );
+}
+
+export function analyticsTransactions(
+  transactions: TxWithCategory[],
+  pairedKeysOverride?: Set<string>,
+): TxWithCategory[] {
+  const pairedKeys = pairedKeysOverride ?? buildAnalyticsPairedKeys(transactions);
   return transactions.filter((tx) =>
     shouldCountInAnalytics({ transactionKey: tx.id, category: tx.category }, pairedKeys),
   );
@@ -129,8 +141,11 @@ export function buildDashboardMetrics(
   | "merchants"
   | "categorizedPercent"
 > {
-  const currentForAnalytics = analyticsTransactions(current);
-  const previousForAnalytics = analyticsTransactions(previous);
+  // Pair across previous+current so month-boundary own-account transfers
+  // are excluded from both period summaries (same as discretionary/trend).
+  const windowPairedKeys = buildAnalyticsPairedKeys([...previous, ...current]);
+  const currentForAnalytics = analyticsTransactions(current, windowPairedKeys);
+  const previousForAnalytics = analyticsTransactions(previous, windowPairedKeys);
 
   return {
     summary: summarizePeriod(
