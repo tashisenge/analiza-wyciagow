@@ -6,6 +6,7 @@ import {
   aggregateSavingsImpact,
   type SavingsImpactSummary,
 } from "@/lib/optimization/aggregate-savings-impact";
+import { excludePairedOwnAccountTransfers } from "@/lib/optimization/exclude-paired-transfers";
 import {
   fetchAccountIds,
   fetchBudgetsForContext,
@@ -59,7 +60,7 @@ export async function refreshWorkspaceOpportunities(
     where: optimizableTransactionsWhere(workspaceId, accountIds, sixMonthsAgo(anchor)),
     include: { category: true },
   });
-  const mapped = mapTransactionsForOptimization(allTxs);
+  const mapped = mapTransactionsForOptimization(excludePairedOwnAccountTransfers(allTxs));
   const detected = await runDetectionForMonth({ workspaceId, context, mapped, anchor });
   await runFollowUpVerification(workspaceId, mapped, anchor);
   return upsertOpportunities({
