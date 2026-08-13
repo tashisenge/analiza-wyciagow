@@ -9,7 +9,10 @@ import {
 import type { DashboardOpportunity } from "@/lib/analytics/dashboard-types";
 import type { ContextFilter } from "@/lib/analytics/filters";
 import type { MonthPoint } from "@/lib/analytics/monthly-trend";
-import { monthlyExpenseTrend } from "@/lib/analytics/monthly-trend";
+import {
+  DASHBOARD_TREND_MONTHS,
+  monthlyExpenseTrend,
+} from "@/lib/analytics/monthly-trend";
 import { prisma } from "@/lib/db";
 
 interface TxForTrend {
@@ -63,7 +66,7 @@ export function buildDashboardTrendData(
     monthlyTrend: monthlyExpenseTrend(
       transactions,
       range.currentEnd,
-      range.isFullYear ? 12 : 6,
+      range.isFullYear ? 12 : DASHBOARD_TREND_MONTHS,
     ),
     yearlyMonths: range.isFullYear
       ? buildYearlyMonthSummaries(yearTransactions, yearForTrend)

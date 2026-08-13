@@ -8,6 +8,10 @@ import type {
 import type { DateRangeResult } from "@/lib/analytics/date-range";
 import { fetchDashboardOpportunities } from "@/lib/analytics/fetch-dashboard-opportunities";
 import type { ContextFilter } from "@/lib/analytics/filters";
+import {
+  DASHBOARD_TREND_MONTHS,
+  dashboardTransactionFetchStart,
+} from "@/lib/analytics/monthly-trend";
 import { summarizePeriod } from "@/lib/analytics/period-summary";
 import { shouldCountInAnalytics } from "@/lib/analytics/should-count-in-analytics";
 import { topMerchants } from "@/lib/analytics/top-merchants";
@@ -72,7 +76,14 @@ export async function fetchDashboardRaw(
         where: {
           workspaceId,
           accountId: { in: accountIds },
-          bookedAt: { gte: range.previousStart, lte: range.currentEnd },
+          bookedAt: {
+            gte: dashboardTransactionFetchStart(
+              range.previousStart,
+              range.currentEnd,
+              range.isFullYear ? 12 : DASHBOARD_TREND_MONTHS,
+            ),
+            lte: range.currentEnd,
+          },
         },
         include: { category: true },
       }),
