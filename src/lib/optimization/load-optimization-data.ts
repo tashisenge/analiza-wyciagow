@@ -30,21 +30,24 @@ export type OpportunityWithRelations = Prisma.OptimizationOpportunityGetPayload<
   include: typeof opportunityInclude;
 }>;
 
-async function runFollowUpVerification(
-  workspaceId: string,
-  mapped: ReturnType<typeof mapTransactionsForOptimization>,
-  anchor: Date,
-): Promise<void> {
-  const thirtyDaysAgo = new Date(anchor.getTime() - 30 * 24 * 60 * 60 * 1000);
+interface FollowUpVerificationInput {
+  workspaceId: string;
+  context: ContextFilter;
+  mapped: ReturnType<typeof mapTransactionsForOptimization>;
+  anchor: Date;
+}
+
+async function runFollowUpVerification(input: FollowUpVerificationInput): Promise<void> {
+  const thirtyDaysAgo = new Date(input.anchor.getTime() - 30 * 24 * 60 * 60 * 1000);
+  const earlier = new Date(thirtyDaysAgo.getTime() - 30 * 24 * 60 * 60 * 1000);
   await verifyImplementedSavings({
     prisma,
-    workspaceId,
-    beforeTxs: mapped.filter(
-      (tx) =>
-        tx.bookedAt >= new Date(thirtyDaysAgo.getTime() - 30 * 24 * 60 * 60 * 1000) &&
-        tx.bookedAt < thirtyDaysAgo,
+    workspaceId: input.workspaceId,
+    accountContext: input.context,
+    beforeTxs: input.mapped.filter(
+      (tx) => tx.bookedAt >= earlier && tx.bookedAt < thirtyDaysAgo,
     ),
-    afterTxs: mapped.filter((tx) => tx.bookedAt >= thirtyDaysAgo),
+    afterTxs: input.mapped.filter((tx) => tx.bookedAt >= thirtyDaysAgo),
   });
 }
 
@@ -61,7 +64,7 @@ export async function refreshWorkspaceOpportunities(
   });
   const mapped = mapTransactionsForOptimization(allTxs);
   const detected = await runDetectionForMonth({ workspaceId, context, mapped, anchor });
-  await runFollowUpVerification(workspaceId, mapped, anchor);
+  await runFollowUpVerification({ workspaceId, context, mapped, anchor });
   return upsertOpportunities({
     prisma,
     workspaceId,
