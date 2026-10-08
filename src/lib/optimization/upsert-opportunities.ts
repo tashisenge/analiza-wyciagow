@@ -1,4 +1,4 @@
-import type { OpportunityStatus, PrismaClient } from "@prisma/client";
+import type { AccountContext, OpportunityStatus, PrismaClient } from "@prisma/client";
 
 import { measureSavingsImpact } from "@/lib/optimization/measure-savings-impact";
 import {
@@ -72,6 +72,7 @@ export async function upsertOpportunities(
 export interface VerifySavingsOptions {
   prisma: PrismaClient;
   workspaceId: string;
+  accountContext: AccountContext;
   beforeTxs: TxForOptimization[];
   afterTxs: TxForOptimization[];
 }
@@ -79,10 +80,12 @@ export interface VerifySavingsOptions {
 async function fetchPendingVerification(
   prisma: PrismaClient,
   workspaceId: string,
+  accountContext: AccountContext,
 ): Promise<{ id: string; counterparty: string | null }[]> {
   return prisma.optimizationOpportunity.findMany({
     where: {
       workspaceId,
+      accountContext,
       status: "IMPLEMENTED",
       savingsVerified: false,
       counterparty: { not: null },
@@ -91,28 +94,41 @@ async function fetchPendingVerification(
   });
 }
 
+async function markSavingsVerified(
+  options: VerifySavingsOptions,
+  opportunity: { id: string; counterparty: string | null },
+): Promise<boolean> {
+  if (!opportunity.counterparty) {
+    return false;
+  }
+  const works = measureSavingsImpact(
+    opportunity.counterparty,
+    options.beforeTxs,
+    options.afterTxs,
+  );
+  if (!works) {
+    return false;
+  }
+  await options.prisma.optimizationOpportunity.update({
+    where: { id: opportunity.id },
+    data: { savingsVerified: true },
+  });
+  return true;
+}
+
 export async function verifyImplementedSavings(
   options: VerifySavingsOptions,
 ): Promise<number> {
-  const implemented = await fetchPendingVerification(options.prisma, options.workspaceId);
+  const implemented = await fetchPendingVerification(
+    options.prisma,
+    options.workspaceId,
+    options.accountContext,
+  );
   let verified = 0;
-  for (const opp of implemented) {
-    if (!opp.counterparty) {
-      continue;
+  for (const opportunity of implemented) {
+    if (await markSavingsVerified(options, opportunity)) {
+      verified += 1;
     }
-    const works = measureSavingsImpact(
-      opp.counterparty,
-      options.beforeTxs,
-      options.afterTxs,
-    );
-    if (!works) {
-      continue;
-    }
-    await options.prisma.optimizationOpportunity.update({
-      where: { id: opp.id },
-      data: { savingsVerified: true },
-    });
-    verified += 1;
   }
   return verified;
 }
