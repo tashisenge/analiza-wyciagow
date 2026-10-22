@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { buildBulkCategoryWhere } from "@/lib/transactions/bulk-category-filter";
+import { bulkUpdateSchema } from "@/lib/transactions/validate-bulk-update";
 
 describe("buildBulkCategoryWhere", () => {
   it("scopes to workspace and account ids", () => {
@@ -57,6 +58,43 @@ describe("buildBulkCategoryWhere", () => {
     expect(where.mbankCategory).toEqual({
       equals: "Żywność i chemia domowa",
       mode: "insensitive",
+    });
+  });
+
+  it("keeps hidden page tag filters in bulk updates", () => {
+    const where = buildBulkCategoryWhere({
+      workspaceId: "ws-1",
+      accountIds: ["acc-a"],
+      filters: { tagId: "tag-business-trip" },
+    });
+    expect(where.tags).toEqual({ some: { tagId: "tag-business-trip" } });
+  });
+
+  it("keeps hidden page category filters in bulk updates", () => {
+    const where = buildBulkCategoryWhere({
+      workspaceId: "ws-1",
+      accountIds: ["acc-a"],
+      filters: { categoryName: "Podróże" },
+    });
+    expect(where.category).toEqual({ name: "Podróże", workspaceId: "ws-1" });
+  });
+});
+
+describe("bulkUpdateSchema", () => {
+  it("keeps hidden page filters sent by the bulk client", () => {
+    const parsed = bulkUpdateSchema.parse({
+      categoryId: "cat-target",
+      filters: {
+        tagId: "tag-business-trip",
+        categoryId: "cat-current",
+        categoryName: "Podróże",
+      },
+    });
+
+    expect(parsed.filters).toEqual({
+      tagId: "tag-business-trip",
+      categoryId: "cat-current",
+      categoryName: "Podróże",
     });
   });
 });

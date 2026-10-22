@@ -3,6 +3,7 @@ import type { OpportunityStatus, PrismaClient } from "@prisma/client";
 import { measureSavingsImpact } from "@/lib/optimization/measure-savings-impact";
 import {
   buildDedupeKey,
+  buildLegacyDedupeKey,
   monthKeyFromDate,
 } from "@/lib/optimization/opportunity-dedupe-key";
 import {
@@ -19,22 +20,70 @@ interface UpsertOneOptions {
   accountContext: "firma" | "dom" | "razem";
   item: DetectedOpportunity;
   dedupeKey: string;
+  legacyDedupeKey: string;
 }
 
-async function upsertOne(options: UpsertOneOptions): Promise<boolean> {
-  const { prisma, workspaceId, accountContext, item, dedupeKey } = options;
-  const existing = await prisma.optimizationOpportunity.findUnique({
-    where: { workspaceId_dedupeKey: { workspaceId, dedupeKey } },
-  });
-  if (existing && LOCKED_STATUSES.includes(existing.status)) {
-    return false;
-  }
+function isLocked(status: OpportunityStatus): boolean {
+  return LOCKED_STATUSES.includes(status);
+}
 
+async function findCurrentOpportunity(options: UpsertOneOptions): Promise<{
+  status: OpportunityStatus;
+} | null> {
+  const { prisma, workspaceId, dedupeKey } = options;
+  return prisma.optimizationOpportunity.findUnique({
+    where: { workspaceId_dedupeKey: { workspaceId, dedupeKey } },
+    select: { status: true },
+  });
+}
+
+async function findLegacyOpportunity(options: UpsertOneOptions): Promise<{
+  id: string;
+  status: OpportunityStatus;
+} | null> {
+  const { prisma, workspaceId, accountContext, legacyDedupeKey } = options;
+  return prisma.optimizationOpportunity.findFirst({
+    where: { workspaceId, dedupeKey: legacyDedupeKey, accountContext },
+    select: { id: true, status: true },
+  });
+}
+
+async function migrateLegacyOpportunity(
+  options: UpsertOneOptions,
+  legacyId: string,
+): Promise<void> {
+  await options.prisma.optimizationOpportunity.update({
+    where: { id: legacyId },
+    data: { ...opportunityUpdateData(options.item), dedupeKey: options.dedupeKey },
+  });
+}
+
+async function upsertCurrentOpportunity(options: UpsertOneOptions): Promise<void> {
+  const { prisma, workspaceId, accountContext, item, dedupeKey } = options;
   await prisma.optimizationOpportunity.upsert({
     where: { workspaceId_dedupeKey: { workspaceId, dedupeKey } },
     create: opportunityCreateData({ workspaceId, accountContext, item, dedupeKey }),
     update: opportunityUpdateData(item),
   });
+}
+
+async function upsertOne(options: UpsertOneOptions): Promise<boolean> {
+  const existing = await findCurrentOpportunity(options);
+  if (existing && isLocked(existing.status)) {
+    return false;
+  }
+  if (!existing) {
+    const legacy = await findLegacyOpportunity(options);
+    if (legacy && isLocked(legacy.status)) {
+      return false;
+    }
+    if (legacy) {
+      await migrateLegacyOpportunity(options, legacy.id);
+      return true;
+    }
+  }
+
+  await upsertCurrentOpportunity(options);
   return true;
 }
 
@@ -54,13 +103,15 @@ export async function upsertOpportunities(
   let count = 0;
 
   for (const item of options.detected) {
-    const dedupeKey = buildDedupeKey(item, monthKey);
+    const dedupeKey = buildDedupeKey(item, monthKey, options.accountContext);
+    const legacyDedupeKey = buildLegacyDedupeKey(item, monthKey);
     const saved = await upsertOne({
       prisma: options.prisma,
       workspaceId: options.workspaceId,
       accountContext: options.accountContext,
       item,
       dedupeKey,
+      legacyDedupeKey,
     });
     if (saved) {
       count += 1;

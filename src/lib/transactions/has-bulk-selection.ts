@@ -9,6 +9,9 @@ export function hasBulkSelection(
     Boolean(filters.counterpartyContains?.trim()),
     Boolean(filters.mbankCategory?.trim()),
     Boolean(filters.uncategorizedOnly),
+    Boolean(filters.tagId?.trim()),
+    Boolean(filters.categoryId?.trim()),
+    Boolean(filters.categoryName?.trim()),
     Boolean(filters.dateFrom),
     Boolean(filters.dateTo),
   ].some(Boolean);
