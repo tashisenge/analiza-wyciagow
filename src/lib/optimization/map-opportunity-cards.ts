@@ -10,7 +10,7 @@ export interface MappedOpportunityCard {
   type: OpportunityType;
   title: string;
   description: string;
-  estimatedMonthlySavings: { toString(): string } | null;
+  estimatedMonthlySavings: string | null;
   counterparty: string | null;
   categoryId: string | null;
   savingsVerified: boolean;
@@ -31,7 +31,10 @@ export function mapOpportunitiesForCards(
     type: item.type,
     title: item.title,
     description: item.description,
-    estimatedMonthlySavings: item.estimatedMonthlySavings,
+    // Prisma Decimal is a class. Next.js throws if it is passed to a client component.
+    estimatedMonthlySavings: item.estimatedMonthlySavings
+      ? item.estimatedMonthlySavings.toString()
+      : null,
     counterparty: item.counterparty,
     categoryId: item.categoryId,
     savingsVerified: item.savingsVerified,
