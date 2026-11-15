@@ -41,6 +41,8 @@ function mapTransactionRow(
   );
   return {
     ...tx,
+    // Prisma Decimal is a class. Next.js throws if it is passed to a client component.
+    amount: tx.amount.toString(),
     suggestedCategoryId:
       tx.categoryId ?? (isOwnAccountTransfer ? input.transferCategoryId : ""),
     similarCounts: input.similarCounts.get(tx.id) ?? {

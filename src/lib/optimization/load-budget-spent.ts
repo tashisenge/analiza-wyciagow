@@ -14,6 +14,29 @@ export interface LoadBudgetSpentOptions {
   monthStart: Date;
 }
 
+export function mapBudgetRowsForClient(
+  rows: { budget: BudgetWithCategory; spent: number }[],
+): {
+  budget: {
+    id: string;
+    categoryId: string;
+    category: { name: string };
+    monthlyLimit: string;
+  };
+  spent: number;
+}[] {
+  return rows.map((row) => ({
+    spent: row.spent,
+    budget: {
+      id: row.budget.id,
+      categoryId: row.budget.categoryId,
+      category: { name: row.budget.category.name },
+      // Prisma Decimal is a class. Next.js throws if it is passed to a client component.
+      monthlyLimit: row.budget.monthlyLimit.toString(),
+    },
+  }));
+}
+
 export async function loadBudgetSpentRows(
   options: LoadBudgetSpentOptions,
 ): Promise<{ budget: BudgetWithCategory; spent: number }[]> {

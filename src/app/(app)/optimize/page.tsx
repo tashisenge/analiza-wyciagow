@@ -7,6 +7,7 @@ import { OptimizePanel } from "@/components/optimization/OptimizePanel";
 import { PageHeader } from "@/components/ui/PageHeader";
 import type { ContextFilter } from "@/lib/analytics/filters";
 import { auth } from "@/lib/auth";
+import { mapBudgetRowsForClient } from "@/lib/optimization/load-budget-spent";
 import { loadOptimizePageData } from "@/lib/optimization/load-optimization-data";
 import { mapOpportunitiesForCards } from "@/lib/optimization/map-opportunity-cards";
 
@@ -49,7 +50,7 @@ export default async function OptimizePage({
       <BudgetEditor
         context={context}
         categories={data.categories}
-        budgets={data.budgets}
+        budgets={mapBudgetRowsForClient(data.budgets)}
       />
     </div>
   );
